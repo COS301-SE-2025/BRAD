@@ -1,7 +1,7 @@
 # User Stories
 
 ## 1.Role: General user(Reporter)
-**Descrption**
+**Description**
 - A member of the public or organization who wants to report a suspicious website.
   
 **User Story**
@@ -20,7 +20,7 @@
 - A cybersecurity analyst who reviews and classifies domain submissions.
   
 **User Story**
-As an investigator I want to view all reports submitted and their results so that I can analyse them, change their status, and send feedback to the reporter.
+- As an investigator I want to view all reports submitted and their results so that I can analyse them, change their status, and send feedback to the reporter.
 
 **Definition of done:**
 - I can view all submitted reports
