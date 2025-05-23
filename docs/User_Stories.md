@@ -5,7 +5,7 @@
 - A member of the public or organization who wants to report a suspicious website.
   
 **User Story:**
-- As a general user I want to submit a suspicious domain so that I can check if it's legal and safe to use.**
+- As a general user I want to submit a suspicious domain so that I can check if it's legal and safe to use.
 
 **Definition of done:**
 - I can submit a suspicious domain via a simple form
