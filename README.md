@@ -12,6 +12,12 @@
 
 </p>
 
+<div align="center">
+
+# B.R.A.D Tyto Insights x DNS.Business
+
+</div>
+
 <!-- [![License: MIT](https://cdn.prod.website-files.com/5e0f1144930a8bc8aace526c/65dd9eb5aaca434fac4f1c34_License-MIT-blue.svg)](/LICENSE)
 [![Deps](https://cdn.prod.website-files.com/5e0f1144930a8bc8aace526c/65dd9eb5aaca434fac4f1c9e_Deps-Up--to--date-brightgreen.svg)]()
 [![Build Status](https://cdn.prod.website-files.com/5e0f1144930a8bc8aace526c/65dd9eb5aaca434fac4f1c7c_Build-Passing-brightgreen.svg)]()
@@ -19,7 +25,7 @@
 
 # Overview
 
-This repository contains our team's **Mini-Project Database** that consists of a **NoSQL database system** designed from scratch. This includes a API, CLI, daemon, Client-Library and UI.
+This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)** project, **a cybersecurity web application** that automates the analysis of potentially malicious URLs. Users can submit suspicious links through the website, where an AI-powered bot safely visits and analyzes the domain. The system extracts metadata, detects threats like malware, and compiles forensic reports. All findings are aggregated into a centralized platform that supports **incident reporting, dashboard visualization, and historical threat analysis**.
 
 ## Contents:
 
@@ -44,10 +50,12 @@ This repository contains our team's **Mini-Project Database** that consists of a
 
 ## Documentation
 
-- [SRS Document](/docs/requirement-specs/SRS_Document.md)
+- [SRS Document](/docs/SRS_Document.md)
 - [Design specifications](/docs/requirement-specs/Design_Specification_Document.md)
-- [Github Contributions](/docs/requirement-specs/GitHub-contributions.pdf)
-- [API Documentation](/docs/requirement-specs/API_Documentation.md)
+- [Service Contract](/docs/Service_Contracts.md)
+- [User Stories](/docs/User_Stories.md)
+  <!-- - [Github Contributions](/docs/requirement-specs/GitHub-contributions.pdf) -->
+  <!-- - [API Documentation](/docs/requirement-specs/API_Documentation.md) -->
 - [Project Board]()
 
 ## Demo Videos
@@ -135,13 +143,13 @@ act -W path/to/workflow.yml
 
 ## Team members
 
-| Name                              | Primary roles                     | Links                                                                                                                                                                                                                                               |
-| --------------------------------- | --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| E (Ethan) Vletter u22497082       | Project Manager, UI-Designer      | [<img src="docs/svgs/linkedin.svg" alt="Linkedin" width="30" height="30">](https://www.linkedin.com/in/ethan-vletter/) [<img src="docs/svgs/github-color.svg" alt="Github" width="30" height="30">](https://github.com/EthanVletter)                |
-| TS (Tebatso) Mahlathini u22611704 | UI-Designer ,Integration Engineer | [<img src="docs/svgs/linkedin.svg" alt="Linkedin" width="30" height="30">](https://www.linkedin.com/in/tebatso-mahlathini-30864b256/) [<img src="docs/svgs/github-color.svg" alt="Github" width="30" height="30">](https://github.com/tebatsoSophy) |
-| C (Carinda) Smith u22652974       | Main API Architect                | [<img src="docs/svgs/linkedin.svg" alt="Linkedin" width="30" height="30">](http://www.linkedin.com/in/carinda-smith-a01a9430a) [<img src="docs/svgs/github-color.svg" alt="Github" width="30" height="30">](https://github.com/carinda-smith)       |
-| M (Megan) Pretorius u\_\_         | \_\_\_                            | [<img src="docs/svgs/linkedin.svg" alt="Linkedin" width="30" height="30">]() [<img src="docs/svgs/github-color.svg" alt="Github" width="30" height="30">]()                                                                                         |
-| S (Salome) ** u**                 | \_\_                              | [<img src="docs/svgs/linkedin.svg" alt="Linkedin" width="30" height="30">]() [<img src="docs/svgs/github-color.svg" alt="Github" width="30" height="30">]()                                                                                         |
+| Name                              | Primary roles           | Links                                                                                                                                                                                                                                               |
+| --------------------------------- | ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| E (Ethan) Vletter u22497082       | Project Manager, DevOps | [<img src="docs/svgs/linkedin.svg" alt="Linkedin" width="30" height="30">](https://www.linkedin.com/in/ethan-vletter/) [<img src="docs/svgs/github-color.svg" alt="Github" width="30" height="30">](https://github.com/EthanVletter)                |
+| TS (Tebatso) Mahlathini u22611704 | API, DevOps             | [<img src="docs/svgs/linkedin.svg" alt="Linkedin" width="30" height="30">](https://www.linkedin.com/in/tebatso-mahlathini-30864b256/) [<img src="docs/svgs/github-color.svg" alt="Github" width="30" height="30">](https://github.com/tebatsoSophy) |
+| C (Carinda) Smith u22652974       | API                     | [<img src="docs/svgs/linkedin.svg" alt="Linkedin" width="30" height="30">](http://www.linkedin.com/in/carinda-smith-a01a9430a) [<img src="docs/svgs/github-color.svg" alt="Github" width="30" height="30">](https://github.com/carinda-smith)       |
+| M (Megan) Pretorius u23708833     | UI                      | [<img src="docs/svgs/linkedin.svg" alt="Linkedin" width="30" height="30">]() [<img src="docs/svgs/github-color.svg" alt="Github" width="30" height="30">]()                                                                                         |
+| S (Salome) Kalaka u19364742       | API                     | [<img src="docs/svgs/linkedin.svg" alt="Linkedin" width="30" height="30">]() [<img src="docs/svgs/github-color.svg" alt="Github" width="30" height="30">]()                                                                                         |
 
 ## Contact Us
 
