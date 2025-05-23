@@ -1,6 +1,10 @@
 # User Stories
 
-## 1. As a general user I want to submit a suspicious domain so that I can check if it's legal and safe to use.
+## 1.Role: General user(Reporter)
+**Descrption**
+- A member of the public or organization who wants to report a suspicious website.
+**User Story**
+- As a general user I want to submit a suspicious domain so that I can check if it's legal and safe to use.**
 
 **Definition of done:**
 - I can submit a suspicious domain via a simple form
@@ -10,7 +14,11 @@
 
 ---
 
-## 2. As an investigator I want to view all reports submitted and their results so that I can analyse them, change their status, and send feedback to the reporter.
+## 2.Role:Ivestigator
+**Description**
+- A cybersecurity analyst who reviews and classifies domain submissions.
+**User Story**
+As an investigator I want to view all reports submitted and their results so that I can analyse them, change their status, and send feedback to the reporter.
 
 **Definition of done:**
 - I can view all submitted reports
@@ -27,3 +35,4 @@
 - I can view all submitted reports
 - I can assign a report to an investigator
 - An investigator can only view the reports assigned to them
+
