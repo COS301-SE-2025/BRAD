@@ -1,26 +1,34 @@
-const { addUser, findUser } = require("../models/userStore");
+const User = require('../models/users');
+const bcrypt = require('bcryptjs');
 
-exports.register = (req, res) => {
-  const { username, password, role } = req.body;
-  if (!username || !password || !role) {
-    return res.status(400).json({ message: "Missing fields" });
+exports.login = async (req, res) => {
+  const { identifier, password } = req.body;
+
+  try {
+    const identifierNormalized = identifier.toLowerCase().trim();
+
+    const user = await User.findOne({
+      $or: [
+        { email: identifierNormalized },
+        { username: identifierNormalized }
+      ]
+    });
+
+    if (!user) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+
+    const { password: _, ...userData } = user.toObject();
+
+    res.status(200).json({ message: "Login successful", user: userData });
+  } catch (error) {
+    console.error("Error during login:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
-  if (findUser(username)) {
-    return res.status(409).json({ message: "User already exists" });
-  }
-  addUser({ username, password, role });
-  res.status(201).json({ message: "User registered" });
 };
 
-exports.login = (req, res) => {
-  const { username, password } = req.body;
-  const user = findUser(username);
-  if (!user || user.password !== password) {
-    return res.status(401).json({ message: "Invalid credentials" });
-  }
-  res.status(200).json({ message: "Login successful", role: user.role });
-};
-
-exports.logout = (_req, res) => {
-  res.status(200).json({ message: "Logout successful" });
-};
