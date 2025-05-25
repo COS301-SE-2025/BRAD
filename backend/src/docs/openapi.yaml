@@ -87,3 +87,33 @@ paths:
       responses:
         '200':
           description: Analysis result
+
+  /pending-reports:
+    get:
+      summary: Get the next un-analyzed report
+      responses:
+        '200':
+          description: A pending report
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Report'
+        '204':
+          description: No pending reports
+
+  /analyzed-report:
+    post:
+      summary: Submit fake analysis for a report
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AnalyzedInput'
+      responses:
+        '200':
+          description: Analysis submitted successfully
+        '400':
+          description: Missing ID or analysis
+        '404':
+          description: Report not found

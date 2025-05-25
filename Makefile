@@ -12,6 +12,9 @@ backend:
 run-backend:
 	cd $(BACKEND_DIR) && npm start
 
+test-backend:
+	cd backend && npm test
+
 # === Frontend ===
 frontend:
 	cd $(FRONTEND_DIR) && npm install
@@ -25,6 +28,9 @@ bot:
 
 run-bot:
 	cd $(BOT_DIR) && npm start
+
+test-bot:
+	cd bot && npm test
 
 # === First-Time Setup ===
 dev-init:
