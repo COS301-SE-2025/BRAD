@@ -27,10 +27,7 @@ const registerSchema = Joi.object({
 });
 
 
-const loginSchema = Joi.object({
-  username: Joi.string().required(),
-  password: Joi.string().required(),
-});
+
 
 // Routes
 router.post('/register', validateBody(registerSchema), authController.register);
