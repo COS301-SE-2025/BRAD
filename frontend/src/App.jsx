@@ -6,6 +6,7 @@ import RegisterPage from './pages/Register';
 import ReporterDashboard from './pages/ReporterDashboard';
 import AboutPage from './pages/About';
 import InvestigatorDashboard from './pages/InvestigatorDashboard';
+import UserSettings from './pages/UserSettings';
 import './App.css';
 
 function App() {
@@ -18,6 +19,8 @@ function App() {
         <Route path="/dashboard" element={<ReporterDashboard />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/investigator" element={<InvestigatorDashboard />} />
+        <Route path="/settings" element={<UserSettings />} />
+        <Route path="/investigator/settings" element={<UserSettings />} />
         {/* Add more routes here */}
       </Routes>
     </Router>
