@@ -79,3 +79,12 @@
   font-weight: bold;
   text-decoration: underline;
 }
+
+.forgotPass-button {
+  background: none;
+  border: none;
+  color: #1e3a8a;
+  cursor: pointer;
+  font-weight: bold;
+  text-decoration: underline;
+}
