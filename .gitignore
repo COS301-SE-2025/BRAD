@@ -1,3 +1,4 @@
+# Global ignores
 node_modules/
 .env
 logs/
