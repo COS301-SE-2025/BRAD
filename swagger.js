@@ -1,4 +1,9 @@
 const swaggerJsdoc = require("swagger-jsdoc");
+const yaml = require("js-yaml");
+const fs = require("fs");
+const path = require("path");
+
+const swaggerDoc = yaml.load(fs.readFileSync(path.join(__dirname, "docs/openapi.yaml"), "utf8"));
 
 const options = {
   definition: {
@@ -11,4 +16,4 @@ const options = {
   apis: ["./routes/*.js", "./docs/*.yaml"],
 };
 
-module.exports = swaggerJsdoc(options);
+module.exports = swaggerDoc;

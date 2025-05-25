@@ -1,0 +1,89 @@
+openapi: 3.0.0
+info:
+  title: B.R.A.D API
+  version: "1.0.0"
+
+paths:
+  /register:
+    post:
+      summary: Register a user or investigator
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+                role:
+                  type: string
+      responses:
+        '201':
+          description: User registered
+
+  /login:
+    post:
+      summary: Login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
+
+  /logout:
+    post:
+      summary: Logout
+      responses:
+        '200':
+          description: Logout successful
+
+  /report:
+    post:
+      summary: Submit a suspicious domain
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                domain:
+                  type: string
+                reason:
+                  type: string
+      responses:
+        '201':
+          description: Report submitted
+
+  /reports:
+    get:
+      summary: View all submitted reports
+      responses:
+        '200':
+          description: List of reports
+
+  /forensics/{id}:
+    get:
+      summary: Forensic analysis of a report
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: integer
+          required: true
+          description: Report ID
+      responses:
+        '200':
+          description: Analysis result

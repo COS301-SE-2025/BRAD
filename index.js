@@ -18,3 +18,7 @@ app.use("/", reportRoutes);
 app.listen(3000, '0.0.0.0', () => {
   console.log("BRAD API running at http://localhost:3000");
 });
+
+app.get("/", (req, res) => {
+  res.send("Welcome to the BRAD API");
+});
