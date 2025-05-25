@@ -1,0 +1,74 @@
+.investigator-dashboard {
+  display: flex;
+  background-color: #f1f5f9;
+  min-height: 100vh;
+}
+
+.dashboard-main {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.dashboard-main h2 {
+  color: #1e3a8a;
+  margin-bottom: 2rem;
+}
+
+.dashboard-columns {
+  display: flex;
+  gap: 2rem;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.report-column {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 1rem;
+  flex: 1;
+  min-width: 280px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.report-column h3 {
+  margin-bottom: 1rem;
+  color: #1e3a8a;
+}
+
+.report-card {
+  background-color: #f9fafb;
+  border: 1px solid #d1d5db;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  border-radius: 6px;
+}
+
+.report-card p {
+  margin-bottom: 0.75rem;
+  font-weight: bold;
+  color: #1f2937;
+}
+
+.report-card button {
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.start-button {
+  background-color: #1e40af;
+  color: white;
+}
+
+.continue-button {
+  background-color: #facc15;
+  color: #1e3a8a;
+}
+
+.view-button {
+  background-color: #10b981;
+  color: white;
+}

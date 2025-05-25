@@ -20,8 +20,12 @@ const LoginPage = () => {
       return;
     }
 
-    // Simulate login success
-    navigate('/dashboard');
+    // Simulate login success with role-based redirect
+    if (username.trim().toLowerCase().startsWith('i_')) {
+      navigate('/investigator');
+    } else {
+      navigate('/dashboard');
+}
   };
 
   return (

@@ -5,6 +5,7 @@ import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import ReporterDashboard from './pages/ReporterDashboard';
 import AboutPage from './pages/About';
+import InvestigatorDashboard from './pages/InvestigatorDashboard';
 import './App.css';
 
 function App() {
@@ -16,6 +17,7 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/dashboard" element={<ReporterDashboard />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/investigator" element={<InvestigatorDashboard />} />
         {/* Add more routes here */}
       </Routes>
     </Router>
