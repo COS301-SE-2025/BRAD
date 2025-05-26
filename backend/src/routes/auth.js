@@ -3,6 +3,7 @@ const router = express.Router();
 const Joi = require('joi');
 const authController = require('../controllers/authController');
 
+
 // Validation middleware
 function validateBody(schema) {
   return (req, res, next) => {
@@ -15,6 +16,21 @@ function validateBody(schema) {
     next();
   };
 }
+
+const loginSchema = Joi.object({
+  identifier: Joi.string().required().messages({
+    'string.empty': 'Username or email is required.',
+    'any.required': 'Username or email is required.'
+  }),
+  password: Joi.string().min(6).required().messages({
+    'string.empty': 'Password is required.',
+    'string.min': 'Password must be at least 6 characters long.',
+    'any.required': 'Password is required.'
+  })
+});
+
+router.post('/login', validateBody(loginSchema), authController.login);
+=======
 
 const registerSchema = Joi.object({
   firstname: Joi.string().min(3).max(30).required(),
