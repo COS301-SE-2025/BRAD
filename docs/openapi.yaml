@@ -1,0 +1,82 @@
+openapi: 3.0.0
+info:
+  title: User API
+  version: "1.0.0"
+
+paths:
+  /register:
+    post:
+      summary: Register a new user
+      tags:
+        - Auth
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - firstname
+                - lastname
+                - username
+                - email
+                - password
+              properties:
+                firstname:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  example: John
+                lastname:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  example: Doe
+                username:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  example: johndoe123
+                email:
+                  type: string
+                  format: email
+                  example: john@example.com
+                password:
+                  type: string
+                  minLength: 6
+                  example: securePass123
+                confirmPassword:
+                  type: string
+                  minLength: 6
+                  example: securePass123
+      responses:
+        '201':
+          description: User successfully registered
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  userId:
+                    type: string
+                    example: 64f1a14eabc123001c98fdc9
+        '400':
+          description: Validation error or user already exists
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User with this email or username already exists.
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Internal server error

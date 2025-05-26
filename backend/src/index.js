@@ -1,24 +1,27 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
-const connectDB = require('./config/db');  
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const swaggerUi = require("swagger-ui-express");
+const swaggerSpec = require("./swagger");
 
+const authRoutes = require("./routes/auth");
+const reportRoutes = require("./routes/report");
+
+
+const connectDB=require('../src/config/db')
 const app = express();
+connectDB();
 app.use(cors());
-app.use(express.json());
+app.use(bodyParser.json());
 
-connectDB(); // Connect to MongoDB
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use("/", authRoutes);
+app.use("/", reportRoutes);
 
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'Backend running with MongoDB' });
+app.listen(3000, '0.0.0.0', () => {
+  console.log("BRAD API running at http://localhost:3000");
 });
 
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+app.get("/", (req, res) => {
+  res.send("Welcome to the BRAD API");
 });
-
-const testRoutes = require('./routes/test');
-const userRoutes = require('./routes/users');
-
-app.use('/api', userRoutes);
