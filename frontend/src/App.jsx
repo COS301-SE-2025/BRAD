@@ -7,6 +7,7 @@ import ReporterDashboard from './pages/ReporterDashboard';
 import AboutPage from './pages/About';
 import InvestigatorDashboard from './pages/InvestigatorDashboard';
 import UserSettings from './pages/UserSettings';
+import AdminDashboard from './pages/AdminDashboard';
 import './App.css';
 
 function App() {
@@ -21,6 +22,7 @@ function App() {
         <Route path="/investigator" element={<InvestigatorDashboard />} />
         <Route path="/settings" element={<UserSettings />} />
         <Route path="/investigator/settings" element={<UserSettings />} />
+        <Route path="/admin" element={<AdminDashboard />} />
         {/* Add more routes here */}
       </Routes>
     </Router>

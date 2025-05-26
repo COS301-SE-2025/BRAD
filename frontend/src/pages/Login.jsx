@@ -23,7 +23,11 @@ const LoginPage = () => {
     // Simulate login success with role-based redirect
     if (username.trim().toLowerCase().startsWith('i_')) {
       navigate('/investigator');
-    } else {
+    } 
+    else if (username.trim().toLowerCase().startsWith('a_'))  {
+      navigate('/admin');
+    }
+    else {
       navigate('/dashboard');
 }
   };
