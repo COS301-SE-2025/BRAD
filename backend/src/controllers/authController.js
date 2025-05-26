@@ -1,6 +1,5 @@
-const User = require('../models/users');
-const bcrypt = require('bcryptjs');
-
+const User = require("../models/users");
+const bcrypt = require("bcryptjs");
 
 exports.login = async (req, res) => {
   const { identifier, password } = req.body;
@@ -11,8 +10,8 @@ exports.login = async (req, res) => {
     const user = await User.findOne({
       $or: [
         { email: identifierNormalized },
-        { username: identifierNormalized }
-      ]
+        { username: identifierNormalized },
+      ],
     });
 
     if (!user) {
@@ -30,40 +29,42 @@ exports.login = async (req, res) => {
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ message: "Internal server error" });
-=======
-exports.register = async (req, res) => {
-  const { firstname, lastname, username, email, password } = req.body;
 
-  try {
-    const emailNormalized = email.toLowerCase().trim();
-    const usernameNormalized = username.trim();
+    exports.register = async (req, res) => {
+      const { firstname, lastname, username, email, password } = req.body;
 
-    const existingUser = await User.findOne({
-      $or: [{ email: emailNormalized }, { username: usernameNormalized }],
-    });
+      try {
+        const emailNormalized = email.toLowerCase().trim();
+        const usernameNormalized = username.trim();
 
-    if (existingUser) {
-      return res.status(409).json({ message: 'User with this email or username already exists.' });
-    }
+        const existingUser = await User.findOne({
+          $or: [{ email: emailNormalized }, { username: usernameNormalized }],
+        });
 
-    const hashedPassword = await bcrypt.hash(password, 10);
+        if (existingUser) {
+          return res.status(409).json({
+            message: "User with this email or username already exists.",
+          });
+        }
 
-    const newUser = new User({
-      firstname,
-      lastname,
-      username: usernameNormalized,
-      email: emailNormalized,
-      password: hashedPassword,
-      role: 'general', // optional, but explicit
-    });
+        const hashedPassword = await bcrypt.hash(password, 10);
 
-    await newUser.save();
+        const newUser = new User({
+          firstname,
+          lastname,
+          username: usernameNormalized,
+          email: emailNormalized,
+          password: hashedPassword,
+          role: "general", // optional, but explicit
+        });
 
-    res.status(201).json({ userId: newUser._id });
-  } catch (error) {
-    console.error('Error registering user:', error);
-    res.status(500).json({ message: 'Internal server error' });
+        await newUser.save();
 
+        res.status(201).json({ userId: newUser._id });
+      } catch (error) {
+        console.error("Error registering user:", error);
+        res.status(500).json({ message: "Internal server error" });
+      }
+    };
   }
 };
-
