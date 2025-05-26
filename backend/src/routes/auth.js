@@ -16,6 +16,7 @@ function validateBody(schema) {
     next();
   };
 }
+
 const loginSchema = Joi.object({
   identifier: Joi.string().required().messages({
     'string.empty': 'Username or email is required.',
@@ -29,5 +30,23 @@ const loginSchema = Joi.object({
 });
 
 router.post('/login', validateBody(loginSchema), authController.login);
+=======
+
+const registerSchema = Joi.object({
+  firstname: Joi.string().min(3).max(30).required(),
+  lastname: Joi.string().min(3).max(30).required(),
+  username: Joi.string().min(3).max(30).required(),
+  email: Joi.string().email().required(),
+  password: Joi.string().min(6).required(),
+  confirmPassword: Joi.string().valid(Joi.ref('password')).required()
+    .messages({ 'any.only': 'Passwords do not match' }),
+});
+
+
+
+
+// Routes
+router.post('/register', validateBody(registerSchema), authController.register);
+
 
 module.exports = router;
