@@ -3,87 +3,301 @@ info:
   title: B.R.A.D API
   version: "1.0.0"
 
-paths:
-  /register:
-    post:
-      summary: Register a user or investigator
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                username:
-                  type: string
-                password:
-                  type: string
-                role:
-                  type: string
-      responses:
-        '201':
-          description: User registered
+security:
+  - bearerAuth: []
 
+paths:
   /login:
     post:
-      summary: Login
+      summary: Login with username or email
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - identifier
+                - password
               properties:
-                username:
+                identifier:
                   type: string
+                  description: Username or email
+                  example: johndoe or john@example.com
                 password:
                   type: string
+                  format: password
+                  example: password123
       responses:
         '200':
           description: Login successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Login successful
+                  user:
+                    type: object
+                    description: User data excluding password
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '401':
+          description: Invalid credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Invalid credentials
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Internal server error
 
-  /logout:
+  /addadmin:
     post:
-      summary: Logout
-      responses:
-        '200':
-          description: Logout successful
-
-  /report:
-    post:
-      summary: Submit a suspicious domain
+      summary: Add a new admin
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+                - firstname
+                - lastname
+                - email
+                - username
+                - password
               properties:
-                domain:
+                firstname:
                   type: string
-                reason:
+                lastname:
                   type: string
+                email:
+                  type: string
+                  format: email
+                username:
+                  type: string
+                password:
+                  type: string
+                  format: password
       responses:
         '201':
-          description: Report submitted
+          description: Admin created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Admin created successfully
+        '409':
+          description: Email or username already in use
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Email or username already exists
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Internal server error
 
-  /reports:
-    get:
-      summary: View all submitted reports
-      responses:
-        '200':
-          description: List of reports
-
-  /forensics/{id}:
-    get:
-      summary: Forensic analysis of a report
+  /promote/{userId}:
+    patch:
+      summary: Promote user to investigator
+      description: Promotes a user to 'investigator' unless they already have that role. Only accessible by admins.
+      security:
+        - bearerAuth: []
       parameters:
-        - in: path
-          name: id
-          schema:
-            type: integer
+        - name: userId
+          in: path
           required: true
-          description: Report ID
+          description: ID of the user to promote
+          schema:
+            type: string
+            example: 64f9d5b8d5d2b91f5f317a7e
       responses:
         '200':
-          description: Analysis result
+          description: User promoted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User promoted to investigator
+                  user:
+                    type: object
+                    description: The promoted user object
+        '400':
+          description: User is already an investigator
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User is already an investigator
+        '401':
+          description: Unauthorized - JWT token missing or invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized
+        '403':
+          description: Forbidden - not an admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Only admins can promote users
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Internal server error
+
+
+  /demote/{userId}:
+    patch:
+      summary: demote user from investigator general
+      description: demotes a user to 'general' unless they already have that role. Only accessible by admins.
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: ID of the user to demote
+          schema:
+            type: string
+            example: 64f9d5b8d5d2b91f5f317a7e
+      responses:
+        '200':
+          description: User demoted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User demoted to general
+                  user:
+                    type: object
+                    description: The demoted user object
+        '400':
+          description: User is already a general user
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User is already a general user
+        '401':
+          description: Unauthorized - JWT token missing or invalid
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Unauthorized
+        '403':
+          description: Forbidden - not an admin
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Only admins can demote users
+        '404':
+          description: User not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: User not found
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Internal server error
+
+
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
