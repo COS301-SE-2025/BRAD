@@ -7,7 +7,10 @@ const swaggerSpec = require("./swagger");
 const authRoutes = require("./routes/auth");
 const reportRoutes = require("./routes/report");
 
+
+const connectDB=require('../src/config/db')
 const app = express();
+connectDB();
 app.use(cors());
 app.use(bodyParser.json());
 
