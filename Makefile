@@ -30,10 +30,10 @@ venv-bot:
 	$(PIP) install -r requirements.txt
 
 run-bot:
-	$(PYTHON) bot/src/bot.py
+	cd $(BOT_DIR) && python src/bot.py
 
 test-bot:
-
+	cd $(BOT_DIR) && python -m unittest -v tests/test_bot.py
 
 # === First-Time Setup ===
 dev-init:
