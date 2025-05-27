@@ -2,6 +2,29 @@
 
 # Software Requirement Specifications
 
+# 1. Introduction
+
+The **Bot to Report Abusive Domains (B.R.A.D)** is a cybersecurity-focused application designed to automate the investigation and analysis of domain abuse reports. With the increasing prevalence of phishing websites, malware-hosting domains, and other forms of DNS abuse, organizations require efficient, secure, and intelligent tools to support cybersecurity operations.
+
+B.R.A.D addresses this need by providing a streamlined web-based platform where users can submit suspicious URLs. Upon submission, a secure, containerized bot performs automated scraping and forensic analysis on the domain—extracting content, detecting potential malware, collecting metadata (such as WHOIS data, IP addresses, and SSL certificates), and classifying risk levels using AI techniques. The system compiles this data into structured forensic reports, which are made available to cybersecurity investigators through a dedicated dashboard.
+
+## 1.1 Business Need
+
+Modern cyber threats are increasingly sophisticated, targeting individuals, businesses, and infrastructure through deceptive and malicious domains. Manual approaches to investigating these threats are often time-consuming and reactive. There is a clear need for an automated solution that facilitates the rapid assessment and reporting of potentially harmful domains. B.R.A.D aims to fill this gap by providing a secure, scalable system for domain abuse detection and reporting.
+
+## 1.2 Project Scope
+
+The scope of this project includes the design and implementation of:
+- A **User Submission Portal** for reporting suspicious domains
+- A **Containerized Bot** for automated domain visits and content scraping
+- **Forensic Data Collection** to gather and store domain intelligence
+- **AI-Powered Risk Classification** to evaluate the level of threat
+- An **Investigator Dashboard** for reviewing and analyzing reports
+- Optional integration with threat intelligence sources and real-time alerting
+
+The B.R.A.D system will support both a user-friendly interface and API-based access to ensure integration flexibility and ease of use.
+
+---
 # Requirements
 
 ## 1. Core Requirements
