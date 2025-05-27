@@ -2,19 +2,23 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Register.css';
 import BRAD_robot from '../assets/BRAD_robot.png';
+import API from '../api/axios';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
 
   const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
+    firstname: '',
+    lastname: '',
     email: '',
+    username: '',
     password: '',
     confirmPassword: '',
+    role: 'general', 
   });
 
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
 
   const handleChange = (e) => {
     setForm({
@@ -22,9 +26,10 @@ const RegisterPage = () => {
       [e.target.name]: e.target.value,
     });
     setError('');
+    setSuccess('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (form.password !== form.confirmPassword) {
@@ -32,9 +37,18 @@ const RegisterPage = () => {
       return;
     }
 
-    // Simulate registration
-    console.log('User registered:', form);
-    navigate('/login');
+    try {
+      const userData = { ...form };
+      const response = await API.post('/register', userData);
+      setSuccess(response.data.message);
+      setTimeout(() => navigate('/login'), 1500);
+    } catch (err) {
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Registration failed. Please try again.');
+      }
+    }
   };
 
   return (
@@ -43,7 +57,7 @@ const RegisterPage = () => {
         <div className="robot-content">
           <img src={BRAD_robot} alt="BRAD Robot" className="brad-robot" />
           <h2 className="welcome-message">
-            Welcome new user create an account with B.R.A.D to get started
+            Welcome new user, create an account with B.R.A.D to get started
           </h2>
         </div>
       </div>
@@ -53,17 +67,17 @@ const RegisterPage = () => {
         <form className="register-form" onSubmit={handleSubmit}>
           <input
             type="text"
-            name="firstName"
+            name="firstname"
             placeholder="First Name"
-            value={form.firstName}
+            value={form.firstname}
             onChange={handleChange}
             required
           />
           <input
             type="text"
-            name="lastName"
+            name="lastname"
             placeholder="Last Name"
-            value={form.lastName}
+            value={form.lastname}
             onChange={handleChange}
             required
           />
@@ -72,6 +86,14 @@ const RegisterPage = () => {
             name="email"
             placeholder="Email"
             value={form.email}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="text"
+            name="username"
+            placeholder="Username"
+            value={form.username}
             onChange={handleChange}
             required
           />
@@ -91,8 +113,15 @@ const RegisterPage = () => {
             onChange={handleChange}
             required
           />
+          <select name="role" value={form.role} onChange={handleChange}>
+            <option value="investigator">Investigator</option>
+            <option value="admin">Admin</option>
+            <option value="general">General</option>
+          </select>
+
           <button type="submit">Register</button>
           {error && <div className="error">{error}</div>}
+          {success && <div className="success">{success}</div>}
         </form>
 
         <p className="login-link">

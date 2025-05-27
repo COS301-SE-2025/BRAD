@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/Login.css';
 import BRAD_robot from '../assets/BRAD_robot.png';
 import ForgotPasswordModal from '../components/ForgotPasswordModal';
+import API from "../api/axios";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -12,25 +13,46 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
-  const handleLogin = (e) => {
-    e.preventDefault();
+  const handleLogin = async (e) => {
+  e.preventDefault();
 
-    if (!username || !password) {
-      setError('Please enter both username and password.');
-      return;
-    }
+  if (!username || !password) {
+    setError('Please enter both username and password.');
+    return;
+  }
 
-    // Simulate login success with role-based redirect
-    if (username.trim().toLowerCase().startsWith('i_')) {
+  try {
+    const response = await API.post('/login', {
+      identifier: username,  
+      password,
+    });
+
+
+    // save token or user data
+    const { role, user } = response.data;
+
+    localStorage.setItem("user", JSON.stringify({
+      _id: user._id,
+      username: user.username
+    }));
+
+    if (role === 'investigator') {
       navigate('/investigator');
-    } 
-    else if (username.trim().toLowerCase().startsWith('a_'))  {
+    } else if (role === 'admin') {
       navigate('/admin');
-    }
-    else {
+    } else {
       navigate('/dashboard');
-}
-  };
+    }
+
+  } catch (err) {
+    if (err.response && err.response.data?.message) {
+      setError(err.response.data.message);
+    } else {
+      setError('Login failed. Please try again.');
+    }
+  }
+};
+
 
   return (
     <div className="login-page">
