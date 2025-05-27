@@ -37,4 +37,30 @@ describe('LandingPage', () => {
     expect(screen.getByAltText('BRAD Robot')).toBeInTheDocument();
   });
 
+  test('clicking "Login" navigates to /login', () => {
+    render(
+      <MemoryRouter>
+        <LandingPage />
+      </MemoryRouter>
+    );
+
+    const loginButton = screen.getByRole('button', { name: /Login/i });
+    fireEvent.click(loginButton);
+
+    expect(mockedNavigate).toHaveBeenCalledWith('/login');
+  });
+
+  test('clicking "Learn More" navigates to /about', () => {
+    render(
+      <MemoryRouter>
+        <LandingPage />
+      </MemoryRouter>
+    );
+
+    const learnMoreButton = screen.getByRole('button', { name: /Learn More/i });
+    fireEvent.click(learnMoreButton);
+
+    expect(mockedNavigate).toHaveBeenCalledWith('/about');
+  });
+
 });
