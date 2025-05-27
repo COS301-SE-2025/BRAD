@@ -67,7 +67,7 @@ const InvestigatorDashboard = () => {
             {completed.map(report => (
               <div className="report-card" key={report._id}>
                 <p><strong>{report.domain}</strong></p>
-                <p>Date: {new Date(report.createdAt).toLocaleString()()}</p>
+                <p>Date: {new Date(report.createdAt).toLocaleString()}</p>
                 <p>Verdict: {report.investigatorDecision}</p>
                 <button className="view-button" onClick={() => setSelectedReport(report)}>
                   View Analysis

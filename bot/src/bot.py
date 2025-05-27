@@ -51,7 +51,9 @@ def run_bot(run_once=False):
                 report = response.json()
                 report_id = report.get("_id") or report.get("id")
                 print(f"Analyzing domain: {report['domain']} (ID: {report_id})")
-                
+
+                time.sleep(5) 
+
                 # Generate mock analysis
                 analysis = generate_analysis(report["domain"])
 
