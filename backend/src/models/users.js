@@ -31,6 +31,7 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
+    enum: ['general', 'investigator'],
     default: 'general',
   }
 }, { timestamps: true });
