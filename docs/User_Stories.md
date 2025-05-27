@@ -31,7 +31,12 @@
 
 ---
 
-## 3. As an admin I want to assign domain reports to specific investigators so that I can manage workload distribution and accountability (optional/bonus)
+## 3.Role:Admin
+**Description:**
+- A system administrator responsible for managing user roles.
+  
+**User Story:**
+As an admin I want to view all users and manage their roles so that I can control who has access to specific functionalities
 
 **Definition of done:**
 - I can view all submitted reports
