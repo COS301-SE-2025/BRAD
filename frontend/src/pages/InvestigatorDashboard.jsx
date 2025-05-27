@@ -82,7 +82,18 @@ const InvestigatorDashboard = () => {
           <div className="modal-overlay">
             <div className="modal-content">
               <h3>Analysis for {selectedReport.domain}</h3>
-              <pre>{JSON.stringify(selectedReport.analysis, null, 2)}</pre>
+              <div className="analysis-details">
+                <p><strong>Domain:</strong> {selectedReport.analysis.domain}</p>
+                <p><strong>Scanned At:</strong> {new Date(selectedReport.analysis.scannedAt).toLocaleString()}</p>
+                <p><strong>Risk Score:</strong> {selectedReport.analysis.riskScore}</p>
+                <p><strong>Title:</strong> {selectedReport.analysis.title}</p>
+                <p><strong>Malware Detected:</strong> {selectedReport.analysis.malwareDetected ? 'Yes' : 'No'}</p>
+                <p><strong>Summary:</strong> {selectedReport.analysis.summary}</p>
+                <p><strong>IP Address:</strong> {selectedReport.analysis.ip}</p>
+                <p><strong>Registrar:</strong> {selectedReport.analysis.registrar}</p>
+                <p><strong>SSL Valid:</strong> {selectedReport.analysis.sslValid ? 'Yes' : 'No'}</p>
+                <p><strong>WHOIS Owner:</strong> {selectedReport.analysis.whoisOwner}</p>
+              </div>
 
               {!selectedReport.investigatorDecision && (
                 <div className="modal-buttons">
