@@ -36,10 +36,10 @@
 - A system administrator responsible for managing user roles.
   
 **User Story:**
-As an admin I want to view all users and manage their roles so that I can control who has access to specific functionalities
+- As an admin I want to view all users and manage their roles so that I can control who has access to specific functionalities
 
 **Definition of done:**
-- I can view all submitted reports
-- I can assign a report to an investigator
-- An investigator can only view the reports assigned to them
+- I can view all registered users
+- I can promote a user to the role of investigator
+- I can demote an investigator to a general user
 
