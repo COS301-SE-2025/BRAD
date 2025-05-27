@@ -1,0 +1,8 @@
+# Global ignores
+node_modules/
+.env
+logs/
+*.log
+.cache/
+dist/
+coverage/
