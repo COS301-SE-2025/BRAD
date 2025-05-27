@@ -28,7 +28,7 @@ const loginSchema = Joi.object({
   }),
 });
 
-router.post("/login", validateBody(loginSchema), authController.login);
+
 
 const registerSchema = Joi.object({
   firstname: Joi.string().min(3).max(30).required(),
@@ -40,9 +40,11 @@ const registerSchema = Joi.object({
     .valid(Joi.ref("password"))
     .required()
     .messages({ "any.only": "Passwords do not match" }),
+  role: Joi.string().valid("admin", "investigator", "general").default("general"), 
 });
+
 
 // Routes
 router.post("/register", validateBody(registerSchema), authController.register);
-
+router.post("/login", validateBody(loginSchema), authController.login);
 module.exports = router;
