@@ -1,8 +1,8 @@
-const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const User = require('../models/users');
-const Admin = require('../models/admin');
+const User = require("../models/users");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken"); // Ensure this is included
 
+// LOGIN
 exports.login = async (req, res) => {
   const { identifier, password } = req.body;
 
@@ -12,20 +12,20 @@ exports.login = async (req, res) => {
     let user = await Admin.findOne({
       $or: [
         { email: identifierNormalized },
-        { username: identifierNormalized }
-      ]
+        { username: identifierNormalized },
+      ],
     });
 
-    let role = 'admin';
+    let role = "admin";
 
     if (!user) {
       user = await User.findOne({
         $or: [
           { email: identifierNormalized },
-          { username: identifierNormalized }
-        ]
+          { username: identifierNormalized },
+        ],
       });
-      role = 'general';
+      role = "general";
     }
 
     if (!user) {
@@ -40,7 +40,7 @@ exports.login = async (req, res) => {
     const token = jwt.sign(
       { id: user._id, role },
       process.env.JWT_SECRET,
-      { expiresIn: '1h' }
+      { expiresIn: "1h" }
     );
 
     const { password: _, ...userData } = user.toObject();
@@ -48,7 +48,7 @@ exports.login = async (req, res) => {
     res.status(200).json({
       message: "Login successful",
       user: { ...userData, role },
-      token
+      token,
     });
   } catch (error) {
     console.error("Error during login:", error);
@@ -56,8 +56,7 @@ exports.login = async (req, res) => {
   }
 };
 
-
-
+// REGISTER
 exports.register = async (req, res) => {
   const { firstname, lastname, username, email, password } = req.body;
 
@@ -70,7 +69,9 @@ exports.register = async (req, res) => {
     });
 
     if (existingUser) {
-      return res.status(409).json({ message: 'User with this email or username already exists.' });
+      return res
+        .status(409)
+        .json({ message: "User with this email or username already exists." });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -81,14 +82,14 @@ exports.register = async (req, res) => {
       username: usernameNormalized,
       email: emailNormalized,
       password: hashedPassword,
-      role: 'general',
+      role: "general",
     });
 
     await newUser.save();
 
     res.status(201).json({ userId: newUser._id });
   } catch (error) {
-    console.error('Error registering user:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error registering user:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

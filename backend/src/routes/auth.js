@@ -1,8 +1,7 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Joi = require('joi');
-const authController = require('../controllers/authController');
-
+const Joi = require("joi");
+const authController = require("../controllers/authController");
 
 // Validation middleware
 function validateBody(schema) {
@@ -19,16 +18,15 @@ function validateBody(schema) {
 
 const loginSchema = Joi.object({
   identifier: Joi.string().required().messages({
-    'string.empty': 'Username or email is required.',
-    'any.required': 'Username or email is required.'
+    "string.empty": "Username or email is required.",
+    "any.required": "Username or email is required.",
   }),
   password: Joi.string().min(6).required().messages({
-    'string.empty': 'Password is required.',
-    'string.min': 'Password must be at least 6 characters long.',
-    'any.required': 'Password is required.'
-  })
+    "string.empty": "Password is required.",
+    "string.min": "Password must be at least 6 characters long.",
+    "any.required": "Password is required.",
+  }),
 });
-
 
 
 
@@ -38,15 +36,13 @@ const registerSchema = Joi.object({
   username: Joi.string().min(3).max(30).required(),
   email: Joi.string().email().required(),
   password: Joi.string().min(6).required(),
-  confirmPassword: Joi.string().valid(Joi.ref('password')).required()
-    .messages({ 'any.only': 'Passwords do not match' }),
+  confirmPassword: Joi.string()
+    .valid(Joi.ref("password"))
+    .required()
+    .messages({ "any.only": "Passwords do not match" }),
 });
 
-
-
-
 // Routes
-router.post('/register', validateBody(registerSchema), authController.register);
-router.post('/login', validateBody(loginSchema), authController.login);
-
+router.post("/register", validateBody(registerSchema), authController.register);
+router.post("/login", validateBody(loginSchema), authController.login);
 module.exports = router;
