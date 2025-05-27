@@ -1,32 +1,20 @@
 const User = require("../models/users");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken"); // Ensure this is included
+const jwt = require("jsonwebtoken");
 
-// LOGIN
 exports.login = async (req, res) => {
   const { identifier, password } = req.body;
 
   try {
-    const identifierNormalized = identifier.toLowerCase().trim();
+    const emailNormalized = identifier.toLowerCase().trim();
+    const usernameNormalized = identifier.trim();
 
-    let user = await Admin.findOne({
+    const user = await User.findOne({
       $or: [
-        { email: identifierNormalized },
-        { username: identifierNormalized },
+        { email: emailNormalized },
+        { username: usernameNormalized },
       ],
     });
-
-    let role = "admin";
-
-    if (!user) {
-      user = await User.findOne({
-        $or: [
-          { email: identifierNormalized },
-          { username: identifierNormalized },
-        ],
-      });
-      role = "general";
-    }
 
     if (!user) {
       return res.status(401).json({ message: "Invalid credentials" });
@@ -38,7 +26,7 @@ exports.login = async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user._id, role },
+      { id: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1h" }
     );
@@ -47,7 +35,7 @@ exports.login = async (req, res) => {
 
     res.status(200).json({
       message: "Login successful",
-      user: { ...userData, role },
+      user: userData,
       token,
     });
   } catch (error) {
@@ -56,13 +44,9 @@ exports.login = async (req, res) => {
   }
 };
 
-// REGISTER
+
 exports.register = async (req, res) => {
-  const { firstname, lastname, username, email, password } = req.body;
-  }
-}
-    exports.register = async (req, res) => {
-      const { firstname, lastname, username, email, password, role } = req.body;
+  const { firstname, lastname, username, email, password, role } = req.body;
 
   try {
     const emailNormalized = email.toLowerCase().trim();
@@ -86,7 +70,7 @@ exports.register = async (req, res) => {
       username: usernameNormalized,
       email: emailNormalized,
       password: hashedPassword,
-      role: "general",
+      role: role || "general",  // ← use role if provided, fallback to general
     });
 
     await newUser.save();
