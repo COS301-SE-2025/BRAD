@@ -40,7 +40,9 @@ const registerSchema = Joi.object({
     .valid(Joi.ref("password"))
     .required()
     .messages({ "any.only": "Passwords do not match" }),
+  role: Joi.string().valid("admin", "investigator", "general").default("general"), 
 });
+
 
 // Routes
 router.post("/register", validateBody(registerSchema), authController.register);

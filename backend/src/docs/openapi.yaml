@@ -1,14 +1,13 @@
 openapi: 3.0.0
 info:
-  title: User API
+  title: User & Report API
   version: "1.0.0"
 
 paths:
   /register:
     post:
       summary: Register a new user
-      tags:
-        - Auth
+      tags: [Auth]
       requestBody:
         required: true
         content:
@@ -21,34 +20,29 @@ paths:
                 - username
                 - email
                 - password
+                - confirmPassword
               properties:
                 firstname:
                   type: string
-                  minLength: 3
-                  maxLength: 30
                   example: John
                 lastname:
                   type: string
-                  minLength: 3
-                  maxLength: 30
                   example: Doe
                 username:
                   type: string
-                  minLength: 3
-                  maxLength: 30
                   example: johndoe123
                 email:
                   type: string
                   format: email
-                  example: john@example.com
                 password:
                   type: string
                   minLength: 6
-                  example: securePass123
                 confirmPassword:
                   type: string
                   minLength: 6
-                  example: securePass123
+                role:
+                  type: string
+                  enum: [admin, general, investigator]
       responses:
         '201':
           description: User successfully registered
@@ -59,31 +53,111 @@ paths:
                 properties:
                   userId:
                     type: string
-                    example: 64f1a14eabc123001c98fdc9
         '400':
           description: Validation error or user already exists
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  message:
-                    type: string
-                    example: User with this email or username already exists.
         '500':
           description: Internal server error
+
+  /login:
+    post:
+      summary: Login
+      tags: [Auth]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [identifier, password]
+              properties:
+                identifier:
+                  type: string
+                  description: Email or username
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Login successful
           content:
             application/json:
               schema:
                 type: object
                 properties:
-                  message:
+                  userId:
                     type: string
-                    example: Internal server error
+                  role:
+                    type: string
+                  username:
+                    type: string
+        '401':
+          description: Invalid credentials
+
+  /logout:
+    post:
+      summary: Logout
+      tags: [Auth]
+      responses:
+        '200':
+          description: Logout successful
+
+  /report:
+    post:
+      summary: Submit a suspicious domain
+      tags: [Reports]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [domain, submittedBy]
+              properties:
+                domain:
+                  type: string
+                submittedBy:
+                  type: string
+      responses:
+        '201':
+          description: Report submitted
+
+  /reports:
+    get:
+      summary: Get all submitted reports
+      tags: [Reports]
+      parameters:
+        - in: query
+          name: user
+          schema:
+            type: string
+          description: Filter reports by user ID
+      responses:
+        '200':
+          description: List of reports
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Report'
+
+  /forensics/{id}:
+    get:
+      summary: Perform forensic analysis
+      tags: [Reports]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Analysis result
 
   /pending-reports:
     get:
-      summary: Get the next un-analyzed report
+      summary: Get the next pending report
+      tags: [Bot]
       responses:
         '200':
           description: A pending report
@@ -96,7 +170,8 @@ paths:
 
   /analyzed-report:
     post:
-      summary: Submit fake analysis for a report
+      summary: Submit analysis result
+      tags: [Bot]
       requestBody:
         required: true
         content:
@@ -105,8 +180,133 @@ paths:
               $ref: '#/components/schemas/AnalyzedInput'
       responses:
         '200':
-          description: Analysis submitted successfully
+          description: Analysis submitted
         '400':
-          description: Missing ID or analysis
+          description: Missing fields
         '404':
           description: Report not found
+
+  /report/{id}/decision:
+    patch:
+      summary: Submit investigator verdict
+      tags: [Investigator]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [verdict]
+              properties:
+                verdict:
+                  type: string
+                  enum: [malicious, benign]
+      responses:
+        '200':
+          description: Decision submitted
+        '400':
+          description: Invalid input
+        '404':
+          description: Report not found
+
+  /report/{id}/assign:
+    patch:
+      summary: Assign report to investigator
+      tags: [Investigator]
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [userId]
+              properties:
+                userId:
+                  type: string
+      responses:
+        '200':
+          description: Assignment successful
+        '400':
+          description: Missing userId
+        '404':
+          description: Report not found
+
+components:
+  schemas:
+    Report:
+      type: object
+      properties:
+        _id:
+          type: string
+        domain:
+          type: string
+        submittedBy:
+          $ref: '#/components/schemas/User'
+        analyzed:
+          type: boolean
+        investigatorDecision:
+          type: string
+        analysis:
+          type: object
+          properties:
+            verdict:
+              type: string
+            riskScore:
+              type: integer
+            scannedAt:
+              type: string
+              format: date-time
+
+    AnalyzedInput:
+      type: object
+      required: [id, analysis]
+      properties:
+        id:
+          type: string
+        analysis:
+          type: object
+          properties:
+            domain:
+              type: string
+            verdict:
+              type: string
+            riskScore:
+              type: integer
+            scannedAt:
+              type: string
+            summary:
+              type: string
+            title:
+              type: string
+            ip:
+              type: string
+            registrar:
+              type: string
+            sslValid:
+              type: boolean
+            whoisOwner:
+              type: string
+
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+        username:
+          type: string
+        email:
+          type: string
+        role:
+          type: string

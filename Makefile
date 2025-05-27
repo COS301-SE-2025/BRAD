@@ -25,11 +25,11 @@ run-frontend:
 
 # === Bot (Python) ===
 venv-bot:
-	cd $(BOT_DIR) && python -m venv venv && \
-	. venv/bin/activate && pip install -r requirements.txt
+	cd $(BOT_DIR) && py -m venv venv && \
+	venv/Scripts/python.exe -m pip install -r requirements.txt
 
 run-bot:
-	cd $(BOT_DIR) && python src/bot.py
+	cd $(BOT_DIR) && py src/bot.py
 
 test-bot:
 

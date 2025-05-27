@@ -59,4 +59,4 @@ class TestBot(unittest.TestCase):
             args, kwargs = mock_post.call_args
             self.assertIn("/analyzed-report", args[0])
             self.assertEqual(kwargs["json"]["id"], 42)
-
+    

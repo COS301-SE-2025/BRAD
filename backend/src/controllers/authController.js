@@ -25,13 +25,22 @@ exports.login = async (req, res) => {
 
     const { password: _, ...userData } = user.toObject();
 
-    res.status(200).json({ message: "Login successful", user: userData });
+    res.status(200).json({
+      message: "Login successful",
+      role: userData.role,
+      user: {
+        _id: user._id,
+        username: user.username
+      }
+    });
+
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ message: "Internal server error" });
-
+  }
+}
     exports.register = async (req, res) => {
-      const { firstname, lastname, username, email, password } = req.body;
+      const { firstname, lastname, username, email, password, role } = req.body;
 
       try {
         const emailNormalized = email.toLowerCase().trim();
@@ -55,7 +64,7 @@ exports.login = async (req, res) => {
           username: usernameNormalized,
           email: emailNormalized,
           password: hashedPassword,
-          role: "general", // optional, but explicit
+          role, // optional, but explicit
         });
 
         await newUser.save();
@@ -66,5 +75,3 @@ exports.login = async (req, res) => {
         res.status(500).json({ message: "Internal server error" });
       }
     };
-  }
-};
