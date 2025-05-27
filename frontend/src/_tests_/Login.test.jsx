@@ -15,11 +15,13 @@ jest.mock('../components/ForgotPasswordModal', () => () => (
   <div data-testid="forgot-password-modal">Forgot Password Modal</div>
 ));
 
+
 jest.mock('../api/axios', () => ({
   post: jest.fn(),
 }));
 
 import API from '../api/axios';
+
 
 describe('LoginPage', () => {
   beforeEach(() => {
@@ -53,6 +55,7 @@ describe('LoginPage', () => {
     expect(screen.getByText(/Please enter both username and password/i)).toBeInTheDocument();
   });
 
+
   test('navigates to /dashboard for normal users', async () => {
   API.post.mockResolvedValue({
     data: {
@@ -80,6 +83,7 @@ describe('LoginPage', () => {
   await screen.findByText(/Forgot Password\?/i);
   expect(mockedNavigate).toHaveBeenCalledWith('/dashboard');
 });
+
 
 
   test('opens Forgot Password modal', () => {

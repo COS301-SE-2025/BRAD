@@ -1,14 +1,18 @@
 import React from 'react';
+
 import { render, screen, fireEvent, act } from '@testing-library/react';
+
 import RegisterPage from '../pages/Register';
 import { MemoryRouter } from 'react-router-dom';
 
 const mockedNavigate = jest.fn();
 
+
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
   useNavigate: () => mockedNavigate,
 }));
+
 
 jest.mock('../api/axios', () => ({
   post: jest.fn(() =>
@@ -17,6 +21,7 @@ jest.mock('../api/axios', () => ({
 }));
 
 jest.useFakeTimers();
+
 
 describe('RegisterPage', () => {
   beforeEach(() => {
@@ -41,11 +46,13 @@ describe('RegisterPage', () => {
   });
 
   test('shows error if passwords do not match', async () => {
+
     render(
       <MemoryRouter>
         <RegisterPage />
       </MemoryRouter>
     );
+
 
     fireEvent.change(screen.getByPlaceholderText('First Name'), {
       target: { value: 'John' },
@@ -59,6 +66,7 @@ describe('RegisterPage', () => {
     fireEvent.change(screen.getByPlaceholderText('Username'), {
       target: { value: 'johndoe' },
     });
+
     fireEvent.change(screen.getByPlaceholderText('Password'), {
       target: { value: 'password123' },
     });

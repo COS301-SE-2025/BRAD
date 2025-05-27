@@ -6,19 +6,21 @@ const swaggerSpec = require("./swagger");
 
 const authRoutes = require("./routes/auth");
 const reportRoutes = require("./routes/report");
+const adminRoutes=require('../src/routes/admin')
 
-
-const connectDB=require('../src/config/db')
+const connectDB = require("../src/config/db");
 const app = express();
 connectDB();
+
 app.use(cors());
 app.use(bodyParser.json());
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/", authRoutes);
 app.use("/", reportRoutes);
+app.use("/", adminRoutes);
 
-app.listen(3000, '0.0.0.0', () => {
+app.listen(3000, "0.0.0.0", () => {
   console.log("BRAD API running at http://localhost:3000");
 });
 
