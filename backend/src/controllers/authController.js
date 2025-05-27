@@ -9,7 +9,6 @@ exports.login = async (req, res) => {
   try {
     const identifierNormalized = identifier.toLowerCase().trim();
 
-    // Try to find in Admin collection
     let user = await Admin.findOne({
       $or: [
         { email: identifierNormalized },
@@ -19,7 +18,6 @@ exports.login = async (req, res) => {
 
     let role = 'admin';
 
-    // If not found in Admin, try User
     if (!user) {
       user = await User.findOne({
         $or: [
@@ -55,5 +53,42 @@ exports.login = async (req, res) => {
   } catch (error) {
     console.error("Error during login:", error);
     res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+
+
+exports.register = async (req, res) => {
+  const { firstname, lastname, username, email, password } = req.body;
+
+  try {
+    const emailNormalized = email.toLowerCase().trim();
+    const usernameNormalized = username.trim();
+
+    const existingUser = await User.findOne({
+      $or: [{ email: emailNormalized }, { username: usernameNormalized }],
+    });
+
+    if (existingUser) {
+      return res.status(409).json({ message: 'User with this email or username already exists.' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({
+      firstname,
+      lastname,
+      username: usernameNormalized,
+      email: emailNormalized,
+      password: hashedPassword,
+      role: 'general',
+    });
+
+    await newUser.save();
+
+    res.status(201).json({ userId: newUser._id });
+  } catch (error) {
+    console.error('Error registering user:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };

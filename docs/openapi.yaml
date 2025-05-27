@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: B.R.A.D API
+  title: User API
   version: "1.0.0"
 
 security:
@@ -10,6 +10,8 @@ paths:
   /login:
     post:
       summary: Login with username or email
+      tags:
+        - Auth
       requestBody:
         required: true
         content:
@@ -77,6 +79,60 @@ paths:
   /addadmin:
     post:
       summary: Add a new admin
+      tags:
+        - Admin
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - email
+              properties:
+                email:
+                  type: string
+                  format: email
+                  example: newadmin@example.com
+      responses:
+        '201':
+          description: Admin created successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Admin created successfully
+        '409':
+          description: Email already in use
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Email already exists
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Internal server error
+
+  /register:
+    post:
+      summary: Register a new user
+      tags:
+        - Auth
       requestBody:
         required: true
         content:
@@ -89,22 +145,40 @@ paths:
                 - email
                 - username
                 - password
+                - confirmPassword
               properties:
                 firstname:
                   type: string
+                  minLength: 3
+                  maxLength: 30
+                  example: John
                 lastname:
                   type: string
+                  minLength: 3
+                  maxLength: 30
+                  example: Doe
+                username:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  example: johndoe123
                 email:
                   type: string
                   format: email
-                username:
-                  type: string
+                  example: john@example.com
                 password:
                   type: string
+                  minLength: 6
                   format: password
+                  example: securePass123
+                confirmPassword:
+                  type: string
+                  minLength: 6
+                  format: password
+                  example: securePass123
       responses:
         '201':
-          description: Admin created
+          description: User successfully registered
           content:
             application/json:
               schema:
@@ -112,7 +186,7 @@ paths:
                 properties:
                   message:
                     type: string
-                    example: Admin created successfully
+                    example: User successfully registered
         '409':
           description: Email or username already in use
           content:
@@ -138,6 +212,8 @@ paths:
     patch:
       summary: Promote user to investigator
       description: Promotes a user to 'investigator' unless they already have that role. Only accessible by admins.
+      tags:
+        - Admin
       security:
         - bearerAuth: []
       parameters:
@@ -161,7 +237,6 @@ paths:
                     example: User promoted to investigator
                   user:
                     type: object
-                    description: The promoted user object
         '400':
           description: User is already an investigator
           content:
@@ -213,11 +288,12 @@ paths:
                     type: string
                     example: Internal server error
 
-
   /demote/{userId}:
     patch:
-      summary: demote user from investigator general
-      description: demotes a user to 'general' unless they already have that role. Only accessible by admins.
+      summary: Demote user from investigator to general
+      description: Demotes a user to 'general' unless they already have that role. Only accessible by admins.
+      tags:
+        - Admin
       security:
         - bearerAuth: []
       parameters:
@@ -241,7 +317,6 @@ paths:
                     example: User demoted to general
                   user:
                     type: object
-                    description: The demoted user object
         '400':
           description: User is already a general user
           content:
@@ -292,8 +367,6 @@ paths:
                   message:
                     type: string
                     example: Internal server error
-
-
 
 components:
   securitySchemes:
