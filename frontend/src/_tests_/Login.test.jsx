@@ -15,6 +15,12 @@ jest.mock('../components/ForgotPasswordModal', () => () => (
   <div data-testid="forgot-password-modal">Forgot Password Modal</div>
 ));
 
+jest.mock('../api/axios', () => ({
+  post: jest.fn(),
+}));
+
+import API from '../api/axios';
+
 describe('LoginPage', () => {
   beforeEach(() => {
     mockedNavigate.mockClear();
@@ -47,23 +53,34 @@ describe('LoginPage', () => {
     expect(screen.getByText(/Please enter both username and password/i)).toBeInTheDocument();
   });
 
-  test('navigates to /dashboard for normal users', () => {
-    render(
-      <MemoryRouter>
-        <LoginPage />
-      </MemoryRouter>
-    );
-
-    fireEvent.change(screen.getByPlaceholderText(/Username/i), {
-      target: { value: 'user123' },
-    });
-    fireEvent.change(screen.getByPlaceholderText(/Password/i), {
-      target: { value: 'pass' },
-    });
-
-    fireEvent.click(screen.getByRole('button', { name: /Login/i }));
-    expect(mockedNavigate).toHaveBeenCalledWith('/dashboard');
+  test('navigates to /dashboard for normal users', async () => {
+  API.post.mockResolvedValue({
+    data: {
+      role: 'general',
+      user: { _id: '123', username: 'user123' },
+    },
   });
+
+  render(
+    <MemoryRouter>
+      <LoginPage />
+    </MemoryRouter>
+  );
+
+  fireEvent.change(screen.getByPlaceholderText(/Username/i), {
+    target: { value: 'user123' },
+  });
+  fireEvent.change(screen.getByPlaceholderText(/Password/i), {
+    target: { value: 'pass' },
+  });
+
+  fireEvent.click(screen.getByRole('button', { name: /Login/i }));
+
+  // Wait for navigation
+  await screen.findByText(/Forgot Password\?/i);
+  expect(mockedNavigate).toHaveBeenCalledWith('/dashboard');
+});
+
 
   test('opens Forgot Password modal', () => {
     render(
