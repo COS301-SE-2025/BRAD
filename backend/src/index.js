@@ -8,8 +8,7 @@ const authRoutes = require("./routes/auth");
 const reportRoutes = require("./routes/report");
 const adminRoutes=require('../src/routes/admin')
 
-
-const connectDB=require('../src/config/db')
+const connectDB = require("../src/config/db");
 const app = express();
 connectDB();
 
@@ -21,7 +20,7 @@ app.use("/", authRoutes);
 app.use("/", reportRoutes);
 app.use("/", adminRoutes);
 
-app.listen(3000, '0.0.0.0', () => {
+app.listen(3000, "0.0.0.0", () => {
   console.log("BRAD API running at http://localhost:3000");
 });
 

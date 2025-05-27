@@ -44,9 +44,8 @@ exports.login = async (req, res) => {
   }
 };
 
-
 exports.register = async (req, res) => {
-  const { firstname, lastname, username, email, password, role } = req.body;
+  const { firstname, lastname, username, email, password } = req.body;
 
   try {
     const emailNormalized = email.toLowerCase().trim();
@@ -57,9 +56,9 @@ exports.register = async (req, res) => {
     });
 
     if (existingUser) {
-      return res
-        .status(409)
-        .json({ message: "User with this email or username already exists." });
+      return res.status(409).json({
+        message: "User with this email or username already exists.",
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -70,7 +69,7 @@ exports.register = async (req, res) => {
       username: usernameNormalized,
       email: emailNormalized,
       password: hashedPassword,
-      role: role || "general",  // ← use role if provided, fallback to general
+      role: role || "general", // optional, but explicit
     });
 
     await newUser.save();
