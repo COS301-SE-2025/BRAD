@@ -45,7 +45,7 @@ exports.login = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-  const { firstname, lastname, username, email, password } = req.body;
+  const { firstname, lastname, username, email, password, role } = req.body;
 
   try {
     const emailNormalized = email.toLowerCase().trim();
@@ -69,7 +69,7 @@ exports.register = async (req, res) => {
       username: usernameNormalized,
       email: emailNormalized,
       password: hashedPassword,
-      role: role || "general", // optional, but explicit
+      role: "general", // optional, but explicit
     });
 
     await newUser.save();
