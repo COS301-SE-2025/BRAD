@@ -56,10 +56,13 @@ This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)**
 ## Documentation
 
 - [SRS Document](/docs/SRS_Document.md)
-- [Design specifications](/docs/requirement-specs/Design_Specification_Document.md)
+- [Design specifications](/docs/DesignRequirements.md)
 - [Service Contract](/docs/Service_Contracts.md)
 - [User Stories](/docs/User_Stories.md)
-- [Github Contributions](/docs/requirement-specs/GitHub_Contributions.pdf)
+- [Architectural Requirements](/docs/Architectural_Requirements.pdf)
+- [Quality Requirements](/docs/Quality_Requirements.pdf)
+- [User Stories](/docs/User_Stories.md)
+- [Github Contributions](/docs/GitHub_Contributions.pdf)
     <!-- - [Github Contributions](/docs/requirement-specs/GitHub-contributions.pdf) -->
     <!-- - [API Documentation](/docs/requirement-specs/API_Documentation.md) -->
 - [Project Board](https://github.com/orgs/COS301-SE-2025/projects/220/views/1)
