@@ -1,5 +1,5 @@
-**Architectural** **Requirements**
-**QualityRequirementsAddressed:[<u>Link</u>](file:///C:/Users/Salome/Documents/2025/COS301/Capstone%20Brad%20project/Quality%20Requirements.docx)**
+**Architectural** **Requirements** **QualityRequirementsAddressed:**
+[**<u>Link</u>**](https://github.com/COS301-SE-2025/BRAD/blob/main/docs/Quality%20Requirements.pdf)
 
 **ArchitecturalPatterns**
 
@@ -197,15 +197,15 @@ independently when needed.
 
 **Model-View-Controller** **(MVC)**
 
-On the frontend, the Model-View-Controller (MVC) pattern is optionally
-applied to the investigator dashboard to cleanly separate concerns. The
-model holds domain data and system state, the view renders the UI (e.g.,
-graphs, logs, alerts), and the controller handles user input and
-orchestrates responses. This structure enhances usability by ensuring
-that the interface is responsive and intuitive. It also improves
-maintainability, as frontend developers can update visual components,
-logic, or data handling independently reducing the likelihood of bugs
-and simplifying testing.
+On the frontend, the Model-View-Controller (MVC) pattern is applied to
+the investigator dashboard to cleanly separate concerns. The model holds
+domain data and system state, the view renders the UI (e.g., graphs,
+logs, alerts), and the controller handles user input and orchestrates
+responses. This structure enhances usability by ensuring that the
+interface is responsive and intuitive. It also improves maintainability,
+as frontend developers can update visual components, logic, or data
+handling independently reducing the likelihood of bugs and simplifying
+testing.
 
 **Quality** **Requirements** **Addressed:**
 
