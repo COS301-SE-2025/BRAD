@@ -117,10 +117,8 @@ The B.R.A.D system will support both a user-friendly interface and API-based acc
  
 <p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 
-
 <br />
 <br />
-
 
 # User Stories
 
@@ -187,8 +185,6 @@ The B.R.A.D system will support both a user-friendly interface and API-based acc
  
 <p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 
-<br />
-<br />
 <br />
 <br />
 
@@ -369,8 +365,6 @@ style="width:7.26805in;height:4.41944in" />
 
 <br />
 <br />
-<br />
-<br />
 
 # Functional Requirements
 
@@ -485,8 +479,6 @@ style="width:7.26805in;height:4.41944in" />
  
 <p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 
-<br />
-<br />
 <br />
 <br />
 
@@ -665,13 +657,10 @@ User uploads additional proof. The system validates and stores the file, linking
   <img src="./images/DomainModelV2.jpg" style="max-width:100%; height:auto;" />
 </div>
 
-
- <br />
+<br />
  
 <p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 
-<br />
-<br />
 <br />
 <br />
 
@@ -1137,8 +1126,6 @@ components.
 
  <br />
  <br />
- <br />
- <br />
 
 # Technology Requirements
 
@@ -1165,8 +1152,6 @@ components.
 
 <p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 
- <br />
- <br />
  <br />
  <br />
 
