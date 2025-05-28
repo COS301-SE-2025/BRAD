@@ -64,9 +64,11 @@ This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)**
   <!-- - [Architectural Requirements](/docs/Architectural_Requirements.md) -->
   <!-- - [Quality Requirements](/docs/Quality_Requirements.pdf) -->
 - [Github Contributions](/docs/GitHub_Contributions.pdf)
-  <!-- - [User Stories](/docs/User_Stories.md) -->
-  <!-- - [Github Contributions](/docs/requirement-specs/GitHub-contributions.pdf) -->
-  <!-- - [API Documentation](/docs/requirement-specs/API_Documentation.md) -->
+    <!-- - [Github Contributions](/docs/requirement-specs/GitHub-contributions.pdf) -->
+    <!-- - [API Documentation](/docs/requirement-specs/API_Documentation.md) -->
+- [Project Board](https://github.com/orgs/COS301-SE-2025/projects/220/views/1)
+- [Project Plan](/docs/Project-plan.md)
+- [Burn Down Charts](/docs/burn-down-charts.md)
 
 ## Demo Videos
 
