@@ -61,7 +61,7 @@ This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)**
 - [Design specifications](/docs/DesignRequirements.md)
 - [Service Contract](/docs/Service_Contracts.md)
 - [User Stories](/docs/User_Stories.md)
-- [Architectural Requirements](/docs/Architectural_Requirements.pdf)
+- [Architectural Requirements](/docs/Architectural_Requirements.md)
 - [Quality Requirements](/docs/Quality_Requirements.pdf)
 - [User Stories](/docs/User_Stories.md)
 - [Github Contributions](/docs/GitHub_Contributions.pdf)
