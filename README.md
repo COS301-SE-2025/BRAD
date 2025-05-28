@@ -58,25 +58,31 @@ This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)**
 ## Documentation
 
 - [SRS Document](/docs/SRS_Document.md)
-- [Design specifications](/docs/DesignRequirements.md)
-- [Service Contract](/docs/Service_Contracts.md)
-- [User Stories](/docs/User_Stories.md)
-- [Architectural Requirements](/docs/Architectural_Requirements.md)
-- [Quality Requirements](/docs/Quality_Requirements.pdf)
-- [User Stories](/docs/User_Stories.md)
+  <!-- - [Design specifications](/docs/DesignRequirements.md) -->
+  <!-- - [Service Contract](/docs/Service_Contracts.md) -->
+  <!-- - [User Stories](/docs/User_Stories.md) -->
+  <!-- - [Architectural Requirements](/docs/Architectural_Requirements.md) -->
+  <!-- - [Quality Requirements](/docs/Quality_Requirements.pdf) -->
 - [Github Contributions](/docs/GitHub_Contributions.pdf)
-    <!-- - [Github Contributions](/docs/requirement-specs/GitHub-contributions.pdf) -->
-    <!-- - [API Documentation](/docs/requirement-specs/API_Documentation.md) -->
-- [Project Board](https://github.com/orgs/COS301-SE-2025/projects/220/views/1)
-- [Project Plan](/docs/User_Stories.md)
-- [Burn Down Charts](/docs/User_Stories.md)
+  <!-- - [User Stories](/docs/User_Stories.md) -->
+  <!-- - [Github Contributions](/docs/requirement-specs/GitHub-contributions.pdf) -->
+  <!-- - [API Documentation](/docs/requirement-specs/API_Documentation.md) -->
 
 ## Demo Videos
+
+- [Demo 1 pdf](/docs/demo-files/Demo1.pdf)
+- [Demo 1 video](https://drive.google.com/file/d/1Sao8gPITNV2-APj4J4pW27-Gpho8C8op/view?usp=sharing)
 
 <!-- - [MP4-Demo1](https://drive.google.com/file/d/17mjbkHNwQ7dw3W5S9SFvYshkr1r34ICE/view?usp=sharing)
 - [MP4-Demo1.pdf](/docs/requirement-specs/MP4-Demo1.pdf)
 - [MP4-Demo2](https://drive.google.com/file/d/19o50OhefAFh2qgN6Zg8dnNXcm8-NMJCH/view?usp=sharing)
 - [MP4-Demo2.pdf](/docs/requirement-specs/MP4-Demo2.pdf) -->
+
+## Project
+
+- [Project Board](https://github.com/orgs/COS301-SE-2025/projects/220/views/1)
+- [Project Plan](/docs/User_Stories.md)
+- [Burn Down Charts](/docs/User_Stories.md)
 
 ## Installation
 
@@ -87,6 +93,8 @@ git clone https://github.com/COS301-SE-2025/BRAD.git
 
 cd BRAD
 ```
+
+### **_Docker not running yet_**
 
 ### **2. Running the Project (Docker)**
 
