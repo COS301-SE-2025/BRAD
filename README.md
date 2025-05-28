@@ -45,6 +45,8 @@ This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)**
 
 ```
 📂 MP4
+├── 📂 backend/             # backend and data storage
+├── 📂 bot/                 # used to analyze reports
 ├── 📂 frontend/            # UI
 ├── 📂 docs/                # Documentation
 ├── 📄 README.md            # Project overview
