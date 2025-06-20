@@ -1,97 +1,167 @@
-/* Landing.css */
-
-html, body, #root {
-  height: 100%;
+body, html, .landing-page {
   margin: 0;
   padding: 0;
-  background-color: #e0f2fe; /* force background on root level */
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(to bottom right, #000814, #001f3f, #0077b6);
+  color: white;
+  height: 100vh;
+  overflow-x: hidden;
 }
 
-.landing-page {
-  min-height: 100vh;
-  width: 100%;
+/* NAVBAR */
+.landing-navbar {
+  position: fixed;
+  top: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(173, 216, 230, 0.25);
+  backdrop-filter: blur(20px);
+  border-radius: 50px;
+  display: flex;
+  padding: 0.7rem 2rem;
+  z-index: 1000;
+  width: 85%;
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.3);
+}
+
+.logo-container {
   display: flex;
   align-items: center;
-  justify-content: center;
-  padding: 2rem;
-  box-sizing: border-box;
 }
 
-.robot-section {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.logo-image {
+  width: 50px;
+  height: 50px;
+  margin-right: 0.8rem;
 }
 
-.brad-robot {
-  max-height: 60vh;
-  max-width: 100%;
+.logo-text {
+  font-size: 1.8rem;
+  font-weight: bold;
+  color: #ffffff;
 }
 
-.text-section {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  color: #1e3a8a;
-  padding-left: 2rem;
+.nav-links a {
+  margin-left: 1.5rem;
+  text-decoration: none;
+  color: #ffffff;
+  font-weight: 500;
+  transition: color 0.3s;
+  margin-right: 10px;
 }
 
-.text-section h1 {
-  font-size: 3rem;
-  margin-bottom: 0.5rem;
-}
-
-.subtitle {
-  font-size: 1.5rem;
-  margin-bottom: 2rem;
+.nav-links a:hover {
+  color: #7dd3fc;
 }
 
 .login-button {
-  background-color: #1e40af;
-  color: white;
-  border: none;
-  padding: 12px 24px;
-  font-size: 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s ease-in-out;
-  margin-left: 600px;
+  background-color: #7dd3fc;
+  color: #000814;
+  padding: 0.4rem 1rem;
+  border-radius: 20px;
+  font-weight: bold;
+  margin-left: 1.5rem;
+  transition: all 0.3s;
 }
 
 .login-button:hover {
-  background-color: #2563eb;
-}
-
-.info-section {
-  position: absolute;
-  top: 20px;
-  right: 30px;
-  text-align: right;
-  z-index: 10;
-}
-
-.info-section p {
-  margin: 0;
-  color: #1e3a8a;
-  font-weight: bold;
-}
-
-.about-button {
-  background-color: transparent;
-  border: 2px solid #1e3a8a;
-  color: #1e3a8a;
-  padding: 8px 16px;
-  font-size: 0.9rem;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  margin-top: 4px;
-}
-
-.about-button:hover {
-  background-color: #1e3a8a;
+  background-color: #00b4d8;
   color: white;
 }
+
+/* HERO */
+.landing-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5rem 4rem 2rem 4rem;
+  /* min-height: 100vh; */
+}
+
+.hero-content h1 {
+  font-size: 3.5rem;
+  color: #ffffff;
+  margin-bottom: 1rem;
+}
+
+.hero-content p {
+  font-size: 1.3rem;
+  color: #cde8ff;
+  margin-bottom: 2rem;
+  max-width: 500px;
+}
+
+.cta-button {
+  background: #00b4d8;
+  color: white;
+  padding: 0.9rem 2.5rem;
+  border: none;
+  border-radius: 25px;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.cta-button:hover {
+  background: #0096c7;
+}
+
+.hero-image img {
+  max-width: 450px;
+  width: 100%;
+  height: auto;
+  animation: float 4s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .landing-navbar {
+    flex-direction: column;
+    width: 90%;
+  }
+  .nav-links {
+    margin-top: 0.5rem;
+  }
+  .landing-hero {
+    flex-direction: column;
+    text-align: center;
+    padding: 8rem 2rem 2rem;
+  }
+  .hero-image {
+    margin-top: 2rem;
+  }
+}
+
+/* ABOUT SECTION UPDATED */
+.about-section {
+  text-align: center;
+  padding: 6rem 2rem;
+  background: linear-gradient(to bottom right, #001f3f, #000814);
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+}
+
+.about-section h2 {
+  font-size: 3rem;
+  margin-bottom: 1.5rem;
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.about-section p {
+  font-size: 1.25rem;
+  max-width: 900px;
+  margin: 0 auto;
+  line-height: 1.6;
+  color: #cde8ff;
+}
+
+.highlight {
+  color: #00b4d8;
+}
+
