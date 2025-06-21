@@ -274,4 +274,50 @@ body, html, .landing-page {
   to { opacity: 1; transform: scale(1); }
 }
 
+/* WALKTHROUGH STYLES */
+.walkthrough-section {
+  text-align: center;
+  padding: 2rem 1rem;
+background: linear-gradient(to bottom right, #001a33, #013c7c, #3399cc);  border-top: 2px solid #0077b6;
+}
 
+.walkthrough-section h2 {
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+  color: #ffffff;
+}
+
+.walkthrough-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.youtube-logo {
+  width: 500px;
+  margin-bottom: 0.8rem; 
+}
+
+.walkthrough-content p {
+  font-size: 1.2rem;
+  color: #ffffff;
+  margin-bottom: 1rem; 
+}
+
+.watch-button {
+  background-color: #ff0000;
+  color: #ffffff;
+  padding: 0.8rem 2rem;
+  border-radius: 30px;
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: bold;
+  transition: background 0.3s ease;
+}
+
+.watch-button:hover {
+  background-color: #cc0000;
+}
