@@ -321,3 +321,52 @@ background: linear-gradient(to bottom right, #001a33, #013c7c, #3399cc);  border
 .watch-button:hover {
   background-color: #cc0000;
 }
+
+/* FOOTER SECTION */
+.footer-section {
+  background: linear-gradient(to bottom right, #001026, #002c5b, #3399cc);
+  padding: 3rem 1rem;
+  color: #ffffff;
+  text-align: center;
+  border-top: 2px solid #0077b6;
+}
+
+.footer-content {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 3rem;
+  margin-bottom: 2rem;
+}
+
+.footer-column {
+  max-width: 300px;
+}
+
+.footer-column h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  color: #7dd3fc;
+}
+
+.footer-column p {
+  font-size: 1rem;
+  color: #cde8ff;
+  line-height: 1.5;
+}
+
+.repo-link {
+  color: #ff4c4c;
+  font-weight: bold;
+  text-decoration: none;
+  transition: color 0.3s;
+}
+
+.repo-link:hover {
+  color: #ff1a1a;
+}
+
+.footer-bottom {
+  font-size: 0.9rem;
+  color: #cde8ff;
+}

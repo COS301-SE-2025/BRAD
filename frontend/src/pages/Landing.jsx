@@ -4,6 +4,7 @@ import LandingNavbar from '../components/LandingNavbar';
 import AboutBrad  from '../components/AboutBrad';
 import HowItWorks from '../components/HowItWorks';
 import Walkthrough from '../components/Walkthrough';
+import Footer from '../components/Footer';
 import '../styles/Landing.css';
 
 const Landing = () => {
@@ -14,6 +15,7 @@ const Landing = () => {
       <AboutBrad />
       <HowItWorks />
       <Walkthrough />
+      <Footer />
     </div>
   );
 };
