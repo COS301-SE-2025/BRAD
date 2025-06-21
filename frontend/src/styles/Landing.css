@@ -215,3 +215,63 @@ body, html, .landing-page {
   color: #cde8ff;
 }
 
+/* POPUP STYLES */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 8, 20, 0.85);
+  backdrop-filter: blur(4px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.popup-content {
+  background: #001f3f;
+  padding: 2rem 3rem;
+  border-radius: 20px;
+  max-width: 800px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 0 20px rgba(0,0,0,0.4);
+  color: #cde8ff;
+  animation: fadeIn 0.3s ease;
+}
+
+.popup-content h3 {
+  font-size: 2rem;
+  color: #7dd3fc;
+  margin-bottom: 1rem;
+}
+
+.popup-content p {
+  font-size: 1.2rem;
+  margin-bottom: 2rem;
+}
+
+.popup-content button {
+  background: #7dd3fc;
+  color: #001f3f;
+  padding: 0.7rem 2rem;
+  border: none;
+  border-radius: 20px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.3s;
+}
+
+.popup-content button:hover {
+  background: #00b4d8;
+  color: white;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.8); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+
