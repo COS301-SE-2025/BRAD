@@ -165,3 +165,53 @@ body, html, .landing-page {
   color: #00b4d8;
 }
 
+/* HOW IT WORKS SECTION */
+.how-it-works-section {
+  background: #001a33;
+  text-align: center;
+  padding: 4rem 1rem;
+}
+
+.how-it-works-section h2 {
+  font-size: 3rem;
+  margin-bottom: 3rem;
+  color: #ffffff;
+}
+
+.how-it-works-cards {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+.how-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 2rem;
+  width: 280px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  transition: transform 0.3s ease;
+}
+
+.how-card:hover {
+  transform: translateY(-10px);
+}
+
+.how-card img {
+  width: 80px;
+  margin-bottom: 1rem;
+}
+
+.how-card h3 {
+  color: #7dd3fc;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.how-card p {
+  font-size: 1.1rem;
+  color: #cde8ff;
+}
+
