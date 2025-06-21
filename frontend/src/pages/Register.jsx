@@ -39,7 +39,7 @@ const RegisterPage = () => {
 
     try {
       const userData = { ...form };
-      const response = await API.post('/register', userData);
+      const response = await API.post('/auth/register', userData);
       setSuccess(response.data.message);
       setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
