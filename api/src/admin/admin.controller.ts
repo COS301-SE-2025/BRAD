@@ -22,7 +22,7 @@ import {
   } from '@nestjs/swagger';
   
   @ApiTags('Admin')
-  @ApiBearerAuth() // Applies to all routes in this controller
+  @ApiBearerAuth('JWT-auth') // Applies to all routes in this controller
   @Controller('admin')
   export class AdminController {
     constructor(private adminService: AdminService) {}
