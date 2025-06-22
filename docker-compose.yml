@@ -1,0 +1,62 @@
+version: '3.9'
+
+services:
+  db:
+    image: mongo
+    container_name: brad-mongo
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo_data:/data/db
+      - ./database/mongo.conf:/etc/mongo.conf:ro
+    networks:
+      - brad-network
+    command: mongod --quiet --logpath /var/log/mongodb/mongod.log
+
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: brad-api
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    environment:
+      - MONGO_URI=mongodb://db:27017/brad_db
+      - NODE_ENV=development
+    networks:
+      - brad-network
+    command: npm run start:dev
+
+  bot:
+    build:
+      context: ./bot
+      dockerfile: Dockerfile
+    container_name: brad-bot
+    depends_on:
+      - api
+    environment:
+      - API_URL=http://api:3000
+    networks:
+      - brad-network
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: brad-frontend
+    ports:
+      - "5173:5173"
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    networks:
+      - brad-network
+    command: sh -c "npm run dev -- --host"
+
+volumes:
+  mongo_data:
+
+networks:
+  brad-network:
+    driver: bridge
