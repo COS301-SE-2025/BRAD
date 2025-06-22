@@ -31,19 +31,24 @@ const AdminDashboard = () => {
     }
   };
 
-  const updateRole = async () => {
-    try {
-      const res = currentRole === 'general'
+ const updateRole = async (userId, currentRole, newRole) => {
+  try {
+    const res =
+      newRole === 'investigator'
         ? await promoteUser(userId)
-        : await demoteUser(userId);
+        : newRole === 'reporter'
+        ? await demoteUser(userId)
+        : null;
 
+    if (res) {
       setUsers(users.map((u) =>
         u._id === userId ? { ...u, role: res.data.role } : u
       ));
-    } catch (err) {
-      console.error('Role update failed:', err);
     }
-  };
+  } catch (err) {
+    console.error('Role update failed:', err);
+  }
+};
 
   const removeUser = (userId) => {
     setUsers(users.filter((u) => u._id !== userId));
@@ -57,11 +62,8 @@ const AdminDashboard = () => {
         <h2>Admin Dashboard</h2>
         {view === 'create' && <CreateUser addUser={addUser} />}
         {view === 'manage' && (
-          <ManageUsers
-            users={users}
-            updateRole={(users._id, users.role)}
-            removeUser={removeUser}
-          />
+        <ManageUsers users={users} updateRole={updateRole} removeUser={removeUser} />
+
         )}
       </div>
     </div>
