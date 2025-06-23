@@ -8,7 +8,15 @@ from datetime import datetime, timezone
 # Load environment variables
 load_dotenv()
 API_URL = os.getenv("API_URL", "http://localhost:3000")
-POLL_INTERVAL = 10  # seconds
+
+headers = {
+            'Authorization': f"Bot {os.getenv('BOT_ACCESS_KEY')}"
+          }
+
+if not headers['Authorization'] or headers['Authorization'] == "Bot ":
+    raise RuntimeError("BOT_ACCESS_KEY is missing in environment variables.")
+
+POLL_INTERVAL = 6  # seconds
 
 # Simulate page scan (scraping)
 def perform_scraping(domain):
@@ -43,7 +51,8 @@ def run_bot(run_once=False):
     while True:
         try:
             # Check for a pending report
-            response = requests.get(f"{API_URL}/pending-reports")
+            print(headers)
+            response = requests.get(f"{API_URL}/pending-reports",headers=headers)
 
             if response.status_code == 204:
                 print("No pending reports. Waiting...")
@@ -61,7 +70,7 @@ def run_bot(run_once=False):
                 result = requests.post(f"{API_URL}/analyzed-report", json={
                     "id": report_id,
                     "analysis": analysis
-                })
+                },headers=headers)
 
                 if result.status_code == 200:
                     print(f"Report ID {report_id} analyzed and saved.\n")

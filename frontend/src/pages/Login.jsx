@@ -22,7 +22,7 @@ const LoginPage = () => {
   }
 
   try {
-    const response = await API.post('/login', {
+    const response = await API.post('http://localhost:3000/auth/login', {
       identifier: username,  
       password,
     });

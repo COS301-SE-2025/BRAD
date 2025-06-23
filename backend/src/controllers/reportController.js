@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const { performAnalysis } = require("../services/forensicService");
-const Report = require('../models/Report');
+const Report = require('../models/report');
 
 exports.submitReport = async (req, res) => {
   const { domain, submittedBy } = req.body;
