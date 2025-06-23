@@ -53,11 +53,6 @@ useEffect(() => {
             <input type="text" placeholder="Enter URL" className="url-input" value={domain} onChange={(e) => setDomain(e.target.value)} />
             <button className="submit-url-button" onClick={submitReport}>Submit</button>
           </div>
-          <div className="evidence-upload">
-            <p>Attach Optional Evidence</p>
-            <div className="drop-area">Drag & Drop files here<br />or</div>
-            <button className="browse-button">Browse files</button>
-          </div>
         </div>
 
         <div className="history-section">

@@ -1,10 +1,9 @@
 .login-page {
-  background-color: #e0f2fe;
-  /*min-height: 100vh; */
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 2rem;
+  color: #ffffff;
 }
 
 .robot-section {
@@ -25,18 +24,20 @@
   flex-direction: column;
   justify-content: center;
   padding: 2rem;
-  color: #1e3a8a;
+  color: #ffffff;
 }
 
 .form-section h2 {
   font-size: 2rem;
   margin-bottom: 1rem;
+  color: #ffffff;
 }
 
 .login-form {
   display: flex;
   flex-direction: column;
   gap: 1rem;
+  
 }
 
 .login-form input {
@@ -49,7 +50,7 @@
 .login-form button {
   padding: 0.75rem;
   font-size: 1rem;
-  background-color: #1e3a8a;
+  background: #00b4d8;
   color: white;
   border: none;
   border-radius: 6px;
@@ -58,7 +59,7 @@
 }
 
 .login-form button:hover {
-  background-color: #2563eb;
+  background: #0096c7;
 }
 
 .error {
@@ -69,12 +70,13 @@
 .register-link {
   margin-top: 1rem;
   font-size: 0.9rem;
+  color: #ffffff;
 }
 
 .register-link button {
   background: none;
   border: none;
-  color: #1e3a8a;
+  color: #ffffff;
   cursor: pointer;
   font-weight: bold;
   text-decoration: underline;
@@ -83,7 +85,7 @@
 .forgotPass-button {
   background: none;
   border: none;
-  color: #1e3a8a;
+  color: #f7f7f7;
   cursor: pointer;
   font-weight: bold;
   text-decoration: underline;
