@@ -53,6 +53,9 @@ const RegisterPage = () => {
 
   return (
     <div className="register-page">
+    <button className="back-button" onClick={() => navigate(-1)}>
+      ← Back
+    </button>
       <div className="robot-section">
         <div className="robot-content">
           <img src={BRAD_robot} alt="BRAD Robot" className="brad-robot" />
@@ -113,11 +116,6 @@ const RegisterPage = () => {
             onChange={handleChange}
             required
           />
-          <select name="role" value={form.role} onChange={handleChange}>
-            <option value="investigator">Investigator</option>
-            <option value="admin">Admin</option>
-            <option value="general">General</option>
-          </select>
 
           <button type="submit">Register</button>
           {error && <div className="error">{error}</div>}

@@ -1,6 +1,5 @@
 import React from 'react';
 import '../styles/Landing.css';
-import robotImage from '../assets/BRAD_robot.png';
 
 const LandingNavbar = () => {
   return (

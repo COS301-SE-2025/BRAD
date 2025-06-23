@@ -56,6 +56,9 @@ const LoginPage = () => {
 
   return (
     <div className="login-page">
+      <button className="back-button" onClick={() => navigate(-1)}>
+        ← Back
+      </button>
       <div className="robot-section">
         <img src={BRAD_robot} alt="BRAD Robot" className="brad-robot" />
       </div>

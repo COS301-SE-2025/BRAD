@@ -2,8 +2,7 @@
   padding: 2.5rem;
   max-width: 900px;
   margin: auto;
-  color: #1e3a8a;
-  background-color: #f9fafb;
+  color: #ffffff;
   font-family: sans-serif;
   position: relative;
 }
@@ -14,16 +13,11 @@
   left: 1rem;
   padding: 0.5rem 1rem;
   background-color: transparent;
-  border: 2px solid #1e3a8a;
-  color: #1e3a8a;
+  color: #ffffff;
+  border-color: #ffffff;
   border-radius: 6px;
   font-weight: bold;
   cursor: pointer;
-}
-
-.back-button:hover {
-  background-color: #1e3a8a;
-  color: white;
 }
 
 .logo-header {
