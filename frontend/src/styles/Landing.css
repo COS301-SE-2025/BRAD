@@ -142,7 +142,7 @@ body, html, .landing-page {
 .about-section {
   text-align: center;
   padding: 6rem 2rem;
-  background: linear-gradient(to bottom right, #001f3f, #000814);
+  /* background: linear-gradient(to bottom right, #001f3f, #000814); */
   border-top: 2px solid rgba(255, 255, 255, 0.1);
 }
 
@@ -167,7 +167,7 @@ body, html, .landing-page {
 
 /* HOW IT WORKS SECTION */
 .how-it-works-section {
-  background: #001a33;
+  /* background: #001a33; */
   text-align: center;
   padding: 4rem 1rem;
 }
@@ -278,7 +278,7 @@ body, html, .landing-page {
 .walkthrough-section {
   text-align: center;
   padding: 2rem 1rem;
-background: linear-gradient(to bottom right, #001a33, #013c7c, #3399cc);  border-top: 2px solid #0077b6;
+/* background: linear-gradient(to bottom right, #001a33, #013c7c, #3399cc);  border-top: 2px solid #0077b6; */
 }
 
 .walkthrough-section h2 {
@@ -324,7 +324,7 @@ background: linear-gradient(to bottom right, #001a33, #013c7c, #3399cc);  border
 
 /* FOOTER SECTION */
 .footer-section {
-  background: linear-gradient(to bottom right, #001026, #002c5b, #3399cc);
+  /* background: linear-gradient(to bottom right, #001026, #002c5b, #3399cc); */
   padding: 3rem 1rem;
   color: #ffffff;
   text-align: center;
@@ -370,3 +370,56 @@ background: linear-gradient(to bottom right, #001a33, #013c7c, #3399cc);  border
   font-size: 0.9rem;
   color: #cde8ff;
 }
+
+/* PERFORMANCE STATS SECTION */
+.performance-stats-section {
+  /* background: linear-gradient(to bottom right, #000814, #002548, #005080); */
+  padding: 5rem 1rem;
+  text-align: center;
+}
+
+.performance-stats-section h2 {
+  font-size: 2.5rem;
+  margin-bottom: 3rem;
+  color: #ffffff;
+}
+
+.stats-cards {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.stats-card {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 20px;
+  padding: 1rem;
+  width: 100%;
+  max-width: 200px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  transition: transform 0.3s ease;
+}
+
+.stats-card:hover {
+  transform: translateY(-8px);
+}
+
+.stats-card h3 {
+  color: #7dd3fc;
+  font-size: 1.4rem;
+  margin-bottom: 1rem;
+}
+
+.stats-card p {
+  font-size: 1.1rem;
+  color: #cde8ff;
+}
+
+.stats-card span {
+  font-weight: bold;
+  font-size: 1.8rem;
+  color: #ffffff;
+}
+

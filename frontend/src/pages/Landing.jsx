@@ -5,6 +5,7 @@ import AboutBrad  from '../components/AboutBrad';
 import HowItWorks from '../components/HowItWorks';
 import Walkthrough from '../components/Walkthrough';
 import Footer from '../components/Footer';
+import PerformanceStats from '../components/PerformanceStats';
 import '../styles/Landing.css';
 
 const Landing = () => {
@@ -12,6 +13,7 @@ const Landing = () => {
     <div className="landing-page">
       <LandingNavbar />
       <LandingHero />
+      <PerformanceStats />
       <AboutBrad />
       <HowItWorks />
       <Walkthrough />
