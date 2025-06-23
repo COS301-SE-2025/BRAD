@@ -1,1 +1,18 @@
-node_modules
+# Global ignores
+node_modules/
+.env
+logs/
+*.log
+.cache/
+dist/
+coverage/
+venv/
+
+# Ignore Python bytecode
+__pycache__/
+*.py[cod]
+
+# (Optional) Ignore test cache
+.pytest_cache/
+
+.coverage
