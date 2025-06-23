@@ -63,9 +63,10 @@ This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)**
   <!-- - [User Stories](/docs/User_Stories.md) -->
   <!-- - [Architectural Requirements](/docs/Architectural_Requirements.md) -->
   <!-- - [Quality Requirements](/docs/Quality_Requirements.pdf) -->
-- [Github Contributions](/docs/GitHub_Contributions.pdf)
+- [Github Contributions](/docs/GitHub_Contributions.md)
     <!-- - [Github Contributions](/docs/requirement-specs/GitHub-contributions.pdf) -->
     <!-- - [API Documentation](/docs/requirement-specs/API_Documentation.md) -->
+- [Older Versions](/docs/versions/)
 
 ## Demo Videos
 
