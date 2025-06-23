@@ -71,6 +71,7 @@ This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)**
 
 - [Demo 1 pdf](/docs/demo-files/Demo1.pdf)
 - [Demo 1 video](https://drive.google.com/file/d/1Sao8gPITNV2-APj4J4pW27-Gpho8C8op/view?usp=sharing)
+- [Demo 1 minutes](/docs/Demo1-minutes.md)
 
 <!-- - [MP4-Demo1](https://drive.google.com/file/d/17mjbkHNwQ7dw3W5S9SFvYshkr1r34ICE/view?usp=sharing)
 - [MP4-Demo1.pdf](/docs/requirement-specs/MP4-Demo1.pdf)
