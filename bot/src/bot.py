@@ -8,7 +8,7 @@ from datetime import datetime, timezone
 # Load environment variables
 load_dotenv()
 API_URL = os.getenv("API_URL", "http://localhost:3000")
-POLL_INTERVAL = 10  # seconds
+POLL_INTERVAL = 6  # seconds
 
 # Simulate page scan (scraping)
 def perform_scraping(domain):
@@ -50,9 +50,7 @@ def run_bot(run_once=False):
             elif response.status_code == 200:
                 report = response.json()
                 report_id = report.get("_id") or report.get("id")
-                print(f"Analyzing domain: {report['domain']} (ID: {report_id})")
-
-                time.sleep(5) 
+                print(f"Analyzing domain: {report['domain']} (ID: {report_id})") 
 
                 # Generate mock analysis
                 analysis = generate_analysis(report["domain"])

@@ -64,6 +64,7 @@ const RegisterPage = () => {
           </h2>
         </div>
       </div>
+      
 
       <div className="form-section">
         <h2>Create an Account</h2>
