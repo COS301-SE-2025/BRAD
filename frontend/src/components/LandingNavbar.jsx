@@ -8,8 +8,8 @@ const LandingNavbar = () => {
       <div className="logo">B.R.A.D</div>
       <div className="nav-links">
         <a href="/about">About</a>
-        <a href="features">Features</a>
-        <a href="contact">Contact</a>
+        <a href="#contact">Contact</a>
+        <a href="/register" className="register-button">Get started</a>
         <a href="/login" className="login-button">Login</a>
       </div>
     </nav>
