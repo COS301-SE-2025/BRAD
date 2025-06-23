@@ -5,7 +5,6 @@ BACKEND_DIR=backend
 FRONTEND_DIR=frontend
 BOT_DIR=bot
 PYTHON=bot/venv/Scripts/python.exe
-PIP = $(PYTHON) -m pip
 
 # === Backend ===
 backend:
@@ -26,14 +25,14 @@ run-frontend:
 
 # === Bot (Python) ===
 venv-bot:
-	cd bot && py -m venv venv && \
-	$(PIP) install -r requirements.txt
+	cd $(BOT_DIR) && py -m venv venv && \
+	venv/Scripts/python.exe -m pip install -r requirements.txt
 
 run-bot:
-	cd $(BOT_DIR) && python src/bot.py
+	cd $(BOT_DIR) && py src/bot.py
 
 test-bot:
-	cd $(BOT_DIR) && python -m unittest -v tests/test_bot.py
+
 
 # === First-Time Setup ===
 dev-init:

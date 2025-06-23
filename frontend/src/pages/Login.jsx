@@ -28,24 +28,17 @@ const LoginPage = () => {
     });
 
 
-    const { user, token } = response.data;
+    // save token or user data
+    const { role, user } = response.data;
 
-    if (!token) {
-      setError('No token returned from server');
-      return;
-    }
-
-    localStorage.setItem('user', JSON.stringify({
+    localStorage.setItem("user", JSON.stringify({
       _id: user._id,
-      username: user.username,
-      token: response.data.token,
-      role: user.role,
+      username: user.username
     }));
 
-
-    if (user.role === 'investigator') {
+    if (role === 'investigator') {
       navigate('/investigator');
-    } else if (user.role === 'admin') {
+    } else if (role === 'admin') {
       navigate('/admin');
     } else {
       navigate('/dashboard');
