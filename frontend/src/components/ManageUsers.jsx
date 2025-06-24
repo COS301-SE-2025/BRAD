@@ -4,17 +4,17 @@ const ManageUsers = ({ users, updateRole, removeUser }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
 
-  const handleRoleChange = (username, currentRole, newRole) => {
-    if (newRole === currentRole) return;
+const handleRoleChange = (userId, currentRole, newRole) => {
+  if (newRole === currentRole) return;
 
-    const confirmChange = window.confirm(
-      `Are you sure you want to change ${username}'s role from "${currentRole}" to "${newRole}"?`
-    );
+  const confirmChange = window.confirm(
+    `Are you sure you want to change this user's role from "${currentRole}" to "${newRole}"?`
+  );
 
-    if (confirmChange) {
-      updateRole(username, newRole);
-    }
-  };
+  if (confirmChange) {
+    updateRole(userId, currentRole, newRole);
+  }
+};
 
   const handleRemove = (username) => {
     const confirmDelete = window.confirm(
@@ -69,32 +69,33 @@ const ManageUsers = ({ users, updateRole, removeUser }) => {
           </tr>
         </thead>
         <tbody>
-          {filteredUsers.map((user, idx) => (
-            <tr key={idx}>
-              <td>{user.username}</td>
-              <td>{user.role}</td>
-              <td>
-                <select
-                  value={user.role}
-                  onChange={(e) =>
-                    handleRoleChange(user.username, user.role, e.target.value)
-                  }
-                >
-                  <option value="reporter">Reporter</option>
-                  <option value="investigator">Investigator</option>
-                  <option value="admin">Admin</option>
-                </select>
-              </td>
-              <td>
-                <button
-                  className="remove-button"
-                  onClick={() => handleRemove(user.username)}
-                >
-                  Remove
-                </button>
-              </td>
-            </tr>
-          ))}
+       {filteredUsers.map((user) => (
+  <tr key={user._id}>
+    <td>{user.username}</td>
+    <td>{user.role}</td>
+    <td>
+      <select
+        value={user.role}
+        onChange={(e) =>
+          handleRoleChange(user._id, user.role, e.target.value)
+        }
+      >
+        <option value="reporter">Reporter</option>
+        <option value="investigator">Investigator</option>
+        <option value="admin">Admin</option>
+      </select>
+    </td>
+    <td>
+      <button
+        className="remove-button"
+        onClick={() => handleRemove(user._id)} 
+      >
+        Remove
+      </button>
+    </td>
+  </tr>
+))}
+
           {filteredUsers.length === 0 && (
             <tr>
               <td colSpan="4" style={{ textAlign: 'center', padding: '1rem' }}>

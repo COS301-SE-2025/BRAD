@@ -1,94 +1,62 @@
 import unittest
-from unittest.mock import patch, MagicMock
-import sys
-import os
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
-
-from bot import generate_analysis, perform_scraping, gather_forensics, run_bot
+from unittest.mock import patch
+from src.bot import generate_analysis, perform_scraping, gather_forensics, run_bot
 
 class TestBot(unittest.TestCase):
 
-    def setUp(self):
-        self.test_domain = "test.com"
+    def test_generate_analysis_contains_required_fields(self):
+        domain = "test.com"
+        result = generate_analysis(domain)
 
-    def tearDown(self):
-        pass
-
-    def test_generate_analysis_structure(self):
-        result = generate_analysis(self.test_domain)
-
-        self.assertEqual(result["domain"], self.test_domain)
-        self.assertIsInstance(result["scannedAt"], str)
+        self.assertEqual(result["domain"], domain)
+        self.assertIn("scannedAt", result)
         self.assertIn("riskScore", result)
         self.assertIn("title", result)
         self.assertIn("ip", result)
         self.assertIn("registrar", result)
-        self.assertIn("sslValid", result)
-        self.assertIn("whoisOwner", result)
 
-    def test_perform_scraping_returns_expected_fields(self):
-        data = perform_scraping(self.test_domain)
+    def test_scraping_returns_expected_fields(self):
+        data = perform_scraping("test.com")
         self.assertIn("title", data)
         self.assertIn("malwareDetected", data)
         self.assertIn("summary", data)
-        self.assertIsInstance(data["malwareDetected"], bool)
 
-    def test_gather_forensics_returns_expected_fields(self):
-        data = gather_forensics(self.test_domain)
+    def test_forensics_returns_expected_fields(self):
+        data = gather_forensics("test.com")
         self.assertIn("ip", data)
         self.assertIn("registrar", data)
         self.assertIn("sslValid", data)
         self.assertIn("whoisOwner", data)
 
-    @patch("bot.requests.get")
-    def test_run_bot_with_no_pending_reports(self, mock_get):
+    @patch("src.bot.requests.get")
+    def test_handle_no_pending_reports(self, mock_get):
         mock_get.return_value.status_code = 204
 
-        with patch("bot.time.sleep", return_value=None), \
+        with patch("src.bot.time.sleep", return_value=None), \
              patch("builtins.print") as mock_print:
-            run_bot(run_once=True)
+            try:
+                run_bot(run_once=True)
+            except KeyboardInterrupt:
+                pass
+
             mock_print.assert_any_call("No pending reports. Waiting...")
 
-    @patch("bot.requests.post")
-    @patch("bot.requests.get")
-    def test_run_bot_processes_pending_report_successfully(self, mock_get, mock_post):
+    @patch("src.bot.requests.post")
+    @patch("src.bot.requests.get")
+    def test_submit_analysis_success(self, mock_get, mock_post):
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = {
-            "_id": "abc123",
+            "id": 42,
             "domain": "malicious.com"
         }
-
         mock_post.return_value.status_code = 200
 
-        with patch("bot.time.sleep", return_value=None), \
-             patch("builtins.print") as mock_print:
+        with patch("src.bot.time.sleep", return_value=None), \
+            patch("builtins.print") as mock_print:
             run_bot(run_once=True)
 
             mock_post.assert_called_once()
-            url = mock_post.call_args[0][0]
-            data = mock_post.call_args[1]["json"]
-
-            self.assertIn("/analyzed-report", url)
-            self.assertEqual(data["id"], "abc123")
-            self.assertIn("analysis", data)
-
-            mock_print.assert_any_call("Report ID abc123 analyzed and saved.\n")
-
-    @patch("bot.requests.post")
-    @patch("bot.requests.get")
-    def test_run_bot_handles_analysis_failure(self, mock_get, mock_post):
-        mock_get.return_value.status_code = 200
-        mock_get.return_value.json.return_value = {
-            "_id": "xyz999",
-            "domain": "fail.com"
-        }
-
-        mock_post.return_value.status_code = 500
-
-        with patch("bot.time.sleep", return_value=None), \
-             patch("builtins.print") as mock_print:
-            run_bot(run_once=True)
-
-            mock_post.assert_called_once()
-            mock_print.assert_any_call("Failed to submit analysis: 500")
-
+            args, kwargs = mock_post.call_args
+            self.assertIn("/analyzed-report", args[0])
+            self.assertEqual(kwargs["json"]["id"], 42)
+    

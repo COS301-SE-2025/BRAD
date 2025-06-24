@@ -1,10 +1,12 @@
 # backend/Dockerfile
-FROM node:20-alpine
+FROM node:18
 
 WORKDIR /app
 
-COPY . .
-
+COPY package*.json ./
 RUN npm install
 
-CMD ["npm", "run", "start"]
+COPY . .
+
+EXPOSE 3000
+CMD ["npm", "start"]

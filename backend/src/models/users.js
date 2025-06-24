@@ -24,7 +24,6 @@ const UserSchema = new mongoose.Schema({
     required: true,
     unique: true,
     trim: true,
-    match: /^[A-Za-z0-9_.-]+$/,
   },
   password: {
     type: String,
@@ -32,8 +31,7 @@ const UserSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ['general', 'admin', 'investigator'],
-    default: 'general'
+    default: 'general',
   }
 }, { timestamps: true });
 

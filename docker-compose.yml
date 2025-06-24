@@ -1,62 +1,52 @@
-version: '3.9'
+version: "3.9"
 
 services:
-  db:
-    image: mongo
-    container_name: brad-mongo
-    ports:
-      - "27018:27017"
-    volumes:
-      - mongo_data:/data/db
-      - ./database/mongo.conf:/etc/mongo.conf:ro
-    networks:
-      - brad-network
-    command: mongod --quiet --logpath /var/log/mongodb/mongod.log
-
   api:
-    build:
-      context: ./api
-      dockerfile: Dockerfile
+    build: ./api
     container_name: brad-api
     ports:
       - "3000:3000"
+    volumes:
+      - ./api:/app
     depends_on:
-      - db
+      - mongo
     environment:
-      - MONGO_URI=mongodb://db:27017/brad_db
+      - MONGO_URI=mongodb://mongo:27017/brad_db
+      - JWT_SECRET=brad_super_secret_2025
+      - BOT_ACCESS_KEY=secret-bot-key-123
+      - PORT=3000
       - NODE_ENV=development
-    networks:
-      - brad-network
-    command: npm run start:dev
 
   bot:
-    build:
-      context: ./bot
-      dockerfile: Dockerfile
+    build: ./bot
     container_name: brad-bot
+    volumes:
+      - ./bot:/app
     depends_on:
+      - mongo
       - api
     environment:
       - API_URL=http://api:3000
-    networks:
-      - brad-network
+      - BOT_ACCESS_KEY=secret-bot-key-123
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
+    build: ./frontend
     container_name: brad-frontend
     ports:
       - "5173:5173"
+    volumes:
+      - ./frontend:/app
     environment:
-      - CHOKIDAR_USEPOLLING=true
-    networks:
-      - brad-network
-    command: sh -c "npm run dev -- --host"
+      - NODE_ENV=development
+
+  mongo:
+    image: mongo
+    container_name: brad-mongo
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
 
 volumes:
-  mongo_data:
-
-networks:
-  brad-network:
-    driver: bridge
+  mongo-data:
