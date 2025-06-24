@@ -1,3 +1,4 @@
+import { use } from 'react';
 import API from './axios';
 
 export const createAdmin = (adminData) =>
@@ -11,3 +12,6 @@ export const promoteUser = (userId) =>
 
 export const demoteUser = (userId) =>
   API.patch(`/admin/demote/${userId}`);
+
+export const deleteUser=(userId)=>
+  API.delete(`/admin/delete/${userId}`)

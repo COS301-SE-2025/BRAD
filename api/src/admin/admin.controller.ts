@@ -6,6 +6,7 @@ import {
     Post,
     UseGuards,
     Get,
+    Delete,
   } from '@nestjs/common';
   import { AdminService } from './admin.service';
   import { Roles } from '../auth/decorators/roles.decorator';
@@ -67,6 +68,17 @@ import {
     @ApiResponse({ status: 200, description: 'List of users retrieved successfully' })
     async getAllUsers() {
       return this.adminService.getAllUsers();
+    }
+
+       @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin')
+    @Delete('delete/:userId')
+    @ApiOperation({ summary: 'Delete a user from the database' })
+    @ApiParam({ name: 'userId', type: 'string', description: 'User ID to delete' })
+    @ApiResponse({ status: 200, description: 'User deleted successfully' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    async delete(@Param('userId') userId: string) {
+      return this.adminService.deleteUser(userId);
     }
   }
   
