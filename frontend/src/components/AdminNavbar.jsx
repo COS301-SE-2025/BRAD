@@ -13,7 +13,7 @@ const AdminNavbar = ({ setView }) => {
         <h1 className="nav-title">B.R.A.D</h1>
       </div>
 
-      <ul className="nav-links">
+      <ul className="nav-link">
         <li><button onClick={() => setView('create')}>Create User</button></li>
         <li><button onClick={() => setView('manage')}>Manage User Roles</button></li>
         <li><button onClick={() => navigate('/login')}>Logout</button></li>

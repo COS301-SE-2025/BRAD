@@ -15,7 +15,7 @@ const InvestigatorNavbar = () => {
       </div>
 
       {/* Investigator Navigation Links */}
-      <ul className="nav-links">
+      <ul className="nav-link">
         <li>
           <button onClick={() => navigate('/investigator')}>Reports</button>
         </li>
