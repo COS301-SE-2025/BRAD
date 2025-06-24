@@ -68,5 +68,16 @@ import {
     async getAllUsers() {
       return this.adminService.getAllUsers();
     }
+
+       @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin')
+    @Patch('delete/:userId')
+    @ApiOperation({ summary: 'delete a user from the database' })
+    @ApiParam({ name: 'userId', type: 'string', description: 'User ID to delete' })
+    @ApiResponse({ status: 200, description: 'User deleted successfully' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    async delete(@Param('userId') userId: string) {
+      return this.adminService.deleteUser(userId);
+    }
   }
   

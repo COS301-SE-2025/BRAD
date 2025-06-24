@@ -58,5 +58,12 @@ export class AdminService {
   async getAllUsers() {
     return this.userModel.find().select('-password');
   }
+
+   async deleteUser(userId: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+    await this.userModel.findByIdAndDelete(userId);
+    return { message: 'User deleted successfully' };
+  }
   
 }
