@@ -16,15 +16,15 @@ const handleRoleChange = (userId, currentRole, newRole) => {
   }
 };
 
-  const handleRemove = (username) => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to permanently remove "${username}"?`
-    );
+const handleRemove = (userId, username) => {
+  const confirmDelete = window.confirm(
+    `Are you sure you want to permanently remove "${username}"?`
+  );
 
-    if (confirmDelete) {
-      removeUser(username);
-    }
-  };
+  if (confirmDelete) {
+    removeUser(userId);
+  }
+};
 
   // Filter based on search and role
   const filteredUsers = users.filter((user) => {
@@ -88,7 +88,7 @@ const handleRoleChange = (userId, currentRole, newRole) => {
     <td>
       <button
         className="remove-button"
-        onClick={() => handleRemove(user._id)} 
+       onClick={() => handleRemove(user._id, user.username)}  
       >
         Remove
       </button>
