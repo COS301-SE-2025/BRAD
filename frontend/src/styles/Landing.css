@@ -141,14 +141,14 @@ body, html, .landing-page {
   border-top: 2px solid rgba(255, 255, 255, 0.1);
 }
 
-.about-section {
+.about-section h2 {
   font-size: 3rem;
   margin-bottom: 1.5rem;
   color: #ffffff;
   font-weight: 700;
 }
 
-.about-section {
+.about-section p {
   font-size: 1.25rem;
   max-width: 900px;
   margin: 0 auto;
