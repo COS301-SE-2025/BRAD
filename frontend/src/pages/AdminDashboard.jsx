@@ -3,7 +3,7 @@ import '../styles/AdminDashboard.css';
 import AdminNavbar from '../components/AdminNavbar';
 import CreateUser from '../components/CreateUser';
 import ManageUsers from '../components/ManageUsers';
-import { getAllUsers, createAdmin, promoteUser, demoteUser } from '../api/admin';
+import { getAllUsers, createAdmin,deleteUser, promoteUser, demoteUser } from '../api/admin';
 
 const AdminDashboard = () => {
   const [view, setView] = useState('create');
@@ -50,9 +50,15 @@ const AdminDashboard = () => {
   }
 };
 
-  const removeUser = (userId) => {
+const removeUser = async (userId) => {
+  try {
+    await deleteUser(userId); 
     setUsers(users.filter((u) => u._id !== userId));
-  };
+  } catch (err) {
+    console.error('Failed to delete user:', err);
+    alert('Failed to delete user. Please try again.');
+  }
+};
 
   return (
     <div className="admin-dashboard">
