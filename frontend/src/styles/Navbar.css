@@ -23,17 +23,17 @@
   font-weight: bold;
 }
 
-.nav-links {
+.nav-link {
   list-style: none;
   padding: 0;
   width: 100%;
 }
 
-.nav-links li {
+.nav-link li {
   margin-bottom: 1rem;
 }
 
-.nav-links button {
+.nav-link button {
   width: 100%;
   padding: 0.6rem;
   font-size: 1rem;
@@ -45,6 +45,6 @@
   transition: background 0.2s;
 }
 
-.nav-links button:hover {
+.nav-link button:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }

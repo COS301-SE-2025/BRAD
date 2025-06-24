@@ -13,7 +13,7 @@ const Navbar = () => {
         <h1 className="nav-title">B.R.A.D</h1>
       </div>
 
-      <ul className="nav-links">
+      <ul className="nav-link">
         <li><button onClick={() => navigate('/dashboard')}>Report</button></li>
         <li><button onClick={() => navigate('/about')}>About</button></li>
         <li><button onClick={() => navigate('/settings')}>User Settings</button></li>

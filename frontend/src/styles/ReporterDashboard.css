@@ -2,6 +2,7 @@
   display: flex;
   height: 100vh;
   background-color: #f0f8ff;
+  color: black;
 }
 
 .dashboard-content {
