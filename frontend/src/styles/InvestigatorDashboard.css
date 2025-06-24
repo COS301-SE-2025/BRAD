@@ -1,6 +1,7 @@
 .investigator-dashboard {
   display: flex;
-  background-color: #f1f5f9;
+  background: linear-gradient(to bottom right, #000814, #001f3f, #0077b6);
+  color: rgb(255, 255, 255);
   min-height: 100vh;
 }
 
@@ -11,7 +12,7 @@
 }
 
 .dashboard-main h2 {
-  color: #1e3a8a;
+  color: #ffffff;
   margin-bottom: 2rem;
 }
 
@@ -23,7 +24,7 @@
 }
 
 .report-column {
-  background: #ffffff;
+  background: rgba(173, 216, 230, 0.25);
   border-radius: 8px;
   padding: 1rem;
   flex: 1;
@@ -33,11 +34,11 @@
 
 .report-column h3 {
   margin-bottom: 1rem;
-  color: #1e3a8a;
+  color: #ffffff;
 }
 
 .report-card {
-  background-color: #f9fafb;
+  background-color: #bfc9d3;
   border: 1px solid #d1d5db;
   padding: 1rem;
   margin-bottom: 1rem;

@@ -1,8 +1,8 @@
 .admin-dashboard {
   display: flex;
-  background-color: #f1f5f9;
+  background: linear-gradient(to bottom right, #000814, #001f3f, #0077b6);
   min-height: 100vh;
-  color: black;
+  color: rgb(253, 253, 253);
 }
 
 .admin-content {
@@ -11,14 +11,15 @@
 }
 
 .admin-content h2 {
-  color: #1e3a8a;
+  
+  color: #ffffff;
   font-size: 2rem;
   margin-bottom: 2rem;
 }
 
 .admin-section {
   margin-bottom: 3rem;
-  background-color: white;
+  background: rgba(173, 216, 230, 0.25);
   padding: 2rem;
   border-radius: 8px;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
@@ -41,7 +42,7 @@
 }
 
 .admin-form button {
-  background-color: #1e3a8a;
+  background-color: #001f3f;
   color: white;
   border: none;
   padding: 0.75rem;
@@ -90,7 +91,8 @@
 }
 
 .user-search-input,
-.role-filter-select {
+.role-filter-select,
+.role-change {
   padding: 0.6rem;
   font-size: 1rem;
   border: 1px solid #cbd5e1;

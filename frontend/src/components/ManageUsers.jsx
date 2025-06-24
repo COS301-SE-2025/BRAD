@@ -75,6 +75,7 @@ const handleRoleChange = (userId, currentRole, newRole) => {
     <td>{user.role}</td>
     <td>
       <select
+        className="role-change"
         value={user.role}
         onChange={(e) =>
           handleRoleChange(user._id, user.role, e.target.value)
