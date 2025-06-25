@@ -1,17 +1,13 @@
 # User Stories
 
 ## 1.Role: General user(Reporter)
-
 **Description:**
-
 - A member of the public or organization who wants to report a suspicious website.
-
+  
 **User Story:**
-
 - As a general user I want to submit a suspicious domain so that I can check if it's legal and safe to use.
 
 **Definition of done:**
-
 - I can submit a suspicious domain via a simple form
 - I can optionally add notes or upload evidence
 - I receive confirmation that my report is submitted
@@ -19,18 +15,14 @@
 
 ---
 
-## 2.Role:Investigator
-
+## 2.Role:Ivestigator
 **Description:**
-
 - A cybersecurity analyst who reviews and classifies domain submissions.
-
+  
 **User Story:**
-
 - As an investigator I want to view all reports submitted and their results so that I can analyse them, change their status, and send feedback to the reporter.
 
 **Definition of done:**
-
 - I can view all submitted reports
 - I can see risk scores and AI verdicts
 - I can open a detailed report with metadata and evidence
@@ -39,18 +31,10 @@
 
 ---
 
-## 3.Role:Admin
-
-**Description:**
-
-- A system administrator responsible for managing user roles.
-
-**User Story:**
-
-- As an admin I want to view all users and manage their roles so that I can control who has access to specific functionalities
+## 3. As an admin I want to assign domain reports to specific investigators so that I can manage workload distribution and accountability (optional/bonus)
 
 **Definition of done:**
+- I can view all submitted reports
+- I can assign a report to an investigator
+- An investigator can only view the reports assigned to them
 
-- I can view all registered users
-- I can promote a user to the role of investigator
-- I can demote an investigator to a general user
