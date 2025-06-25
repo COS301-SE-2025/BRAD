@@ -13,6 +13,10 @@ const AdminDashboard = () => {
     fetchUsers();
   }, []);
 
+  useEffect(() => {
+    document.title = 'B.R.A.D | Admin';
+  }, []);
+
   const fetchUsers = async () => {
     try {
       const res = await getAllUsers();
