@@ -36,6 +36,10 @@ const InvestigatorDashboard = () => {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    document.title = 'B.R.A.D | Investigator';
+  }, []);
+
   const pending = reports.filter(r => r.analyzed && !r.investigatorDecision);
   const completed = reports.filter(r => r.investigatorDecision);
 

@@ -75,6 +75,7 @@ const handleRemove = (userId, username) => {
     <td>{user.role}</td>
     <td>
       <select
+        className="role-change"
         value={user.role}
         onChange={(e) =>
           handleRoleChange(user._id, user.role, e.target.value)
