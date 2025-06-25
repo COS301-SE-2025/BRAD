@@ -51,12 +51,15 @@ This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)**
 ## Documentation
 
 - [SRS Document](/docs/SRS_Document.md)
-- [Design specifications](/docs/requirement-specs/Design_Specification_Document.md)
-- [Service Contract](/docs/Service_Contracts.md)
-- [User Stories](/docs/User_Stories.md)
-  <!-- - [Github Contributions](/docs/requirement-specs/GitHub-contributions.pdf) -->
-  <!-- - [API Documentation](/docs/requirement-specs/API_Documentation.md) -->
-- [Project Board]()
+  <!-- - [Design specifications](/docs/DesignRequirements.md) -->
+  <!-- - [Service Contract](/docs/Service_Contracts.md) -->
+  <!-- - [User Stories](/docs/User_Stories.md) -->
+  <!-- - [Architectural Requirements](/docs/Architectural_Requirements.md) -->
+  <!-- - [Quality Requirements](/docs/Quality_Requirements.pdf) -->
+- [Github Contributions](/docs/GitHub_Contributions.md)
+    <!-- - [Github Contributions](/docs/requirement-specs/GitHub-contributions.pdf) -->
+    <!-- - [API Documentation](/docs/requirement-specs/API_Documentation.md) -->
+- [Older Versions](/docs/versions/)
 
 ## Demo Videos
 
