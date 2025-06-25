@@ -6,12 +6,14 @@ import {
     Post,
     UseGuards,
     Get,
+    Delete,
   } from '@nestjs/common';
   import { AdminService } from './admin.service';
   import { Roles } from '../auth/decorators/roles.decorator';
   import { RolesGuard } from '../auth/guards/roles.guard';
   import { AuthGuard } from '../auth/guards/auth.guard';
   import { AddAdminDto } from '../admin/dto/add-admin.dto';
+  import { CreateUserDto } from './dto/create-user.dto';
   import {
     ApiTags,
     ApiBearerAuth,
@@ -68,5 +70,26 @@ import {
     async getAllUsers() {
       return this.adminService.getAllUsers();
     }
+
+       @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin')
+    @Delete('delete/:userId')
+    @ApiOperation({ summary: 'Delete a user from the database' })
+    @ApiParam({ name: 'userId', type: 'string', description: 'User ID to delete' })
+    @ApiResponse({ status: 200, description: 'User deleted successfully' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    async delete(@Param('userId') userId: string) {
+      return this.adminService.deleteUser(userId);
+    }
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin')
+  @Post('user')
+  @ApiOperation({ summary: 'Create a new user with a one-time password (5-digit)' })
+  @ApiBody({ type: CreateUserDto })
+  @ApiResponse({ status: 201, description: 'User created successfully' })
+  @ApiResponse({ status: 409, description: 'User already exists' })
+  async createUser(@Body() dto: CreateUserDto) {
+  return this.adminService.createUser(dto);
+}
   }
   

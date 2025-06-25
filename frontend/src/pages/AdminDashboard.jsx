@@ -3,7 +3,7 @@ import '../styles/AdminDashboard.css';
 import AdminNavbar from '../components/AdminNavbar';
 import CreateUser from '../components/CreateUser';
 import ManageUsers from '../components/ManageUsers';
-import { getAllUsers, createAdmin, promoteUser, demoteUser } from '../api/admin';
+import { getAllUsers,createUser, createAdmin,deleteUser, promoteUser, demoteUser } from '../api/admin';
 
 const AdminDashboard = () => {
   const [view, setView] = useState('create');
@@ -22,14 +22,15 @@ const AdminDashboard = () => {
     }
   };
 
-  const addUser = async (user) => {
-    try {
-      const res = await createAdmin(user);
-      setUsers([...users, res.data]);
-    } catch (err) {
-      console.error('Add admin failed:', err);
-    }
-  };
+const addUser = async (user) => {
+  try {
+    const res = await createUser(user);
+    setUsers([...users, res.data]);
+  } catch (err) {
+    console.error('User creation failed:', err);
+    alert('Failed to create user. Please check inputs or try again.');
+  }
+};
 
  const updateRole = async (userId, currentRole, newRole) => {
   try {
@@ -50,9 +51,15 @@ const AdminDashboard = () => {
   }
 };
 
-  const removeUser = (userId) => {
+const removeUser = async (userId) => {
+  try {
+    await deleteUser(userId); 
     setUsers(users.filter((u) => u._id !== userId));
-  };
+  } catch (err) {
+    console.error('Failed to delete user:', err);
+    alert('Failed to delete user. Please try again.');
+  }
+};
 
   return (
     <div className="admin-dashboard">
