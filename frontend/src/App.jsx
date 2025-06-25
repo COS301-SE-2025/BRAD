@@ -8,6 +8,7 @@ import AboutPage from './pages/About';
 import InvestigatorDashboard from './pages/InvestigatorDashboard';
 import UserSettings from './pages/UserSettings';
 import AdminDashboard from './pages/AdminDashboard';
+import ChangePassword from './pages/ChangePassword';
 import './App.css';
 
 function App() {
@@ -23,6 +24,7 @@ function App() {
         <Route path="/settings" element={<UserSettings />} />
         <Route path="/investigator/settings" element={<UserSettings />} />
         <Route path="/admin" element={<AdminDashboard />} />
+          <Route path="/change-password" element={<ChangePassword />} />
         {/* Add more routes here */}
       </Routes>
     </Router>
