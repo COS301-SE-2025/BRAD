@@ -1,4 +1,4 @@
-import { Injectable, UnauthorizedException, ConflictException, InternalServerErrorException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, InternalServerErrorException,BadRequestException,NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
+import { ChangePasswordDto } from './dto/change-password.dto';
 @Injectable()
 export class AuthService {
   constructor(@InjectModel(User.name) private userModel: Model<User>,
@@ -60,10 +61,15 @@ export class AuthService {
     }
 
     const isMatch = await bcrypt.compare(dto.password, user.password);
+    
 
     if (!isMatch) {
       throw new UnauthorizedException('Invalid credentials');
     }
+
+  if (user.mustChangePassword) {
+    throw new UnauthorizedException('You must change your password before logging in');
+  }
 
     const secret = this.configService.get<string>('JWT_SECRET');
     if (!secret) {
@@ -144,5 +150,27 @@ async resetPassword(token: string, newPassword: string): Promise<{ message: stri
   return { message: 'Password has been reset successfully' };
 }
 
+async changePassword(username: string, dto: ChangePasswordDto): Promise<any> {
+    const { OTP, newPassword } = dto;
 
+    const user = await this.userModel.findOne({ username });
+
+    if (!user) throw new NotFoundException('User not found');
+    if (!user.mustChangePassword)
+      throw new BadRequestException('Password change not required');
+
+    const isMatch = await bcrypt.compare(OTP, user.password);
+    if (!isMatch) throw new BadRequestException('Invalid one-time password');
+
+    const hashedNew = await bcrypt.hash(newPassword, 10);
+
+    user.password = hashedNew;
+    user.mustChangePassword = false;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+
+    return { message: 'Password changed successfully. You can now log in.' };
+  }
 }
