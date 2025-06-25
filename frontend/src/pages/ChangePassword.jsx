@@ -8,6 +8,7 @@ const ChangePassword = () => {
     OTP: '',
     newPassword: '',
   });
+  const [confirmPassword, setConfirmPassword] = useState(''); // ✅ Added
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,6 +22,12 @@ const ChangePassword = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    if (form.newPassword !== confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -67,6 +74,13 @@ const ChangePassword = () => {
           placeholder="New Password"
           value={form.newPassword}
           onChange={handleChange}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Confirm New Password"
+          value={confirmPassword}
+          onChange={(e) => setConfirmPassword(e.target.value)}
           required
         />
         <button type="submit" disabled={loading}>
