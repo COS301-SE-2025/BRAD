@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import '../styles/UserSettings.css';
 import Navbar from '../components/Navbar';
@@ -6,6 +6,10 @@ import InvestigatorNavbar from '../components/InvestigatorNavbar';
 
 const UserSettings = () => {
   const location = useLocation();
+
+  useEffect(() => {
+    document.title = 'B.R.A.D | User Settings';
+  }, []);
 
   const [form, setForm] = useState({
     firstName: '',

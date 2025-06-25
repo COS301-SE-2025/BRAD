@@ -38,6 +38,20 @@ const InvestigatorDashboard = () => {
     }
   };
 
+  useEffect(() => {
+    fetchReports();
+
+    const interval = setInterval(() => {
+      fetchReports();
+    }, 5000); // Refresh every 5 seconds
+
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    document.title = 'B.R.A.D | Investigator';
+  }, []);
+
   const pending = reports.filter(r => r.analyzed && !r.investigatorDecision);
   const completed = reports.filter(r => r.investigatorDecision);
 

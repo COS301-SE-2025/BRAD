@@ -42,6 +42,9 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, []);
 
+useEffect(() => {
+    document.title = 'B.R.A.D | Reporter';
+  }, []);
 
   return (
     <div className="dashboard-container">
