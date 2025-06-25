@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
-import { ReportSchema } from '../schemas/report.schema';
+import { ReportSchema } from './schema/report.schema';
 import { ReportService } from './report.service';
 import { ReportController } from './report.controller';
 import { ForensicService } from '../services/forensic.service';

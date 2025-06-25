@@ -1,16 +1,5 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Param,
-  Patch,
-  Body,
-  HttpCode,
-  NotFoundException,
-  BadRequestException,
-  UnauthorizedException,
-  UseGuards,
-  Req,
+    Controller, Post, Get, Param, Patch, Body, HttpCode, NotFoundException, BadRequestException, UnauthorizedException, UseGuards, Req, ForbiddenException,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ReportService } from './report.service';
@@ -21,12 +10,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { BotGuard } from '../auth/guards/bot.guard';
 
 import {
-  ApiTags,
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-  ApiParam,
+  ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody, ApiParam,
 } from '@nestjs/swagger';
 
 @ApiTags('Reports')
@@ -37,7 +21,7 @@ export class ReportController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('general', 'admin')
   @Post('report')
-  @ApiBearerAuth() // JWT
+  @ApiBearerAuth("JWT") // JWT
   @ApiOperation({ summary: 'Submit a suspicious domain' })
   @ApiBody({ schema: { type: 'object', properties: { domain: { type: 'string' } } } })
   @ApiResponse({ status: 201, description: 'Report submitted successfully' })
@@ -67,9 +51,9 @@ export class ReportController {
     return this.reportService.getReports(userId, role);
   }
 
-  @UseGuards(BotGuard)
+  //@UseGuards(BotGuard)
   @Get('pending-reports')
-  @ApiBearerAuth() // Bot Access Key
+  //@ApiBearerAuth() // Bot Access Key
   @ApiOperation({ summary: 'Get a pending report for bot analysis' })
   @ApiResponse({ status: 200, description: 'Pending report' })
   @ApiResponse({ status: 404, description: 'No pending reports' })
@@ -79,27 +63,14 @@ export class ReportController {
     return report;
   }
 
-  @UseGuards(BotGuard)
-  @Post('analyzed-report')
-  @HttpCode(200)
-  @ApiBearerAuth() // Bot Access Key
-  @ApiOperation({ summary: 'Bot submits analysis result' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        id: { type: 'string' },
-        analysis: { type: 'object' },
-      },
-      required: ['id', 'analysis'],
-    },
-  })
-  @ApiResponse({ status: 200, description: 'Analysis saved' })
-  @ApiResponse({ status: 400, description: 'Missing report id or analysis' })
-  async saveAnalysis(@Body() body: { id: string; analysis: any }) {
-    if (!body.id || !body.analysis)
-      throw new BadRequestException('Missing report id or analysis');
-    return this.reportService.saveAnalysis(body.id, body.analysis);
+  //@UseGuards(BotGuard)
+  @Patch('reports/:id/analysis')
+  async updateAnalysis(@Param('id') id: string, @Body() body: any) {
+    return this.reportService.updateAnalysis(id, {
+      analysis: body.analysis,
+      whois: body.analysis?.whois,
+      analysisStatus: body.analysisStatus,
+    });
   }
 
   @UseGuards(AuthGuard, RolesGuard)

@@ -1,8 +1,8 @@
-// src/report/report.service.ts
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ForensicService } from '../services/forensic.service';
+import { UpdateAnalysisDto } from './dto/update-analysis.dto'
 
 @Injectable()
 export class ReportService {
@@ -45,15 +45,29 @@ export class ReportService {
     return pending[0] ?? null;
   }
 
-  async saveAnalysis(id: string, analysis: any) {
+  async updateAnalysis(id: string, updateDto: UpdateAnalysisDto): Promise<Report> {
     const updated = await this.reportModel.findByIdAndUpdate(
       id,
-      { analysis, analyzed: true },
-      { new: true }
+      {
+        $set: {
+          analysis: updateDto.analysis,
+          whois: updateDto.whois,
+          analyzed: true,
+          analysisStatus: updateDto.analysisStatus || 'done',
+          updatedAt: new Date(),
+        },
+      },
+      { new: true },
     );
-    if (!updated) throw new NotFoundException('Report not found');
+  
+    if (!updated) {
+      throw new NotFoundException(`Report with id ${id} not found`);
+    }
+  
     return updated;
   }
+  
+  
 
   async updateInvestigatorDecision(id: string, verdict: string) {
     if (!['malicious', 'benign'].includes(verdict))
