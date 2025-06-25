@@ -64,6 +64,9 @@ export class User {
 
   @Prop()
   resetPasswordExpires?: Date;
+
+  @Prop({ default: false })
+mustChangePassword:boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
