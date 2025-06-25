@@ -61,10 +61,15 @@ export class AuthService {
     }
 
     const isMatch = await bcrypt.compare(dto.password, user.password);
+    
 
     if (!isMatch) {
       throw new UnauthorizedException('Invalid credentials');
     }
+
+  if (user.mustChangePassword) {
+    throw new UnauthorizedException('You must change your password before logging in');
+  }
 
     const secret = this.configService.get<string>('JWT_SECRET');
     if (!secret) {
