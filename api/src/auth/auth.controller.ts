@@ -1,14 +1,16 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Post,Patch,Param } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { Public } from './decorators/public.decorator';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
 import {
   ApiTags,
   ApiOperation,
   ApiResponse,
   ApiBody,
+ApiParam,
 } from '@nestjs/swagger';
 
 @ApiTags('Auth')
@@ -56,4 +58,17 @@ async resetPassword(@Body() dto: ResetPasswordDto) {
   return this.authService.resetPassword(dto.token, dto.newPassword);
 }
 
+@Public()
+@Patch('change-password/:username')
+@ApiOperation({ summary: 'Change password after receiving one-time password' })
+@ApiParam({ name: 'username', type: 'string' })
+@ApiBody({ type: ChangePasswordDto })
+@ApiResponse({ status: 200, description: 'Password changed successfully' })
+@ApiResponse({ status: 400, description: 'Invalid credentials or expired OTP' })
+async changePassword(
+  @Param('username') username: string,
+  @Body() dto: ChangePasswordDto,
+) {
+  return this.authService.changePassword(username, dto);
+}
 }
