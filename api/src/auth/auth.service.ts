@@ -7,7 +7,8 @@ import { LoginDto } from './dto/login.dto';
 import { User } from '../schemas/user.schema';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-
+import * as crypto from 'crypto';
+import * as nodemailer from 'nodemailer';
 @Injectable()
 export class AuthService {
   constructor(@InjectModel(User.name) private userModel: Model<User>,
@@ -83,4 +84,65 @@ export class AuthService {
       user: userData,
     };
   }
+
+ async forgotPassword(email: string): Promise<{ message: string }> {
+  const user = await this.userModel.findOne({ email: email.toLowerCase().trim() });
+
+  if (!user) {
+    throw new UnauthorizedException('User not found');
+  }
+
+  // Generate secure token
+  const token = crypto.randomBytes(32).toString('hex');
+  const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+  // Save token and expiration
+  user.resetPasswordToken = token;
+  user.resetPasswordExpires = expires;
+  await user.save();
+
+  // Create transporter
+  const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+      user: this.configService.get<string>('EMAIL_USER'),
+      pass: this.configService.get<string>('EMAIL_PASS'),
+    },
+  });
+
+  const resetLink = `http://localhost:5173/reset-password?token=${token}`;
+
+  const mailOptions = {
+    to: user.email,
+    from: this.configService.get<string>('EMAIL_USER'),
+    subject: 'Password Reset Request',
+    text: `You requested a password reset.\n\nClick the link below to reset your password:\n\n${resetLink}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this, ignore this email.`,
+  };
+
+  await transporter.sendMail(mailOptions);
+
+  return { message: 'Password reset email sent' };
+}
+
+async resetPassword(token: string, newPassword: string): Promise<{ message: string }> {
+  const user = await this.userModel.findOne({
+    resetPasswordToken: token,
+    resetPasswordExpires: { $gt: new Date() },
+  });
+
+  if (!user) {
+    throw new UnauthorizedException('Invalid or expired reset token');
+  }
+
+  const hashed = await bcrypt.hash(newPassword, 10);
+
+  user.password = hashed;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+  await user.save();
+
+  return { message: 'Password has been reset successfully' };
+}
+
+
 }
