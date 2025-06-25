@@ -3,7 +3,7 @@ import '../styles/AdminDashboard.css';
 import AdminNavbar from '../components/AdminNavbar';
 import CreateUser from '../components/CreateUser';
 import ManageUsers from '../components/ManageUsers';
-import { getAllUsers, createAdmin,deleteUser, promoteUser, demoteUser } from '../api/admin';
+import { getAllUsers,createUser, createAdmin,deleteUser, promoteUser, demoteUser } from '../api/admin';
 
 const AdminDashboard = () => {
   const [view, setView] = useState('create');
@@ -26,14 +26,15 @@ const AdminDashboard = () => {
     }
   };
 
-  const addUser = async (user) => {
-    try {
-      const res = await createAdmin(user);
-      setUsers([...users, res.data]);
-    } catch (err) {
-      console.error('Add admin failed:', err);
-    }
-  };
+const addUser = async (user) => {
+  try {
+    const res = await createUser(user);
+    setUsers([...users, res.data]);
+  } catch (err) {
+    console.error('User creation failed:', err);
+    alert('Failed to create user. Please check inputs or try again.');
+  }
+};
 
  const updateRole = async (userId, currentRole, newRole) => {
   try {

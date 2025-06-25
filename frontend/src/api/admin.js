@@ -14,4 +14,7 @@ export const demoteUser = (userId) =>
   API.patch(`/admin/demote/${userId}`);
 
 export const deleteUser=(userId)=>
-  API.delete(`/admin/delete/${userId}`)
+  API.delete(`/admin/delete/${userId}`);
+
+export const createUser = (userData) =>
+  API.post('/admin/user', userData);
