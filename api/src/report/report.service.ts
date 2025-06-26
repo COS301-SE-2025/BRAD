@@ -51,6 +51,9 @@ export class ReportService {
       {
         $set: {
           analysis: updateDto.analysis,
+          scrapingInfo: updateDto.scrapingInfo,
+          abuseFlags: updateDto.abuseFlags,
+          riskScore: updateDto.riskScore,
           whois: updateDto.whois,
           analyzed: true,
           analysisStatus: updateDto.analysisStatus || 'done',
@@ -66,6 +69,8 @@ export class ReportService {
   
     return updated;
   }
+  
+  
   
   
 

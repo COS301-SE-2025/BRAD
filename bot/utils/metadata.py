@@ -24,10 +24,12 @@ def gather_forensics(domain: str) -> dict:
         #print(w)
         registrar = w.registrar or "Unavailable"
         whois_owner = w.org or w.name or "Unknown"
+        whois_raw = dict(w)
     except Exception as e:
         print(f"[BOT] WHOIS lookup failed: {e}")
         registrar = "Unavailable"
         whois_owner = "Unknown"
+        whois_raw = {}
 
     # 3. SSL Certificate
     ssl_data = get_ssl_info(full_domain)
@@ -47,7 +49,7 @@ def gather_forensics(domain: str) -> dict:
         "reverseIp": reverse_domain,
         "registrar": registrar,
         "whoisOwner": whois_owner,
-        "whoisRaw": w,
+        "whoisRaw": whois_raw,
         "sslValid": ssl_data["valid"],
         "sslExpires": ssl_data["expires"],
         "dns": dns_data
@@ -68,7 +70,7 @@ def get_ssl_info(domain: str) -> dict:
             )
             return {"valid": True, "expires": expires}
     except Exception as e:
-        print(f"[!] SSL check failed: {e}")
+        print(f"[BOT] SSL check failed: {e}")
         return {"valid": False, "expires": "Unknown"}
     
 def get_dns_records(domain: str) -> dict:

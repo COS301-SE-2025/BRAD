@@ -11,3 +11,4 @@ whois==0.9.24
 joblib==1.4.2
 python-whois
 dnspython
+playwright==1.44.0

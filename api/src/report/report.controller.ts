@@ -51,7 +51,7 @@ export class ReportController {
     return this.reportService.getReports(userId, role);
   }
 
-  //@UseGuards(BotGuard)
+  @UseGuards(BotGuard)
   @Get('pending-reports')
   //@ApiBearerAuth() // Bot Access Key
   @ApiOperation({ summary: 'Get a pending report for bot analysis' })
@@ -63,16 +63,18 @@ export class ReportController {
     return report;
   }
 
-  //@UseGuards(BotGuard)
+  @UseGuards(BotGuard)
   @Patch('reports/:id/analysis')
   async updateAnalysis(@Param('id') id: string, @Body() body: any) {
     return this.reportService.updateAnalysis(id, {
       analysis: body.analysis,
-      whois: body.analysis?.whois,
+      scrapingInfo: body.scrapingInfo,
+      riskScore: body.analysis?.riskScore,
+      whois: body.analysis?.whois || body.whois,
       analysisStatus: body.analysisStatus,
     });
   }
-
+  
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('investigator')
   @Patch('report/:id/decision')

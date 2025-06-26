@@ -36,7 +36,6 @@ export class Report {
     whoisRaw?: Record<string, any>;
     sslValid?: boolean;
     sslExpires?: string;
-    riskScore?: number;
     dns?: {
       MX?: string[];
       NS?: string[];
@@ -44,6 +43,33 @@ export class Report {
     };
     reverseIp?: string | string[];
   };
+
+  @Prop({ type: Object, default: null })
+  scrapingInfo?: {
+    htmlRaw?: string;
+    screenshotPath?: string;
+    structuredInfo?: {
+      headings?: string[];
+      links?: string[];
+      forms?: string[];
+    };
+    crawledLinks?: string[];
+  };
+  
+  @Prop({ type: Object, default: null })
+  abuseFlags?: {
+    suspiciousJS?: string[];
+    obfuscatedScripts?: boolean;
+    redirectChain?: string[];
+    usesMetaRefresh?: boolean;
+    suspiciousInlineEvents?: string[];
+  };
+  
+  
+  
+  
+  @Prop()
+  riskScore?: number;
 
   @ApiProperty({ enum: ['pending', 'in-progress', 'done', 'error'], default: 'pending' })
   @Prop({ enum: ['pending', 'in-progress', 'done', 'error'], default: 'pending' })
