@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { changePassword } from '../api/auth';
+import '../styles/Password.css';
 
 const ChangePassword = () => {
   const [form, setForm] = useState({
