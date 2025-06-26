@@ -14,11 +14,18 @@
     - [1. Role: General user(Reporter)](#1-role-general-userreporter)
     - [2. Role:Investigator](#2-roleinvestigator)
     - [3. Role:Admin](#3-roleadmin)
-- [Use cases](#use-cases)
-    - [Use Case 1: Submit Domain Report](#use-case-1-submit-domain-report)
-    - [Use Case 2: View Submitted Reports](#use-case-2-view-submitted-reports)
-    - [Use Case 3: Analyse Forensic](#use-case-3-analyse-forensic)
-    - [Complete use cases daigrams:](#complete-use-cases-daigrams)
+- [Use Cases for Demo 1](#use-cases-for-demo-1)
+  - [Use Case 1: Submit Domain Report](#use-case-1-submit-domain-report)
+  - [Use Case 2: View Submitted Reports](#use-case-2-view-submitted-reports)
+  - [Use Case 3: Analyse Forensic](#use-case-3-analyse-forensic)
+  - [Complete Use Case Diagrams](#complete-use-case-diagrams)
+
+- [Use Cases for Demo 2](#use-cases-for-demo-2)
+  - [Use Case 1: Admin Adds a New User](#use-case-1-admin-adds-a-new-user)
+  - [Use Case 2: Admin’s User Management](#use-case-2-admins-user-management)
+  - [Use Case 3: Investigator Analyzes Report Using Bot Response](#use-case-3-investigator-analyzes-report-using-bot-response)
+  - [Use Case 4: Reset or Change Password](#use-case-4-reset-or-change-password)
+    
 - [Functional Requirements](#functional-requirements)
   - [Core Requirements](#core-requirements)
     - [1.1. User Submission Portal](#11-user-submission-portal)
@@ -189,6 +196,7 @@ The B.R.A.D system will support both a user-friendly interface and API-based acc
 <br />
 
 # Use cases
+**Use** **cases for demo** **1**
 
 This outlines and analyses the three main use cases of the B.R.A.D (Bot
 to Report Abusive Domains) cybersecurity application. Each use case is
@@ -361,10 +369,132 @@ style="width:7.26805in;height:4.41944in" />
 
  <br />
  
-<p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
+<p align="right"><a href="#table-of-contents">
+
+⬆️ Back to Table of Contents</a></p>
 
 <br />
 <br />
+
+# Use Cases for Demo 2
+
+---
+
+## Use Case 1: Admin Adds a New User
+
+**User Perspective:**
+
+The **Admin** adds a new user by filling in user details.
+
+**System Role:**
+
+- Stores the new user’s username and email  
+- Sends a One-Time Password (OTP) to the user's email  
+- Redirects the user to complete their setup via the link
+
+**Steps:**
+
+1. Admin enters the new user's:
+   - Username
+   - Email
+   - Role (Admin / Investigator / Reporter)
+2. System sends OTP link via email
+3. User clicks the link and:
+   - Enters OTP
+   - Enters and confirms new password
+   - Gets redirected to login
+
+## Use Case 2: Admin Manages Users
+
+**User Perspective:**
+
+The **Admin** wants to manage users efficiently by modifying roles or removing accounts.
+
+**System Role:**
+
+- Allows filtering and searching of users  
+- Enables role editing and deletion
+
+**Admin Can Perform:**
+
+- Remove user  
+- Edit user role:  
+  - Admin  
+  - Investigator  
+  - Reporter  
+- Filter by role  
+- Search by username
+
+<br />
+
+![Admin User Management](./images/adminUsecase.png)
+
+---
+
+## Use Case 3: Investigator Analyzes Report Using Bot Response
+
+**User Perspective:**
+
+The **Investigator** evaluates a reported domain using bot results and evidence.
+
+**System Role:**
+
+- Displays bot-generated results  
+- Allows investigator to interpret and label the report
+
+**Steps:**
+
+1. View bot response  
+2. Mark report as malicious / not malicious  
+3. Add comments  
+4. Review supporting evidence  
+5. Relaunch bot if needed
+
+<br />
+
+![Investigator Analysis](./images/investigatorUsecase.png)
+
+---
+
+## Use Case 4: Reset or Change Password
+
+**User Perspective:**
+
+Any **user** who has forgotten or needs to reset their password can initiate recovery.
+
+**System Role:**
+
+- Sends password reset link to email  
+- Verifies new password inputs  
+- Redirects back to login
+
+### Steps to Reset Password:
+
+1. On login screen, click **"Forgot Password"**  
+2. Enter email address  
+3. Receive email with reset link  
+4. Click the link and:  
+   - Enter new password  
+   - Confirm password  
+
+### Steps to Register (if not a user):
+
+1. Click **"Register"**  
+2. Enter:  
+   - First name  
+   - Last name  
+   - Email  
+   - Username  
+   - Password  
+3. Already have an account? Click **"Login"**
+
+<br />
+
+![Forgot Password Use Case](./images/forgotPasswordUsecase.png)
+
+---
+
+<p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 
 # Functional Requirements
 
