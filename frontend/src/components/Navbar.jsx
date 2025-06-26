@@ -22,7 +22,16 @@ const Navbar = () => {
           </a>
         </li>
         <li><button onClick={() => navigate('/settings')}>User Settings</button></li>
-        <li><button onClick={() => navigate('/login')}>Logout</button></li>
+        <li>
+          <button
+            onClick={() => {
+              localStorage.removeItem('user');
+              navigate('/login');             
+            }}
+          >
+            Logout
+          </button>
+        </li>
       </ul>
     </div>
   );

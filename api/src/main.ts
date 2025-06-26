@@ -2,6 +2,8 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { join } from 'path';
+import * as express from 'express';
 
 
 dotenv.config();
@@ -41,6 +43,15 @@ async function bootstrap() {
     credentials: true,
   });
 
+  app.use(
+    '/static',
+    express.static(join(__dirname, '..', 'screenshots'), {
+      setHeaders: (res) => {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      },
+    }),
+  );
   await app.listen(3000);
 }
 bootstrap();
