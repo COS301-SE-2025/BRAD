@@ -32,10 +32,15 @@ jobs:
       - name: Build Frontend container
         run: docker build -t brad-frontend ./frontend
 
-      - name: Run API unit tests
-        run: |
-          docker run --rm brad-api npm run test -- --config jest.config.ts
+      # === Only run tests on main ===
+      - name: Run API tests
+        if: github.ref == 'refs/heads/main'
+        run: docker run --rm brad-api npm run test -- --config jest.config.ts
 
-      - name: Run Bot unit tests
-        run: |
-          docker run --rm brad-bot python -m unittest -v tests/test_bot.py
+      - name: Run Frontend tests
+        if: github.ref == 'refs/heads/main'
+        run: docker run --rm brad-frontend npm run test
+
+      - name: Run Bot tests
+        if: github.ref == 'refs/heads/main'
+        run: docker run --rm brad-bot pytest tests/test_bot.py

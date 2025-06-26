@@ -59,6 +59,15 @@ export class AdminService {
     return user.save();
   }
 
+   async promoteToAdmin(userId: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+    if (user.role === 'admin') throw new BadRequestException('User is already an admin');
+
+    user.role = 'admin';
+    return user.save();
+  }
+
   async getAllUsers() {
     return this.userModel.find().select('-password');
   }

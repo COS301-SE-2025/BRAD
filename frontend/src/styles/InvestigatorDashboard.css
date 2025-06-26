@@ -44,11 +44,6 @@
   padding: 1rem;
   margin-bottom: 1rem;
   border-radius: 6px;
-  transition: background-color 0.2s ease;
-}
-
-.report-card:hover {
-  background-color: #f3f4f6;
 }
 
 .report-card p {
@@ -73,6 +68,16 @@
   cursor: pointer;
   font-size: 0.9rem;
   transition: background 0.2s;
+}
+
+.start-button {
+  background-color: #1e40af;
+  color: white;
+}
+
+.continue-button {
+  background-color: #facc15;
+  color: #1e3a8a;
 }
 
 .view-button {
