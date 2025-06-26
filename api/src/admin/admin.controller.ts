@@ -62,6 +62,17 @@ import {
       return this.adminService.demoteUser(userId);
     }
   
+  @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin')
+    @Patch('promote-to-admin/:userId')
+    @ApiOperation({ summary: 'Promote user to an admin' })
+    @ApiParam({ name: 'userId', type: 'string', description: 'User ID to promote' })
+    @ApiResponse({ status: 200, description: 'User promoted successfully' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    async promoteToAdmin(@Param('userId') userId: string) {
+      return this.adminService.promoteToAdmin(userId);
+    }
+
     @UseGuards(AuthGuard, RolesGuard)
     @Roles('admin')
     @Get('users')

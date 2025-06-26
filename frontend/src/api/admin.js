@@ -18,3 +18,6 @@ export const deleteUser=(userId)=>
 
 export const createUser = (userData) =>
   API.post('/admin/user', userData);
+
+export const changeRoleToAdmin=(userId)=>
+  API.patch(`/admin/promote-to-admin/${userId}`);
