@@ -4,11 +4,11 @@ const ManageUsers = ({ users, updateRole, removeUser }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
 
-const handleRoleChange = (userId, currentRole, newRole) => {
+const handleRoleChange = (userId, currentRole, newRole,username) => {
   if (newRole === currentRole) return;
 
   const confirmChange = window.confirm(
-    `Are you sure you want to change this user's role from "${currentRole}" to "${newRole}"?`
+    `Are you sure you want to change "${username}"s role from "${currentRole}" to "${newRole}"?`
   );
 
   if (confirmChange) {
@@ -78,8 +78,9 @@ const handleRemove = (userId, username) => {
         className="role-change"
         value={user.role}
         onChange={(e) =>
-          handleRoleChange(user._id, user.role, e.target.value)
-        }
+          handleRoleChange(user._id, user.role, e.target.value,user.username)
+        } 
+        disabled={user.role === 'admin'}
       >
         <option value="reporter">Reporter</option>
         <option value="investigator">Investigator</option>
