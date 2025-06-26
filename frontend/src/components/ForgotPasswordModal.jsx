@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
-import '../styles/ForgotPasswordModal.css';
+import '../styles/Password.css';
+import { forgotPassword } from '../api/auth';
 
 const ForgotPasswordModal = ({ onClose }) => {
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage('');
+    setError('');
 
-    // Simulate sending reset email
-    setMessage('If an account with this email exists, a reset link will be sent.');
+    try {
+      const res = await forgotPassword(email);
+      setMessage(res.data.message); 
+    } catch (err) {
+      setError(err.response?.data?.message || 'Something went wrong. Try again.');
+    }
   };
 
   return (
@@ -24,12 +32,14 @@ const ForgotPasswordModal = ({ onClose }) => {
             onChange={(e) => {
               setEmail(e.target.value);
               setMessage('');
+              setError('');
             }}
             required
           />
           <button type="submit">Send Reset Link</button>
         </form>
         {message && <p className="success-message">{message}</p>}
+        {error && <p className="error-message">{error}</p>}
         <button className="close-button" onClick={onClose}>
           Close
         </button>

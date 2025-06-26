@@ -4,6 +4,7 @@ import '../styles/Login.css';
 import BRAD_robot from '../assets/BRAD_robot.png';
 import ForgotPasswordModal from '../components/ForgotPasswordModal';
 import API from "../api/axios";
+import { useEffect } from 'react';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -22,7 +23,7 @@ const LoginPage = () => {
   }
 
   try {
-    const response = await API.post('/login', {
+    const response = await API.post('http://localhost:3000/auth/login', {
       identifier: username,  
       password,
     });
@@ -60,6 +61,9 @@ const LoginPage = () => {
   }
 };
 
+useEffect(() => {
+    document.title = 'B.R.A.D | Login';
+  }, []);
 
   return (
     <div className="login-page">

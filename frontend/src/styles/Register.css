@@ -1,13 +1,6 @@
 .register-page {
-  background-color: #e0f2fe;
   display: flex;
-
-}
-
-.robot-section {
-  flex: 1;
-  display: flex;
-  color: #1e3a8a;
+  color: #ffffff;
 }
 
 .brad-robot {
@@ -15,21 +8,10 @@
   max-width: 100%;
 }
 
-.form-section {
-  flex: 1;
-  flex-direction: column;
-  color: #1e3a8a;
-}
-
-.form-section h2 {
-  font-size: 2rem;
-  margin-bottom: 1rem;
-}
-
 .register-form {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 0.5rem;
 }
 
 .register-form input {
@@ -42,7 +24,7 @@
 .register-form button {
   padding: 0.75rem;
   font-size: 1rem;
-  background-color: #1e3a8a;
+  background: #00b4d8;
   color: white;
   border: none;
   border-radius: 6px;
@@ -51,7 +33,7 @@
 }
 
 .register-form button:hover {
-  background-color: #2563eb;
+  background: #0096c7;
 }
 
 .error {
@@ -62,12 +44,13 @@
 .login-link {
   margin-top: 1rem;
   font-size: 0.9rem;
+  color: #ffffff;
 }
 
 .link-button {
   background: none;
   border: none;
-  color: #1e3a8a;
+  color: #ffffff;
   cursor: pointer;
   font-weight: bold;
   text-decoration: underline;

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Register.css';
 import BRAD_robot from '../assets/BRAD_robot.png';
@@ -39,7 +39,7 @@ const RegisterPage = () => {
 
     try {
       const userData = { ...form };
-      const response = await API.post('/register', userData);
+      const response = await API.post('/auth/register', userData);
       setSuccess(response.data.message);
       setTimeout(() => navigate('/login'), 1500);
     } catch (err) {
@@ -51,8 +51,15 @@ const RegisterPage = () => {
     }
   };
 
+  useEffect(() => {
+    document.title = 'B.R.A.D | Register';
+  }, []);
+
   return (
     <div className="register-page">
+    <button className="back-button" onClick={() => navigate(-1)}>
+      ← Back
+    </button>
       <div className="robot-section">
         <div className="robot-content">
           <img src={BRAD_robot} alt="BRAD Robot" className="brad-robot" />
@@ -61,7 +68,6 @@ const RegisterPage = () => {
           </h2>
         </div>
       </div>
-      
 
       <div className="form-section">
         <h2>Create an Account</h2>
@@ -114,11 +120,6 @@ const RegisterPage = () => {
             onChange={handleChange}
             required
           />
-          <select name="role" value={form.role} onChange={handleChange}>
-            <option value="investigator">Investigator</option>
-            <option value="admin">Admin</option>
-            <option value="general">General</option>
-          </select>
 
           <button type="submit">Register</button>
           {error && <div className="error">{error}</div>}

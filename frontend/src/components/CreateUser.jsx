@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 
 const CreateUser = ({ addUser }) => {
   const [newUser, setNewUser] = useState({
-    firstName: '',
-    lastName: '',
+    firstname: '',
+    lastname: '',
     username: '',
     email: '',
-    role: 'reporter',
+    role: 'general',
   });
 
   const handleChange = (e) => {
@@ -18,7 +18,7 @@ const CreateUser = ({ addUser }) => {
     if (!newUser.username || !newUser.email) return;
 
     addUser(newUser);
-    setNewUser({ firstName: '', lastName: '', username: '', email: '', role: 'reporter' });
+    setNewUser({ firstname: '', lastname: '', username: '', email: '', role: 'reporter' });
   };
 
   return (
@@ -27,16 +27,16 @@ const CreateUser = ({ addUser }) => {
       <form className="admin-form" onSubmit={handleSubmit}>
         <input
           type="text"
-          name="firstName"
+          name="firstname"
           placeholder="First Name"
-          value={newUser.firstName}
+          value={newUser.firstname}
           onChange={handleChange}
         />
         <input
           type="text"
-          name="lastName"
+          name="lastname"
           placeholder="Last Name"
-          value={newUser.lastName}
+          value={newUser.lastname}
           onChange={handleChange}
         />
         <input
@@ -56,7 +56,7 @@ const CreateUser = ({ addUser }) => {
           required
         />
         <select name="role" value={newUser.role} onChange={handleChange}>
-          <option value="reporter">Reporter</option>
+          <option value="general">General</option>
           <option value="investigator">Investigator</option>
           <option value="admin">Admin</option>
         </select>
