@@ -9,7 +9,7 @@ const Walkthrough = () => {
         <img src={video_frame} alt="YouTube" className="youtube-logo" />
         <p>Watch our quick demo to see how B.R.A.D. protects you online!</p>
         <a 
-          href="https://www.youtube.com/watch?v=your-demo-video-link" 
+          href="https://youtu.be/gMIGbNoeGXE" 
           target="_blank" 
           rel="noopener noreferrer"
           className="watch-button"
