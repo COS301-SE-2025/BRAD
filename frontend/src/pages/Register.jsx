@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Register.css';
 import BRAD_robot from '../assets/BRAD_robot.png';
@@ -50,6 +50,10 @@ const RegisterPage = () => {
       }
     }
   };
+
+  useEffect(() => {
+    document.title = 'B.R.A.D | Register';
+  }, []);
 
   return (
     <div className="register-page">

@@ -1,11 +1,12 @@
 .navbar {
-  width: 220px;
-  background-color: #1e3a8a;
+  width: 120px;
+  background: rgba(173, 216, 230, 0.25);
   color: white;
   display: flex;
   flex-direction: column;
   padding: 1.5rem 1rem;
   align-items: center;
+  margin-left: 10px;
 }
 
 .brand-section {

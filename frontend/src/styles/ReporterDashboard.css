@@ -1,8 +1,8 @@
 .dashboard-container {
   display: flex;
   height: 100vh;
-  background-color: #f0f8ff;
-  color: black;
+  background: linear-gradient(to bottom right, #000814, #001f3f, #0077b6);
+  color: rgb(255, 255, 255);
 }
 
 .dashboard-content {
@@ -12,7 +12,7 @@
 }
 
 .submit-section, .history-section {
-  background: white;
+  background: rgba(173, 216, 230, 0.25);
   padding: 2rem;
   border-radius: 8px;
   margin-bottom: 2rem;
@@ -27,11 +27,13 @@
   border: 1px solid #ccc;
   border-radius: 6px;
   font-size: 1rem;
+  background-color: transparent;
+  color: rgb(255, 255, 255);
 }
 
 .evidence-upload {
   text-align: center;
-  border: 2px dashed #ccc;
+  border: 2px dashed rgb(255, 255, 255);
   padding: 1.5rem;
   border-radius: 6px;
 }
@@ -39,7 +41,7 @@
 .browse-button {
   margin-top: 1rem;
   padding: 0.5rem 1rem;
-  background-color: #1e40af;
+  background-color:  #001f3f;
   color: white;
   border: none;
   border-radius: 6px;
@@ -74,7 +76,7 @@
   margin-top: 0.5rem;
   padding: 0.4rem 0.8rem;
   font-size: 0.9rem;
-  background-color: #1e40af;
+  background-color:  #001f3f;
   color: white;
   border: none;
   border-radius: 6px;
@@ -88,7 +90,7 @@
 }
 
 .submit-url-button {
-  background-color: #1e40af;
+  background-color:  #001f3f;
   color: white;
   padding: 0.75rem 1rem;
   border: none;
@@ -101,4 +103,47 @@
 
 .submit-url-button:hover {
   background-color: #2563eb;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6); 
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: #ffffff;
+  color: #000000;
+  padding: 2rem;
+  border-radius: 10px;
+  width: 400px;
+  max-width: 90%;
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+  text-align: center;
+}
+
+.modal-content h3 {
+  margin-bottom: 1rem;
+}
+
+.modal-content button {
+  margin-top: 1rem;
+  padding: 0.5rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  background-color: #001f3f;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.modal-content button:hover {
+  background-color: #0077b6;
 }

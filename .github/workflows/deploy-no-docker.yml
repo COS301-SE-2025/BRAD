@@ -1,0 +1,59 @@
+name: CI (No Docker)
+
+on:
+  push:
+    branches: [main, dev]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    services:
+      mongo:
+        image: mongo
+        ports:
+          - 27017:27017
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # ------------------- API --------------------
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install API dependencies
+        working-directory: ./api
+        run: npm install
+
+      - name: Run API tests
+        working-directory: ./api
+        run: npm run test -- --config jest.config.ts
+
+      # ------------------- Bot --------------------
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install bot dependencies
+        working-directory: ./bot
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run bot tests
+        working-directory: ./bot
+        run: pytest tests/test_bot.py
+
+      # ------------------- Frontend --------------------
+      - name: Install frontend dependencies
+        working-directory: ./frontend
+        run: npm install
+
+      - name: Run frontend tests
+        working-directory: ./frontend
+        run: npm run test
