@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import '../styles/ForgotPasswordModal.css';
+import '../styles/Password.css';
 import { forgotPassword } from '../api/auth';
 
 const ForgotPasswordModal = ({ onClose }) => {

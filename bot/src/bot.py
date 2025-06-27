@@ -1,91 +1,101 @@
 import os
 import time
-import random
+import sys
 import requests
-from dotenv import load_dotenv
+import json
 from datetime import datetime, timezone
+from dotenv import load_dotenv
+from utils.analysis import perform_scraping
+from utils.metadata import gather_forensics
+from utils.reporter import fetch_pending_report
 
-# Load environment variables
 load_dotenv()
+
 API_URL = os.getenv("API_URL", "http://localhost:3000")
+AUTH_KEY = os.getenv("BOT_ACCESS_KEY")
+POLL_INTERVAL = 6
 
-headers = {
-            'Authorization': f"Bot {os.getenv('BOT_ACCESS_KEY')}"
-          }
+headers = {'Authorization': f"Bot {AUTH_KEY}"}
+if not AUTH_KEY:
+    raise RuntimeError("BOT_ACCESS_KEY missing from environment.")
 
-if not headers['Authorization'] or headers['Authorization'] == "Bot ":
-    raise RuntimeError("BOT_ACCESS_KEY is missing in environment variables.")
-
-POLL_INTERVAL = 6  # seconds
-
-# Simulate page scan (scraping)
-def perform_scraping(domain):
-    return {
-        "title": f"Mock title for {domain}",
-        "malwareDetected": random.random() > 0.85,
-        "summary": "Mocked page scan complete. No malicious scripts detected."
-    }
-
-# Simulate forensics (whois/IP/SSL)
-def gather_forensics(domain):
-    return {
-        "ip": f"192.168.0.{random.randint(1, 254)}",
-        "registrar": "MockRegistrar Inc.",
-        "sslValid": random.random() > 0.3,
-        "whoisOwner": "John Doe, MockOrg Ltd."
-    }
-
-# Combine all into an analysis object
 def generate_analysis(domain):
-    return {
+    forensics_info = gather_forensics(domain)
+    scraping_info, abuse_flags = perform_scraping(domain)
+    
+    analysis = {
         "domain": domain,
         "scannedAt": datetime.now(timezone.utc).isoformat(),
-        "riskScore": random.randint(0, 100),
-        **perform_scraping(domain),
-        **gather_forensics(domain)
+        **forensics_info,
+        "riskScore": 100 if "bank" in domain else 20
     }
 
-# Main bot logic
+    return analysis, scraping_info, abuse_flags
+
+
+def serialize(obj):
+    if isinstance(obj, dict):
+        return {k: serialize(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [serialize(i) for i in obj]
+    elif isinstance(obj, datetime):
+        return obj.isoformat()
+    return obj
+
+def report_analysis(report_id, analysis_data, scraping_info, abuse_flags):
+    url = f"{API_URL}/reports/{report_id}/analysis"
+    data = {
+        "analysis": serialize(analysis_data),
+        "scrapingInfo": serialize(scraping_info),
+        "abuseFlags": serialize(abuse_flags),
+        "analysisStatus": "done"
+    }
+    try:
+        response = requests.patch(url, json=data, headers=headers)
+        response.raise_for_status()
+        print(f"[BOT] Analysis for {report_id} updated.")
+        return True
+    except Exception as e:
+        print(f"[BOT] Failed to update analysis: {e}")
+        return False
+
+
 def run_bot(run_once=False):
-    print(f"BRAD Bot started - polling every {POLL_INTERVAL}s...\n")
+    print(f"[BOT] BRAD is polling every {POLL_INTERVAL}s...\n")
+
     while True:
         try:
-            # Check for a pending report
-            print(headers)
-            response = requests.get(f"{API_URL}/pending-reports",headers=headers)
+            headers = {'Authorization': f"Bot {AUTH_KEY}"}
+            report = fetch_pending_report(API_URL, headers)
 
-            if response.status_code == 204:
-                print("No pending reports. Waiting...")
-            elif response.status_code == 200:
-                report = response.json()
-                report_id = report.get("_id") or report.get("id")
-                print(f"Analyzing domain: {report['domain']} (ID: {report_id})")
-
-                time.sleep(5) 
-
-                # Generate mock analysis
-                analysis = generate_analysis(report["domain"])
-
-                # Submit analysis
-                result = requests.post(f"{API_URL}/analyzed-report", json={
-                    "id": report_id,
-                    "analysis": analysis
-                },headers=headers)
-
-                if result.status_code == 200:
-                    print(f"Report ID {report_id} analyzed and saved.\n")
-                else:
-                    print(f"Failed to submit analysis: {result.status_code}")
+            if not report:
+                print("No pending reports.")
             else:
-                print(f"Unexpected response: {response.status_code}")
+                report_id = report.get("_id") or report.get("id")
+                domain = report["domain"]
+                print(f"\n[BOT] Analyzing: {domain} (ID: {report_id})")
+                time.sleep(2)
+
+                analysis, scraping, abuse_flags = generate_analysis(domain)
+
+                success = report_analysis(report_id, analysis, scraping, abuse_flags)
+
+                if success:
+                    print(f"[BOT] Submitted analysis for report {report_id}\n")
+                else:
+                    print(f"[BOT] Failed to submit analysis for report {report_id}")
+
         except Exception as e:
-            print(f"Error during bot run: {e}")
+            print(f"[BOT] Error: {e}")
+            time.sleep(POLL_INTERVAL)
 
         if run_once:
             break
 
         time.sleep(POLL_INTERVAL)
 
-# Run bot loop if script is executed directly
+
+
 if __name__ == "__main__":
+    print("[BOT] Starting bot...",flush=True)
     run_bot()
