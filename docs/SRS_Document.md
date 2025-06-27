@@ -123,7 +123,7 @@ The B.R.A.D system will support both a user-friendly interface and API-based acc
 
 # User Stories
 
-### 1. Role: General user(Reporter)
+## 1.Role: General user(Reporter)
 
 **Description:**
 
@@ -135,16 +135,15 @@ The B.R.A.D system will support both a user-friendly interface and API-based acc
 
 **Definition of done:**
 
-- I can submit a suspicious domain via a simple form
-- I can optionally add notes or upload evidence
-- I receive confirmation that my report is submitted
-- I can track my report status and receive feedback
-
-<br />
+- I can submit a suspicious domain via a simple form.
+- I can optionally add notes or upload evidence.
+- I receive confirmation that my report is submitted.
+- I can track my report status and receive feedback.
+- I can request to reset or change my password if I forget it.
 
 ---
 
-### 2. Role:Investigator
+## 2.Role:Investigator
 
 **Description:**
 
@@ -156,17 +155,16 @@ The B.R.A.D system will support both a user-friendly interface and API-based acc
 
 **Definition of done:**
 
-- I can view all submitted reports
-- I can see risk scores and AI verdicts
-- I can open a detailed report with metadata and evidence
-- I can update the report status
-- I can send feedback to the original reporter
-
-<br />
+- I can view all submitted reports.
+- I can see risk scores and AI verdicts.
+- I can open a detailed report with metadata and evidence.
+- I can update the report status.
+- I can send feedback to the original reporter.
+- I can request to change or reset my password if I forget it.
 
 ---
 
-### 3. Role:Admin
+## 3.Role:Admin
 
 **Description:**
 
@@ -174,13 +172,17 @@ The B.R.A.D system will support both a user-friendly interface and API-based acc
 
 **User Story:**
 
-- As an admin I want to view all users and manage their roles so that I can control who has access to specific functionalities
+- As an admin I want to view all users and manage their roles so that I can control who has access to specific functionalities.
 
 **Definition of done:**
 
-- I can view all registered users
-- I can promote a user to the role of investigator
-- I can demote an investigator to a general user
+- I can view all registered users and their current roles.
+- I can promote a user to the role of investigator.
+- I can demote an investigator to a general user.
+- I can change users role to admin.
+- I can create new users.
+- I can request to change or reset my password if I forget it.
+
 
  <br />
  
