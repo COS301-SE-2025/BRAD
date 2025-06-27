@@ -5,7 +5,7 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "jest --coverage"
+    "test": "jest"
   },
   "keywords": [],
   "author": "",
@@ -19,7 +19,6 @@
     "express": "^5.1.0",
     "joi": "^17.13.3",
     "js-yaml": "^4.1.0",
-    "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.0",
     "start": "^5.1.0",
     "swagger-jsdoc": "^6.2.8",

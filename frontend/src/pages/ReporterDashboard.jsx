@@ -25,7 +25,7 @@ const ReporterDashboard = () => {
 
   const fetchReports = async () => {
     try {
-      const response = await API.get(`/reports?user=${user._id}`);
+      const response = await API.get('/reports');
       setReports(response.data);
     } catch (err) {
       console.error('Error fetching reports:', err);
@@ -42,6 +42,9 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, []);
 
+useEffect(() => {
+    document.title = 'B.R.A.D | Reporter';
+  }, []);
 
   return (
     <div className="dashboard-container">

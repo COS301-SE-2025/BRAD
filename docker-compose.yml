@@ -1,0 +1,59 @@
+services:
+  api:
+    build: ./api
+    container_name: brad-api
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./api:/app
+    depends_on:
+      - mongo
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/brad_db
+      - JWT_SECRET=brad_super_secret_2025
+      - BOT_ACCESS_KEY=secret-bot-key-123
+      - PORT=3000
+      - NODE_ENV=development
+      - EMAIL_USER=cos301.cap2@gmail.com
+      - EMAIL_PASS=cmzu mhnu dvds sadx
+    # env_file:
+    #   - .env
+
+
+  bot:
+    build: ./bot
+    container_name: brad-bot
+    volumes:
+      - ./bot:/app
+    depends_on:
+      - mongo
+      - api
+    environment:
+      - API_URL=http://api:3000
+      - BOT_ACCESS_KEY=secret-bot-key-123
+    # env_file:
+    #   - .env
+
+  frontend:
+    build: ./frontend
+    container_name: brad-frontend
+    ports:
+      - "5173:5173"
+    # volumes:
+    #   - ./frontend:/app
+    environment:
+      - NODE_ENV=development
+
+  mongo:
+    image: mongo
+    container_name: brad-mongo
+    restart: always
+    ports:
+      - "27018:27017"
+    volumes:
+      - mongo-data:/data/db
+      - ./database/mongo.conf:/etc/mongo.conf:ro
+    command: mongod --quiet --logpath /var/log/mongodb/mongod.log
+
+volumes:
+  mongo-data:

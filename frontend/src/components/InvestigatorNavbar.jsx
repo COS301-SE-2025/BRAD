@@ -2,6 +2,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Navbar.css';
 import BRAD_robot from '../assets/BRAD_robot.png';
+import UserManual from '../assets/B.R.A.D-User-Manual.pdf'
 
 const InvestigatorNavbar = () => {
   const navigate = useNavigate();
@@ -15,10 +16,15 @@ const InvestigatorNavbar = () => {
       </div>
 
       {/* Investigator Navigation Links */}
-      <ul className="nav-links">
+      <ul className="nav-link">
         <li>
           <button onClick={() => navigate('/investigator')}>Reports</button>
         </li>
+        <li>
+                  <a href={UserManual} target="_blank" rel="noopener noreferrer">
+                    <button>Help Menu</button>
+                  </a>
+                </li>
         <li>
           <button onClick={() => navigate('/investigator/settings')}>Investigator Settings</button>
         </li>
