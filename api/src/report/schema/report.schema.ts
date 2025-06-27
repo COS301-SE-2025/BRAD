@@ -63,6 +63,7 @@ export class Report {
     redirectChain?: string[];
     usesMetaRefresh?: boolean;
     suspiciousInlineEvents?: string[];
+    captchaDetected?: boolean;
   };
   
   
