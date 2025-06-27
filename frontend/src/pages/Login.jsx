@@ -36,6 +36,7 @@ const LoginPage = () => {
       return;
     }
 
+    localStorage.removeItem('user'); // ensure clean state
     localStorage.setItem('user', JSON.stringify({
       _id: user._id,
       username: user.username,

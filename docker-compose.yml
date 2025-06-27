@@ -49,9 +49,11 @@ services:
     container_name: brad-mongo
     restart: always
     ports:
-      - "27017:27017"
+      - "27018:27017"
     volumes:
       - mongo-data:/data/db
+      - ./database/mongo.conf:/etc/mongo.conf:ro
+    command: mongod --quiet --logpath /var/log/mongodb/mongod.log
 
 volumes:
   mongo-data:
