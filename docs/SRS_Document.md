@@ -12,14 +12,23 @@
   - [Business Need](#business-need)
   - [Project Scope](#project-scope)
 - [User Stories](#user-stories)
+
   - [1. Role: General user(Reporter)](#1-role-general-userreporter)
   - [2. Role:Investigator](#2-roleinvestigator)
   - [3. Role:Admin](#3-roleadmin)
-- [Use cases](#use-cases)
+
+- [Use Cases for Demo 1](#use-cases-for-demo-1)
+
   - [Use Case 1: Submit Domain Report](#use-case-1-submit-domain-report)
   - [Use Case 2: View Submitted Reports](#use-case-2-view-submitted-reports)
   - [Use Case 3: Analyse Forensic](#use-case-3-analyse-forensic)
-  - [Complete use cases daigrams:](#complete-use-cases-daigrams)
+  - [Complete Use Case Diagrams](#complete-use-case-diagrams)
+
+- [Use Cases for Demo 2](#use-cases-for-demo-2)
+  - [Use Case 1: Admin Adds a New User](#use-case-1-admin-adds-a-new-user)
+  - [Use Case 2: Admin’s User Management](#use-case-2-admins-user-management)
+  - [Use Case 3: Investigator Analyzes Report Using Bot Response](#use-case-3-investigator-analyzes-report-using-bot-response)
+  - [Use Case 4: Reset or Change Password](#use-case-4-reset-or-change-password)
 - [Functional Requirements](#functional-requirements)
   - [Core Requirements](#core-requirements)
     - [1.1. User Submission Portal](#11-user-submission-portal)
@@ -56,35 +65,55 @@
   - [5. Evidence Management](#5-evidence-management)
     - [Upload Evidence](#upload-evidence)
 - [Domain Model](#domain-model)
-- [Architecture Requirements](#architecture-requirements)
-  - [Quality Requirements](#quality-requirements)
-    - [1. Security (Most Important)](#1-security-most-important)
-    - [2. Compliance](#2-compliance)
-    - [3. Reliability](#3-reliability)
-    - [4. Scalability](#4-scalability)
-    - [5. Maintainability](#5-maintainability)
-  - [Architectural Patterns](#architectural-patterns)
-    - [Gatekeeper Pattern](#gatekeeper-pattern)
-    - [Event-Driven Architecture (EDA)](#event-driven-architecture-eda)
-    - [Service-Oriented Architecture (SOA)](#service-oriented-architecture-soa)
-    - [Micro-services Architecture](#micro-services-architecture)
-    - [Client-Server Model](#client-server-model)
-    - [Layered Architecture](#layered-architecture)
-    - [Pipe and Filter Pattern](#pipe-and-filter-pattern)
-    - [Model-View-Controller (MVC)](#model-view-controller-mvc)
-  - [Design Patterns](#design-patterns)
-    - [1. Factory Pattern](#1-factory-pattern)
-    - [2. Strategy Pattern](#2-strategy-pattern)
-    - [3. Observer Pattern](#3-observer-pattern)
-    - [4. Singleton Pattern](#4-singleton-pattern)
-    - [5. Decorator Pattern](#5-decorator-pattern)
-    - [6. Command Pattern](#6-command-pattern)
-    - [7. Builder Pattern](#7-builder-pattern)
-    - [8. Chain of Responsibility Pattern](#8-chain-of-responsibility-pattern)
-    - [9. Adapter Pattern](#9-adapter-pattern)
-    - [10. Proxy Pattern](#10-proxy-pattern)
-    - [11. Mediator Pattern](#11-mediator-pattern)
-  - [Architectural Constraints](#architectural-constraints)
+
+## Table of Contents
+
+1. [Architectural Requirements](#architectural-requirements)
+2. [Architectural Design Strategy](#architectural-design-strategy)
+   - [Making It Easy to Use](#making-it-easy-to-use)
+   - [Building at a Steady Pace](#building-at-a-steady-pace)
+   - [Keeping the System Safe and Reliable](#keeping-the-system-safe-and-reliable)
+   - [Collaboration](#collaboration)
+   - [Adapting to Change](#adapting-to-change)
+   - [Step-by-Step Improvements](#step-by-step-improvements)
+   - [Customer Trust and Frequent Progress](#customer-trust-and-frequent-progress)
+3. [Architectural Styles](#architectural-styles)
+   - [Event-Driven Architecture (EDA)](#event-driven-architecture-eda)
+   - [Gatekeeper Pattern](#gatekeeper-pattern)
+   - [Client-Server Model](#client-server-model)
+   - [Layered Architecture](#layered-architecture)
+   - [Pipe and Filter Pattern](#pipe-and-filter-pattern)
+4. [Architectural Quality Requirements](#architectural-quality-requirements)
+   - [1. Security (Most Important)](#1-security-most-important)
+   - [2. Compliance](#2-compliance)
+   - [3. Reliability](#3-reliability)
+   - [4. Scalability](#4-scalability)
+   - [5. Maintainability](#5-maintainability)
+5. [Architectural Design and Pattern](#architectural-design-and-pattern)
+   - [Gatekeeper Pattern](#gatekeeper-pattern-1)
+   - [Event-Driven Architecture (EDA)](#event-driven-architecture-eda-1)
+   - [Service-Oriented Architecture (SOA)](#service-oriented-architecture-soa)
+   - [Client-Server Model](#client-server-model-1)
+   - [Layered Architecture](#layered-architecture-1)
+   - [Pipe and Filter Pattern](#pipe-and-filter-pattern-1)
+   - [Model-View-Controller (MVC)](#model-view-controller-mvc)
+6. [Design Patterns](#design-patterns)
+   - [Chain of Responsibility](#chain-of-responsibility)
+7. [Architectural Constraints](#architectural-constraints)
+   - [Adherence to Legal Standards and Regulations](#adherence-to-legal-standards-and-regulations)
+     - [GDPR and POPIA Compliance](#gdpr-and-popia-compliance)
+     - [Audit Logging and Data Traceability](#audit-logging-and-data-traceability)
+     - [Access Control for Sensitive Operations](#access-control-for-sensitive-operations)
+   - [Balancing Automation and Human Oversight](#balancing-automation-and-human-oversight)
+     - [Human-in-the-Loop Decision Making](#human-in-the-loop-decision-making)
+   - [Technical Limitations and Deployment Constraints](#technical-limitations-and-deployment-constraints)
+     - [Budget and Infrastructure Limitations](#budget-and-infrastructure-limitations)
+     - [Network Restrictions for Scraping](#network-restrictions-for-scraping)
+     - [False Positives in AI Classification](#false-positives-in-ai-classification)
+   - [Ethical and Data Handling Considerations](#ethical-and-data-handling-considerations)
+     - [Data Anonymization and Minimization](#data-anonymization-and-minimization)
+     - [Transparency and Explainability](#transparency-and-explainability)
+
 - [Technology Choices](#technology-choices)
 - [Appendices](#appendices)
 
@@ -123,7 +152,7 @@ The B.R.A.D system will support both a user-friendly interface and API-based acc
 
 # User Stories
 
-### 1. Role: General user(Reporter)
+## 1.Role: General user(Reporter)
 
 **Description:**
 
@@ -135,16 +164,15 @@ The B.R.A.D system will support both a user-friendly interface and API-based acc
 
 **Definition of done:**
 
-- I can submit a suspicious domain via a simple form
-- I can optionally add notes or upload evidence
-- I receive confirmation that my report is submitted
-- I can track my report status and receive feedback
-
-<br />
+- I can submit a suspicious domain via a simple form.
+- I can optionally add notes or upload evidence.
+- I receive confirmation that my report is submitted.
+- I can track my report status and receive feedback.
+- I can request to reset or change my password if I forget it.
 
 ---
 
-### 2. Role:Investigator
+## 2.Role:Investigator
 
 **Description:**
 
@@ -156,17 +184,16 @@ The B.R.A.D system will support both a user-friendly interface and API-based acc
 
 **Definition of done:**
 
-- I can view all submitted reports
-- I can see risk scores and AI verdicts
-- I can open a detailed report with metadata and evidence
-- I can update the report status
-- I can send feedback to the original reporter
-
-<br />
+- I can view all submitted reports.
+- I can see risk scores and AI verdicts.
+- I can open a detailed report with metadata and evidence.
+- I can update the report status.
+- I can send feedback to the original reporter.
+- I can request to change or reset my password if I forget it.
 
 ---
 
-### 3. Role:Admin
+## 3.Role:Admin
 
 **Description:**
 
@@ -174,13 +201,16 @@ The B.R.A.D system will support both a user-friendly interface and API-based acc
 
 **User Story:**
 
-- As an admin I want to view all users and manage their roles so that I can control who has access to specific functionalities
+- As an admin I want to view all users and manage their roles so that I can control who has access to specific functionalities.
 
 **Definition of done:**
 
-- I can view all registered users
-- I can promote a user to the role of investigator
-- I can demote an investigator to a general user
+- I can view all registered users and their current roles.
+- I can promote a user to the role of investigator.
+- I can demote an investigator to a general user.
+- I can change users role to admin.
+- I can create new users.
+- I can request to change or reset my password if I forget it.
 
  <br />
  
@@ -190,6 +220,8 @@ The B.R.A.D system will support both a user-friendly interface and API-based acc
 <br />
 
 # Use cases
+
+**Use** **cases for demo** **1**
 
 This outlines and analyses the three main use cases of the B.R.A.D (Bot
 to Report Abusive Domains) cybersecurity application. Each use case is
@@ -362,10 +394,132 @@ style="width:7.26805in;height:4.41944in" />
 
  <br />
  
-<p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
+<p align="right"><a href="#table-of-contents">
+
+⬆️ Back to Table of Contents</a></p>
 
 <br />
 <br />
+
+# Use Cases for Demo 2
+
+---
+
+## Use Case 1: Admin Adds a New User
+
+**User Perspective:**
+
+The **Admin** adds a new user by filling in user details.
+
+**System Role:**
+
+- Stores the new user’s username and email
+- Sends a One-Time Password (OTP) to the user's email
+- Redirects the user to complete their setup via the link
+
+**Steps:**
+
+1. Admin enters the new user's:
+   - Username
+   - Email
+   - Role (Admin / Investigator / Reporter)
+2. System sends OTP link via email
+3. User clicks the link and:
+   - Enters OTP
+   - Enters and confirms new password
+   - Gets redirected to login
+
+## Use Case 2: Admin Manages Users
+
+**User Perspective:**
+
+The **Admin** wants to manage users efficiently by modifying roles or removing accounts.
+
+**System Role:**
+
+- Allows filtering and searching of users
+- Enables role editing and deletion
+
+**Admin Can Perform:**
+
+- Remove user
+- Edit user role:
+  - Admin
+  - Investigator
+  - Reporter
+- Filter by role
+- Search by username
+
+<br />
+
+![Admin User Management](./images/adminUsecase.png)
+
+---
+
+## Use Case 3: Investigator Analyzes Report Using Bot Response
+
+**User Perspective:**
+
+The **Investigator** evaluates a reported domain using bot results and evidence.
+
+**System Role:**
+
+- Displays bot-generated results
+- Allows investigator to interpret and label the report
+
+**Steps:**
+
+1. View bot response
+2. Mark report as malicious / not malicious
+3. Add comments
+4. Review supporting evidence
+5. Relaunch bot if needed
+
+<br />
+
+![Investigator Analysis](./images/investigatorUsecase.png)
+
+---
+
+## Use Case 4: Reset or Change Password
+
+**User Perspective:**
+
+Any **user** who has forgotten or needs to reset their password can initiate recovery.
+
+**System Role:**
+
+- Sends password reset link to email
+- Verifies new password inputs
+- Redirects back to login
+
+### Steps to Reset Password:
+
+1. On login screen, click **"Forgot Password"**
+2. Enter email address
+3. Receive email with reset link
+4. Click the link and:
+   - Enter new password
+   - Confirm password
+
+### Steps to Register (if not a user):
+
+1. Click **"Register"**
+2. Enter:
+   - First name
+   - Last name
+   - Email
+   - Username
+   - Password
+3. Already have an account? Click **"Login"**
+
+<br />
+
+![Forgot Password Use Case](./images/forgotPasswordUsecase.png)
+
+---
+
+<p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 
 # Functional Requirements
 
@@ -658,74 +812,252 @@ User uploads additional proof. The system validates and stores the file, linking
 <br />
 <br />
 
-# Architecture Requirements
+**Architectural** **Requirements**
 
-<br />
+**Architectural** **Design**
+**Strategy:** **Design** **based** **on** **Quality** **Requirements**
 
-## Quality Requirements
+**Making** **It** **Easy** **to** **Use**
 
-### 1. Security (Most Important)
+Usability is just as important as functionality. We design dashboards
+and submission pages that are simple and clear so that users don’t get
+confused. This helps reporters submit suspicious domains quickly and
+investigators work efficiently with the tools we provide.
 
-Security is the foundation of the B.R.A.D system, given its handling of sensitive data like user-submitted URLs, forensic metadata, and potentially malicious content. Unauthorized access or breaches could lead to severe consequences such as data leaks, false reports, or misuse of the system for cyber-attacks. Therefore, security controls, encrypted storage, secure APIs, role-based access control, and container isolation must be thoroughly enforced to protect both user and system integrity.
+**Building** **at** **a** **Steady** **Pace**
 
-|       Stimulus <br>Source        |                   Stimulus                    |                                  Response                                  |                                                                 Response <br>Measure                                                                  |       Environment       |        Artifact         |
-| :------------------------------: | :-------------------------------------------: | :------------------------------------------------------------------------: | :---------------------------------------------------------------------------------------------------------------------------------------------------: | :---------------------: | :---------------------: |
-| Malicious actors/ <br>Attackers. | Attempt to compromise data or infrastructure. | System should block unauthorized access and encrypt sensitive information. | 100% of sensitive data encrypted<br> at rest and in transit. <br>All RBAC (Role Based Access Control) and MFA (Multi-Factor Authentication) enforced. | Production environment. | BRAD Backend/API System |
+Agile encourages teams to work at a pace they can keep up. By focusing
+on performance and clean structure, we avoid messy code and make sure
+the system is efficient and doesn’t slow down as it grows. This helps
+the team avoid burnout and reduces problems later.
 
-<br />
+**Keeping** **the** **System** **Safe** **and** **Reliable**
 
-### 2. Compliance
+Since BRAD works with sensitive information, we always think about
+security and reliability in our design. We implement strong access
+control, monitor system activity, and handle failures in a way that
+doesn’t put data or users at risk. This ensures that the system keeps
+working even under stress.
 
-Compliance ensures that the system operates within the legal and ethical boundaries defined by regulations like GDPR and POPIA. This is especially important for a tool that collects and processes potentially identifiable or legally sensitive data. Compliance includes implementing consent mechanisms, depersonalizing data when possible, logging access to personal data, and providing the right to be forgotten.
+**Collaboration**
 
-|      Stimulus <br>Source      |                Stimulus                 |                                                 Response                                                 |                                        Response <br>Measure                                         |         Environment         |              Artifact               |
-| :---------------------------: | :-------------------------------------: | :------------------------------------------------------------------------------------------------------: | :-------------------------------------------------------------------------------------------------: | :-------------------------: | :---------------------------------: |
-| Legal/ <br>Regulatory Bodies. | Data privacy and <br>regulatory audits. | System should ensure legal <br>compliance in data handling and provide <br>user data control mechanisms. | GDPR and POPIA checklists passed; <br> audit logs maintained;<br> user data deletion <br>supported. | Production <br>environment. | Data <br>Processing <br>Components. |
+When we design based on clear quality requirements, everyone on the team
+knows what matters most. Whether someone is working on the frontend or
+backend, we all follow the same goals like making the system easy to
+use, secure, and quick. This makes teamwork smoother and more focused.
 
-<br />
+**Adapting** **to** **Change**
 
-### 3. Reliability
+Cyber-security threats change quickly. Designing around scalability and
+maintainability helps us make changes without breaking the system. This
+means we can update the scraper, switch AI models, or add new features
+easily. It also lets us respond to new ideas or feedback from users as
+the project goes on.
 
-The reliability of B.R.A.D ensures that forensic investigations can be conducted consistently and accurately. The system should gracefully handle failed URL submissions, avoid crashes during analysis, and recover from bot failures without corrupting data. High reliability builds trust in the system’s outputs and enables analysts to depend on its results for critical decision-making.
+**Step-by-Step** **Improvements**
 
-| Stimulus <br>Source |                                   Stimulus                                    |                               Response                                |                      Response <br>Measure                      |         Environment         |               Artifact                |
-| :-----------------: | :---------------------------------------------------------------------------: | :-------------------------------------------------------------------: | :------------------------------------------------------------: | :-------------------------: | :-----------------------------------: |
-|    System Users.    | Submission of various <br>domains, including malformed <br>or malicious ones. | System hould maintain stable <br>operation and report errors clearly. | 99.9% uptime, bot recovers <br>from crashes within 60 seconds. | Production <br>environment. | Bot Engine <br>and <br>Report System. |
+We build BRAD in small steps. Each sprint adds something new like
+scraping, AI analysis, or reporting. By keeping each step small and tied
+to a quality goal (like performance or accuracy), we make sure we’re
+always improving the system in a smart and manageable way.
 
-<br />
+**Customer** **Trust** **and** **Frequent** **Progress**
 
-### 4. Scalability
+We want users and stakeholders to feel confident in what we’re building.
+By focusing on quality requirements like security, reliability, and
+usability, we make sure that every version of the BRAD system is stable,
+safe, and useful. This helps us deliver real value early and often,
+which is a key part of Agile.
 
-Scalability is essential to support the analysis of many domain reports simultaneously. B.R.A.D must be able to grow with demand, especially during cyber incident spikes. It should process multiple domain submissions concurrently without bottlenecking the system or slowing down analysis pipelines. By ensuring scalability, the system can maintain optimal performance under high loads, enabling faster processing and quicker turnaround times for forensic results.
-
-| Stimulus <br>Source |                      Stimulus                      |                                   Response                                   |                                    Response <br>Measure                                    |         Environment         |           Artifact            |
-| :-----------------: | :------------------------------------------------: | :--------------------------------------------------------------------------: | :----------------------------------------------------------------------------------------: | :-------------------------: | :---------------------------: |
-| Multiple <br>Users. | Submission of multiple<br> links at the same time. | System should scale horizontally <br>to handle multiple concurrent analyses. | Supports 500+ concurrent domain <br>submissions with average <br>analysis &lt; 10s/domain. | Production <br>environment. | Domain Analysis <br>Pipeline. |
-
-<br />
-
-### 5. Maintainability
-
-B.R.A.D’s architecture must allow for frequent updates such as patching vulnerabilities, integrating new threat intelligence feeds or adapting AI models. The system must be designed with modularity and clear interfaces between components (e.g., scrapers, AI, storage) so developers can make targeted changes without affecting the whole system.
-
-|  Stimulus <br>Source  |                       Stimulus                        |                                   Response                                   |                               Response <br>Measure                                |         Environment          |              Artifact               |
-| :-------------------: | :---------------------------------------------------: | :--------------------------------------------------------------------------: | :-------------------------------------------------------------------------------: | :--------------------------: | :---------------------------------: |
-| Development <br>Team. | Requirement to update <br>scraping logic or AI model. | System should allow modular, <br>low-risk updates <br>with minimal downtime. | Docker-based components, <br>automated deployment <br>pipeline, &lt;5 min rollout | Development <br>environment. | Bot Container <br>&<br> AI Modules. |
-
- <br />
- 
 <p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 
-<br />
-<br />
+**Architectural** **Styles**
 
-## Architectural Patterns
+In developing the Bot to Report Abusive Domains (BRAD) system, we have
+selected several architectural styles to meet key quality requirements,
+including security, compliance, scalability, reliability, usability, and
+maintainability. These styles work together to support BRAD’s mission:
+allowing users to report suspicious domains, processing them through an
+automated analysis pipeline, and presenting accurate and accessible
+results to investigators.
+
+The Event-Driven Architecture (EDA) enables BRAD to handle multiple
+domain reports asynchronously. When a suspicious domain is submitted, it
+triggers a chain of downstream processes such as scraping, malware
+checking, AI scoring, and report generation. This pattern boosts
+scalability and performance by decoupling components and allowing them
+to process in parallel. It also improves reliability by using persistent
+queues, which ensure that failed tasks can be retried without data loss.
+
+The Gatekeeper Pattern enforces system-wide security, reliability, and
+compliance. Acting as a single entry point, it performs user
+authentication, role-based access control (RBAC), and multi-factor
+authentication (MFA) where needed. The Gatekeeper also filters and
+validates all incoming requests, applying rate limiting and logging for
+auditability. This protects backend services from malicious or malformed
+input and ensures alignment with data protection laws like POPIA and
+GDPR.
+
+The Client-Server Model separates the frontend user interface from
+backend processing. Users interact with the system via a web portal by
+submitting URLs and reviewing reports while the backend handles
+authentication, analysis, and data storage. This model enhances
+usability by allowing a focused and responsive interface. It also
+supports security and compliance by ensuring that sensitive operations
+are handled server-side under controlled conditions.
+
+The Layered Architecture organizes BRAD into logical layers: the
+presentation layer (user interface), application layer (API and
+Gatekeeper), business logic layer (analysis and classification), and
+data layer (databases and logs). This improves maintainability, as each
+layer can be updated independently and reliability as issues in one
+layer don’t directly affect others. It also enhances security by
+restricting access to sensitive data handling within backend layers
+only.
+
+The Pipe and Filter Pattern structures the backend analysis workflow as
+a clear processing pipeline: Scrape → Malware Detection → AI Risk
+Analysis → Report Generation. Each stage is independent, transforming
+the data and passing it forward. This improves maintainability by
+allowing individual steps to be replaced or updated. It also enhances
+reliability by
+
+supporting error handling and recovery at each stage, and improves
+performance by enabling potential parallel execution of steps.
+
+> **Event-Driven** **Architecture** **(EDA)**
+
+**Quality** **Requirements** **Addressed:**
+
+    • Scalability: Events trigger decoupled processes that scale
+    independently.
+
+    • Performance: Supports real-time, asynchronous
+    execution.
+
+    • Reliability: Persistent queues allow task recovery after failure.
+
+> **Gatekeeper** **Pattern**
+
+**Quality** **Requirements** **Addressed:**
+
+    • Security: Validates and authenticates all incoming traffic.
+
+    • Reliability: Shields services from overload and malformed input.
+
+    • Compliance: Enforces logging and data protection rules (POPIA/GDPR).
+
+> **Client-Server** **Model**
+
+**Quality** **Requirements** **Addressed:**
+
+    • Usability: Frontend provides clear UI for reporters and
+    investigators.
+
+    • Security: Backend controls sensitive operations and
+    data.
+
+    • Compliance: Ensures data validation and consent handling on the server.
+
+> **Layered** **Architecture**
+
+**Quality** **Requirements** **Addressed:**
+
+    • Maintainability: Each layer can be changed independently.
+
+    • Security: Sensitive logic is isolated in protected backend layers.
+
+    •Reliability: Faults are contained within individual layers.
+
+> **Pipe** **and** **Filter** **Pattern**
+
+**Quality** **Requirements** **Addressed:**
+
+    • Maintainability: Filters can be updated without breaking the flow.
+
+    •Reliability: Pipeline resumes from failed stages where possible.
+
+    • Performance: Processing steps can be parallelized and optimized.
+
+<p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
+
+**Architectural** **Quality** **Requirements**
+
+> **1.** **Security** **(Most** **Important)**
+
+Security is the foundation of the B.R.A.D system, given its handling of
+sensitive data like user-submitted URLs, forensic metadata, and
+potentially malicious content. Unauthorized access or breaches could
+lead to severe consequences such as data leaks, false reports, or misuse
+of the system for cyber-attacks. Therefore, security controls, encrypted
+storage, secure APIs, role-based access control, and container isolation
+must be thoroughly enforced to protect both user and system integrity.
+
+| Stimulus Source              | Stimulus                                     | Response                                                                                  | Response Measure                                                                    | Environment            | Artifact                  |
+| ---------------------------- | -------------------------------------------- | ----------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- | ---------------------- | ------------------------- |
+| Malicious actors / Attackers | Attempt to compromise data or infrastructure | System should block unauthorized access, validate input and encrypt sensitive information | 100% of sensitive data encrypted at rest and in transit. All RBAC and MFA enforced. | Production environment | BRAD Backend / API System |
+
+> **2.** **Compliance**
+
+Compliance ensures that the system operates within the legal and ethical
+boundaries defined by regulations like GDPR and POPIA. This is
+especially important for a tool that collects and processes potentially
+identifiable or legally sensitive data. Compliance includes implementing
+consent mechanisms, depersonalizing data when possible, logging access
+to personal data, and providing the right to be forgotten.
+
+| Stimulus Source           | Stimulus                           | Response                                                                                        | Response Measure                                                                      | Environment            | Artifact                   |
+| ------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- | ---------------------- | -------------------------- |
+| Legal / Regulatory Bodies | Data privacy and regulatory audits | System should ensure legal compliance in data handling and provide user data control mechanisms | GDPR and POPIA checklists passed; audit logs maintained; user data deletion supported | Production environment | Data Processing Components |
+
+> **3.** **Reliability**
+
+The reliability of B.R.A.D ensures that forensic investigations can be
+conducted consistently and accurately. The system should gracefully
+handle failed URL submissions, avoid crashes during analysis, and
+recover from bot failures without corrupting data. High reliability
+builds trust in the system’s outputs and enables analysts to depend on
+its results for critical decision-making.
+
+| Stimulus Source | Stimulus                                                             | Response                                                          | Response Measure                                          | Environment            | Artifact                     |
+| --------------- | -------------------------------------------------------------------- | ----------------------------------------------------------------- | --------------------------------------------------------- | ---------------------- | ---------------------------- |
+| System Users    | Submission of various domains, including malformed or malicious ones | System should maintain stable operation and report errors clearly | 99.9% uptime, bot recovers from crashes within 60 seconds | Production environment | Bot Engine and Report System |
+
+**4.** **Scalability**
+
+Scalability is essential to support the analysis of many domain reports
+simultaneously. B.R.A.D must be able to grow with demand, especially
+during cyber incident spikes. It should process multiple domain
+submissions concurrently without bottlenecking the system or slowing
+down analysis pipelines. By ensuring scalability, the system can
+maintain optimal performance under high loads, enabling faster
+processing and quicker turnaround times for forensic results.
+
+| Stimulus Source | Stimulus                                      | Response                                                                | Response Measure                                                               | Environment            | Artifact                 |
+| --------------- | --------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ---------------------- | ------------------------ |
+| Multiple Users  | Submission of multiple links at the same time | System should scale horizontally to handle multiple concurrent analyses | Supports 500+ concurrent domain submissions with average analysis < 10s/domain | Production environment | Domain Analysis Pipeline |
+
+> **5.** **Maintainability**
+
+B.R.A.D’s architecture must allow for frequent updates such as patching
+vulnerabilities, integrating new threat intelligence feeds or adapting
+AI models. The system must be designed with modularity and clear
+interfaces between components (e.g., scrapers, AI, storage) so
+developers can make targeted changes without affecting the whole system.
+
+| Stimulus Source  | Stimulus                                         | Response                                                            | Response Measure                                                       | Environment             | Artifact                   |
+| ---------------- | ------------------------------------------------ | ------------------------------------------------------------------- | ---------------------------------------------------------------------- | ----------------------- | -------------------------- |
+| Development Team | Requirement to update scraping logic or AI model | System should allow modular, low-risk updates with minimal downtime | Docker-based components, automated deployment pipeline, <5 min rollout | Development environment | Bot Container & AI Modules |
+
+<p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
+
+**Architectural** **Design** **and** **Pattern**
 
 In developing the BRAD (Bot to Report Abusive Domains) system, several
 architectural patterns have been chosen to support the project’s
 critical quality requirements.
 
-### Gatekeeper Pattern
+> **Gatekeeper** **Pattern**
 
 The Gatekeeper Pattern is implemented in BRAD as a dedicated security
 layer that mediates all incoming traffic to the system. This component
@@ -741,23 +1073,19 @@ to forensic data. In high-traffic or adversarial scenarios, it supports
 rate limiting, input sanitization, and logging to mitigate threats such
 as denial-of-service (DoS) attacks or injection attempts.
 
-**Quality Requirements Addressed:**
+**Quality** **Requirements** **Addressed:**
 
-1. **Security**: All requests are authenticated, authorized, and
-   validated before reaching internal services, preventing unauthorized
-   access and injection attacks.
+1\. **Security**: All requests are authenticated, authorized, and
+validated before reaching internal services, preventing unauthorized
+access and injection attacks.
 
-2. **Reliability**: The Gatekeeper handles rate limiting, failover
-   routing, and input filtering to protect internal services from
-   overload or failure.
+2\. **Reliability**: The Gatekeeper handles rate limiting, failover
+routing, and input filtering to protect internal services from overload or failure.
 
-3. **Compliance**: Every access attempt is logged and checked against
-   regulatory rules, ensuring adherence to GDPR and POPIA obligations.
+3\. **Compliance**: Every access attempt is logged and checked against
+regulatory rules, ensuring adherence to GDPR and POPIA obligations.
 
-<br />
-<br />
-
-### Event-Driven Architecture (EDA)
+> **Event-Driven** **Architecture** **(EDA)**
 
 The Event-Driven Architecture (EDA) enables BRAD to process large
 volumes of domain investigation requests by allowing system components
@@ -773,21 +1101,16 @@ non-blocking execution. Reliability is also addressed through persistent
 event logs, which ensure that failed or interrupted processes can be
 recovered and replayed without data loss.
 
-**Quality Requirements Addressed:**
+**Quality** **Requirements** **Addressed:**
 
-1. **Scalability**: New event consumers can be added horizontally to
-   meet increased demand during peak investigation periods.
+1\. **Scalability**: New event consumers can be added horizontally to
+meet increased demand during peak investigation periods.
 
-2. **Performance**: Asynchronous processing enables faster throughput
-   for multiple domain investigations running in parallel.
+2\. **Performance**: Asynchronous processing enables faster throughput for multiple domain investigations running in parallel.
 
-3. **Reliability**: Persistent queues and event logs allow retries
-   and recovery if services fail mid-process.
+3\. **Reliability**: Persistent queues and event logs allow retries and recovery if services fail mid-process.
 
-<br />
-<br />
-
-### Service-Oriented Architecture (SOA)
+> **Service-Oriented** **Architecture** **(SOA)**
 
 The Service-Oriented Architecture (SOA) is used to decompose BRAD into
 modular services such as Scrape-Service, Analyse-Service, and
@@ -803,51 +1126,15 @@ the ability to scale only the services under load (e.g., multiple
 scraper instances during high-volume submissions) rather than the entire
 system.
 
-**Quality Requirements Addressed:**
+**Quality** **Requirements** **Addressed:**
 
-1. **Scalability**: Each service can be scaled based on load without
-   affecting the others.
+1\. **Scalability**: Each service can be scaled based on load without affecting the others.
 
-2. **Maintainability**: Services can be
-   independently updated or replaced, supporting long-term evolution.
+2.\. **Maintainability**: Services can be independently updated or replaced, supporting long-term evolution.
 
-3. **Interoperability**: Services follow standard formats and
-   protocols (e.g., JSON, HTTP), enabling integration with external
-   threat intel APIs.
+3\. **Interoperability**: Services follow standard formats and protocols (e.g., JSON, HTTP), enabling integration with external threat intel APIs.
 
-<br />
-<br />
-
-### Micro-services Architecture
-
-The Micro-services Architecture builds on SOA by containerizing each
-service using Docker. Every component whether it's the AI classifier,
-scraper bot, or report builder is packaged and deployed as a separate
-micro-service, running in isolated environments. This structure directly
-improves portability, as each micro-service can be run consistently
-across local, staging, and production environments. It also enhances
-fault tolerance and maintainability, because issues in one micro-service
-(e.g., an AI crash) are isolated from others and can be fixed or
-redeployed independently. Finally, micro-services improve scalability by
-enabling fine-grained control over the system’s resource usage, ensuring
-efficient operation under varying load conditions.
-
-**Quality Requirements Addressed:**
-
-1. **Scalability**: Each micro-service (e.g., a scraping worker) can
-   be replicated independently for load distribution.
-
-2. **Maintainability**: Faults or updates are isolated to a single
-   service, minimizing system-wide impact.
-
-3. **Portability**: Docker containers ensure that services run
-   reliably across different environments (development, testing,
-   deployment).
-
-<br />
-<br />
-
-### Client-Server Model
+> **Client-Server** **Model**
 
 The Client-Server Model is employed in BRAD to separate the frontend
 interfaces (client) from backend processing (server). The frontend
@@ -861,21 +1148,15 @@ accordance with regulations like POPIA and GDPR. Additionally, the model
 enhances usability, as the client can be optimized for user experience
 without compromising backend integrity.
 
-**Quality Requirements Addressed:**
+**Quality** **Requirements** **Addressed:**
 
-1. **Usability**: A clear separation between UI and backend enables
-   focused UX design for investigators and general users.
+1\. **Usability**: A clear separation between UI and backend enables focused UX design for investigators and general users.
 
-2. **Security**: The server centralizes sensitive operations,
-   enforcing access control and API authentication.
+2\. **Security**: The server centralizes sensitive operations, enforcing access control and API authentication.
 
-3. **Compliance**: Client submissions are sanitized and validated on
-   the server to meet data protection regulations.
+3\. **Compliance**: Client submissions are sanitized and validated on the server to meet data protection regulations.
 
-<br />
-<br />
-
-### Layered Architecture
+> **Layered** **Architecture**
 
 The system adopts a Layered Architecture to structure its internal logic
 into four distinct layers: the presentation layer (UI), application
@@ -887,52 +1168,43 @@ by isolating sensitive logic in backend layers that are not exposed to
 users. Furthermore, reliability is strengthened, as each layer is
 testable in isolation, reducing the likelihood of cascading failures.
 
-**Quality Requirements Addressed:**
+**Quality** **Requirements** **Addressed:**
 
-1. **Maintainability**: Developers can make changes to one layer
-   (e.g., UI) without affecting others.
+1\. **Maintainability**: Developers can make changes to one layer (e.g., UI) without affecting others.
 
-2. **Security**: Sensitive operations are encapsulated in deeper
-   layers, reducing attack surface.
+2\. **Security**: Sensitive operations are encapsulated in deeper layers, reducing attack surface.
 
-3. **Reliability**: Layered isolation makes failures easier to
-   contain and debug.
+3\. **Reliability**: Layered isolation makes failures easier to contain and debug.
 
-<br />
-<br />
-
-### Pipe and Filter Pattern
+> **Pipe** **and** **Filter** **Pattern**
 
 The Pipe and Filter Pattern underpins BRAD’s core investigation
 pipeline, where data flows through a series of processing components
 (filters), each performing a specific task in the investigation
 pipeline:
 
-**Scrape → Detect Malware → AI Risk Analysis → Metadata Logging → Report Generation**
+**Scrape** **→** **Detect** **Malware** **→** **AI** **Risk**
+**Analysis** **→** **Metadata** **Logging** **→** **Report**
+**Generation**
 
 Each component (filter) transforms the input and passes it along the
 pipeline. This modular design improves maintainability, as filters can
 be added, replaced, or removed without redesigning the entire flow. It
-also improves reliability by allowing error handling and fallback
+also improves reliability by allowing error handling and fall-back
 mechanisms at each stage. Additionally, performance benefits from
 clearly defined processing stages, which can be parallelized or scaled
 independently when needed.
 
-**Quality Requirements Addressed:**
+**Quality** **Requirements** **Addressed:**
 
-1. **Maintainability**: Each step can be updated or replaced
-   independently.
+1\. **Maintainability**: Each step can be updated or replaced
+independently.
 
-2. **Reliability**: The pipeline can resume at failed steps without
-   reprocessing the entire chain.
+2\. **Reliability**: The pipeline can resume at failed steps without reprocessing the entire chain.
 
-3. **Performance**: Processing is streamlined through well-defined
-   input/output interfaces.
+3\. **Performance**: Processing is streamlined through well-defined input/output interfaces.
 
-<br />
-<br />
-
-### Model-View-Controller (MVC)
+> **Model-View-Controller** **(MVC)**
 
 On the frontend, the Model-View-Controller (MVC) pattern is applied to
 the investigator dashboard to cleanly separate concerns. The model holds
@@ -944,12 +1216,11 @@ as frontend developers can update visual components, logic, or data
 handling independently reducing the likelihood of bugs and simplifying
 testing.
 
-**Quality Requirements Addressed:**
+**Quality** **Requirements** **Addressed:**
 
-1. **Usability**: MVC supports responsive, interactive UIs.
+1\. **Usability**: MVC supports responsive, interactive UIs.
 
-2. **Maintainability**: Clearly separated concerns improve code
-   modularity and testability.
+2\. **Maintainability**: Clearly separated concerns improve code modularity and testability.
 
 Together, these architectural patterns form a unified blueprint for
 BRAD’s development. Each pattern was chosen not only for technical
@@ -958,159 +1229,119 @@ critical quality requirements. This ensures that BRAD is not only
 functional but secure, adaptable, and resilient in the face of
 ever-evolving cyber-security threats.
 
- <br />
- 
-<p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
-<br />
-<br />
+<img src="./images/architectureDiagram.png"
+style="width:6.59514in;height:3.24167in" />
 
-## Design Patterns
-
-### 1. Factory Pattern
-
-• **Use Case**: Creating different types of bot agents or report
-objects depending on domain content (e.g., malware, phishing, scam).
-
-• **Benefit**: Encapsulates object creation, improves scalability when
-new domain types are introduced.
-
-<br />
-
-### 2. Strategy Pattern
-
-• **Use Case**: Switching between scraping techniques (e.g.,
-simple scraper vs. headless browser) or classification models.
-
-• **Benefit**: Makes it easy to plug in new algorithms or scraping
-methods without altering the core logic.
-
-<br />
-
-### 3. Observer Pattern
-
-• **Use Case**: Real-time alerting system notify investigators
-when a high-risk domain is flagged.
-
-• **Benefit**: Decouples alert logic from the classification engine.
-
-<br />
-
-### 4. Singleton Pattern
-
-• **Use Case**: Global configuration manager (e.g., for API keys,
-ML model paths, threat intelligence feeds).
-
-• **Benefit**: Ensures a single point of configuration and avoids
-conflicting settings.
-
-<br />
-
-### 5. Decorator Pattern
-
-• **Use Case**: Enriching domain reports dynamically with new
-metadata like threat score, WHOIS, SSL info, etc.
-
-• **Benefit**: Adds functionality without modifying existing report
-structures.
-
-<br />
-
-### 6. Command Pattern
-
-• **Use Case**: Encapsulating user actions like "submit report,"
-"analyse domain," "override AI decision" as objects.
-
-• **Benefit**: Supports undo, logging, and replay features.
-
-<br />
-
-### 7. Builder Pattern
-
-• **Use Case**: Constructing complex domain reports step by step
-(text, screenshots, metadata, scores).
-
-• **Benefit**: Separates construction logic from representation.
-
-<br />
-
-### 8. Chain of Responsibility Pattern
-
-• **Use Case**: Processing a domain through a pipeline (e.g.,
-scraping → analysis → risk scoring → report generation).
-
-• **Benefit**: Each step handles the task it’s responsible for or passes
-it to the next step.
-
-<br />
-
-### 9. Adapter Pattern
-
-• **Use Case**: Integrating with various external threat
-intelligence APIs or WHOIS lookup tools.
-
-• **Benefit**: Converts incompatible interfaces into one that fits your
-system.
-
-<br />
-
-### 10. Proxy Pattern
-
-• **Use Case**: For secure access to the scraper bot or AI module
-(e.g., rate-limiting, authentication).
-
-• **Benefit**: Adds a layer of control and security around sensitive
-components.
-
-<br />
-
-### 11. Mediator Pattern
-
-• **Use Case**: Manages communication between reporters and
-investigators through an Admin. Reporters submit reports, and the
-Admin assigns them to available investigators.
-
-• **Benefit**: Prevents direct communication between parties, improves
-coordination, and keeps the workflow secure and organized.
-
-<br />
- 
 <p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 
-<br />
+**Design** **Patterns**
 
-## Architectural Constraints
+> **Chain** **of** **Responsibility**
 
-• **Legal & Compliance Risks**: Must comply with GDPR,
-POPIA.
+As a group, we have chosen the Chain of Responsibility design pattern as
+the fundamental approach to how the BRAD (Bot to Report Abusive Domains)
+system is architected. This pattern aligns naturally with the system’s
+core investigation pipeline, which follows a sequential flow:
+**Submission** **→** **Scraping** **→** **Malware** **Detection** **→**
+**Metadata** **Extraction** **→** **AI** **Risk** **Scoring** **→**
+**Report** **Generation**. Each stage in this chain represents a
+specialized processing component responsible for a specific task in the
+analysis workflow. By structuring BRAD’s domain processing in this way,
+we ensure that data moves through clearly defined steps, allowing each
+module to operate independently while contributing to the overall
+forensic report generation.
 
-• **Domain Blocking & Evasion**: Some sites may block
-scraping; might require headless browsers or IP rotation. Some
-websites don’t want to be automatically scanned or scraped by bots. So
-they use techniques to block your bot from accessing their content. To
-work around this tools like Headless browsers and IP rotation may be
-used. They prevent the bot from being blocked by making it seem like
-it is a normal user when it is fact not a normal user.
+We selected the Chain of Responsibility pattern because it provides
+clear separation of concerns, modularity, and flexibility, which are
+essential qualities for a cyber-security system that must evolve
+alongside new threats and technologies. This pattern allows us to
+insert, remove, or replace components in the processing chain (e.g.,
+switching to a new AI model or adding a threat enrichment step) without
+disrupting the entire system. It also enhances maintainability, since
+each component is self-contained and testable in isolation, and improves
+reliability by enabling fine-grained error handling and fall-back
+mechanisms at each stage. Most importantly, it mirrors the linear and
+asynchronous nature of BRAD’s domain analysis pipeline, making it a
+natural and effective fit for the architecture.
 
-• **False Positives in AI Classification**: May
-require manual override or verification, i.e. AI might incorrectly
-flag a safe domain as malicious. Since AI isn't perfect, there’s a
-chance it could make mistakes. That’s why you might need a manual
-override or human verification, where a security analyst or
-investigator reviews the case and decides if the AI's decision was
-actually correct.
-
-• **Data Privacy & Ethics**: Need secure storage,
-depersonalization, and ethical data handling practices.
-
-• **Budgetary Limits**: Although a server and some funds are
-provided, the project must stay within the allocated budget.
-
- <br />
- 
 <p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 
- <br />
- <br />
+**Architectural** **Constraints**
+
+**Adherence** **to** **Legal** **Standards** **and** **Regulations:**
+
+> **GDPR** **and** **POPIA** **Compliance**
+
+The BRAD system must enforce strong data protection measures to comply
+with the General Data Protection Regulation (GDPR) and the Protection of
+Personal Information Act (POPIA). This includes encrypting sensitive
+data during submission, storage, and transmission, and ensuring that
+user consent is obtained before data is processed.
+
+> **Audit** **Logging** **and** **Data** **Traceability**
+
+To support compliance and forensic analysis, the system must maintain
+immutable logs of all critical events, including domain submissions,
+analysis results, and investigator actions. These logs must be securely
+stored and accessible for auditing without exposing sensitive
+information.
+
+> **Access** **Control** **for** **Sensitive** **Operations**
+
+Role-based access control (RBAC) must be implemented to restrict access
+to investigation tools and domain intelligence data. Investigators and
+admins must have different permissions than regular users, with
+multi-factor authentication required for elevated access.
+
+**Balancing** **Automation** **and** **Human** **Oversight:**
+
+> **Human-in-the-Loop** **Decision** **Making**
+
+BRAD must allow investigators to review and override automated AI
+decisions, especially in cases where a domain is incorrectly flagged.
+This means the architecture should support both automated and manual
+review processes in a seamless workflow.
+
+**Technical** **Limitations** **and** **Deployment** **Constraints:**
+
+> **Budget** **and** **Infrastructure** **Limitations**
+
+The system must run within the limits of the provided server resources.
+This constraint affects how services are deployed and scaled, requiring
+the use of lightweight containers and efficient background processing to
+avoid memory and CPU overuse.
+
+> **Network** **Restrictions** **for** **Scraping**
+
+Some domains may block automated scraping using bot detection methods.
+To handle this, the architecture must support scraping strategies such
+as headless browsers, IP rotation, and custom user-agents to avoid
+detection and ensure data can still be collected.
+
+> **False** **Positives** **in** **AI** **Classification**
+
+AI models are not perfect and may misclassify legitimate domains. The
+architecture must therefore include a manual verification layer and
+support model retraining or adjustment without disrupting the rest of
+the system.
+
+**Ethical** **and** **Data** **Handling** **Considerations:**
+
+> **Data** **Anonymization** **and** **Minimization**
+
+User-submitted URLs and metadata may include sensitive content. The
+system must limit the amount of personal data stored and ensure
+anonymization wherever full identification is not required for
+investigation purposes.
+
+> **Transparency** **and** **Explainability**
+
+The risk classification system should produce results that investigators
+can understand and explain. This requires AI outputs to include
+confidence levels, contributing factors, or traceable indicators rather
+than just final labels.
+
+<p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 
 # Technology Choices
 

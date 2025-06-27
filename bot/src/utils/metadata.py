@@ -24,7 +24,7 @@ def gather_forensics(domain: str) -> dict:
         #print(w)
         registrar = w.registrar or "Unavailable"
         whois_owner = w.org or w.name or "Unknown"
-        whois_raw = dict(w)
+        whois_raw = dict(w.items())
     except Exception as e:
         print(f"[BOT] WHOIS lookup failed: {e}")
         registrar = "Unavailable"

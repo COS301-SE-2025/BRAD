@@ -17,4 +17,4 @@ COPY . .
 ENV PYTHONUNBUFFERED=1
 
 # Start the bot
-CMD ["python", "bot.py"]
+CMD ["python", "src/bot.py", "pytest", "tests/integration/test_bot_integration.py", "-v"]

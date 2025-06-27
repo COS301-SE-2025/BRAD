@@ -84,6 +84,7 @@ export class UpdateAnalysisDto {
     redirectChain?: string[];
     usesMetaRefresh?: boolean;
     suspiciousInlineEvents?: string[];
+    captchaDetected?: boolean;
   };
 
   @IsOptional()
