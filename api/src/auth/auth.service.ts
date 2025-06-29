@@ -242,4 +242,41 @@ async changePassword(username: string, dto: ChangePasswordDto): Promise<any> {
     }
   }
 
+  async requestPasswordReset(email: string): Promise<{ message: string }> {
+    const user = await this.userModel.findOne({ email: email.toLowerCase().trim() });
+
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    const token = crypto.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = expires;
+    await user.save();
+
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: this.configService.get<string>('EMAIL_USER'),
+        pass: this.configService.get<string>('EMAIL_PASS'),
+      },
+    });
+
+    const resetLink = `http://localhost:5173/reset-password?token=${token}`;
+
+    const mailOptions = {
+      to: user.email,
+      from: this.configService.get<string>('EMAIL_USER'),
+      subject: 'Password Reset Request',
+      text: `You requested a password reset.\n\nClick the link below to reset your password:\n\n${resetLink}\n\nThis link will expire in 1 hour.\n\nIf you didn't request this, ignore this email.`,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return { message: 'Password reset email sent' };
+  }
+
+
 }

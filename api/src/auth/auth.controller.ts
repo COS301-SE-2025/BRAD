@@ -8,6 +8,7 @@ import { Public } from './decorators/public.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
 import {
   ApiTags,
   ApiOperation,
@@ -62,6 +63,15 @@ export class AuthController {
     return this.authService.refreshToken(dto);
   }
 
+  @Public()
+  @Post('request-password-reset')
+  @ApiOperation({ summary: 'Send a password reset email' })
+  @ApiBody({ type: RequestPasswordResetDto })
+  @ApiResponse({ status: 200, description: 'Reset email sent' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async requestPasswordReset(@Body() dto: RequestPasswordResetDto) {
+    return this.authService.requestPasswordReset(dto.email);
+  }
 
 
   @Public()
