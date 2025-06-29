@@ -1,8 +1,10 @@
-import { Body, Controller, Post,Patch,Param } from '@nestjs/common';
+import { UseGuards, Req, Body, Controller, Post, Patch, Param } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { Request } from 'express';
 import { RegisterDto } from './dto/register.dto';
 import { Public } from './decorators/public.decorator';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import {
@@ -37,6 +39,18 @@ export class AuthController {
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: 'Invalidate the user\'s session/token' })
+  @ApiResponse({ status: 200, description: 'Logout successful' })
+  @ApiResponse({ status: 401, description: 'Unauthorized or invalid token' })
+  async logout(@Req() req: Request) {
+    //const userId = req.user['sub'] || req.user['id'];
+    const userId = (req.user as any).sub || (req.user as any).id;
+    return this.authService.logout(userId, req);
+  }
+
 
 @Public()
 @Post('forgot-password')

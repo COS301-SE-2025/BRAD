@@ -7,14 +7,19 @@ import { LoginDto } from './dto/login.dto';
 import { User } from '../schemas/user.schema';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
+import { BlacklistedToken } from '../schemas/blacklisted-token.schema';
 import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { Request } from 'express';
+
 @Injectable()
 export class AuthService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>,
-  private configService: ConfigService,
-  private jwtService: JwtService,) {}
+  constructor(
+    @InjectModel(User.name) private userModel: Model<User>,
+    @InjectModel(BlacklistedToken.name) private blacklistModel: Model<BlacklistedToken>,
+    private configService: ConfigService,
+    private jwtService: JwtService,) {}
 
   async register(dto: RegisterDto): Promise<{ userId: string }> {
     const email = dto.email.toLowerCase().trim();
@@ -89,6 +94,26 @@ export class AuthService {
       token,
       user: userData,
     };
+  }
+
+  async logout(userId: string, request: Request): Promise<{ message: string }> {
+    const authHeader = request.headers['authorization'];
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new BadRequestException('Authorization header missing or malformed');
+    }
+
+    const token = authHeader.split(' ')[1];
+
+    try {
+      const decoded: any = this.jwtService.verify(token);
+      const expiresAt = new Date(decoded.exp * 1000);
+
+      await this.blacklistModel.create({ token, expiresAt });
+
+      return { message: 'Logout successful' };
+    } catch (err) {
+      throw new UnauthorizedException('Invalid token');
+    }
   }
 
  async forgotPassword(email: string): Promise<{ message: string }> {
