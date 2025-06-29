@@ -47,6 +47,9 @@ export class User {
   @Prop({ required: true })
   password: string;
 
+  @Prop()
+  profileImage?: string;
+
   @ApiProperty({
     example: 'general',
     enum: ['general', 'admin', 'investigator'],

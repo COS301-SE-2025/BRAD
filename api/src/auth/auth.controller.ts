@@ -1,4 +1,4 @@
-import { UseGuards, Req, Body, Controller, Post, Patch, Param } from '@nestjs/common';
+import { UseGuards, Req, Body, Controller, Post, Get, Patch, Param } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { Request } from 'express';
@@ -6,6 +6,7 @@ import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { Public } from './decorators/public.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { RequestPasswordResetDto } from './dto/request-password-reset.dto';
@@ -61,6 +62,28 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid refresh token' })
   async refreshToken(@Body() dto: RefreshTokenDto) {
     return this.authService.refreshToken(dto);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Get('me')
+  @ApiOperation({ summary: 'Get logged-in user\'s profile' })
+  @ApiResponse({ status: 200, description: 'User profile returned successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async getProfile(@Req() req: Request) {
+    const userId = (req.user as any)?.id || (req.user as any)?.sub;
+    return this.authService.getProfile(userId);
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('update-profile')
+  @ApiOperation({ summary: 'Update logged-in user\'s profile' })
+  @ApiBody({ type: UpdateProfileDto })
+  @ApiResponse({ status: 200, description: 'Profile updated successfully' })
+  @ApiResponse({ status: 409, description: 'Username or email already taken' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async updateProfile(@Req() req: Request, @Body() dto: UpdateProfileDto) {
+    const userId = (req.user as any)?.id || (req.user as any)?.sub;
+    return this.authService.updateProfile(userId, dto);
   }
 
   @Public()

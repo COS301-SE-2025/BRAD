@@ -6,6 +6,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { User } from '../schemas/user.schema';
 import { ConfigService } from '@nestjs/config';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtService } from '@nestjs/jwt';
 import { BlacklistedToken } from '../schemas/blacklisted-token.schema';
@@ -137,16 +138,13 @@ export class AuthService {
     throw new UnauthorizedException('User not found');
   }
 
-  // Generate secure token
   const token = crypto.randomBytes(32).toString('hex');
-  const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+  const expires = new Date(Date.now() + 60 * 60 * 1000);
 
-  // Save token and expiration
   user.resetPasswordToken = token;
   user.resetPasswordExpires = expires;
   await user.save();
 
-  // Create transporter
   const transporter = nodemailer.createTransport({
     service: 'Gmail',
     auth: {
@@ -250,7 +248,7 @@ async changePassword(username: string, dto: ChangePasswordDto): Promise<any> {
     }
 
     const token = crypto.randomBytes(32).toString('hex');
-    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    const expires = new Date(Date.now() + 60 * 60 * 1000);
 
     user.resetPasswordToken = token;
     user.resetPasswordExpires = expires;
@@ -276,6 +274,43 @@ async changePassword(username: string, dto: ChangePasswordDto): Promise<any> {
     await transporter.sendMail(mailOptions);
 
     return { message: 'Password reset email sent' };
+  }
+
+  async getProfile(userId: string): Promise<any> {
+    const user = await this.userModel.findById(userId).select('-password -refreshToken');
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto): Promise<any> {
+    const user = await this.userModel.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (dto.username && dto.username !== user.username) {
+      const existing = await this.userModel.findOne({ username: dto.username });
+      if (existing) throw new ConflictException('Username already taken');
+    }
+
+    if (dto.email && dto.email !== user.email) {
+      const existing = await this.userModel.findOne({ email: dto.email.toLowerCase() });
+      if (existing) throw new ConflictException('Email already in use');
+    }
+
+    if (dto.firstname) user.firstname = dto.firstname;
+    if (dto.lastname) user.lastname = dto.lastname;
+    if (dto.username) user.username = dto.username;
+    if (dto.email) user.email = dto.email.toLowerCase();
+    if (dto.profileImage) user.profileImage = dto.profileImage;
+
+    await user.save();
+
+    const { password, refreshToken, ...cleaned } = user.toObject();
+    return { message: 'Profile updated successfully', user: cleaned };
   }
 
 
