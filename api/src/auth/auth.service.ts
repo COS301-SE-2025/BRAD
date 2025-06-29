@@ -6,6 +6,7 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { User } from '../schemas/user.schema';
 import { ConfigService } from '@nestjs/config';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtService } from '@nestjs/jwt';
 import { BlacklistedToken } from '../schemas/blacklisted-token.schema';
 import * as crypto from 'crypto';
@@ -53,7 +54,7 @@ export class AuthService {
     }
   }
 
-  async login(dto: LoginDto): Promise<{ token: string; user: any }> {
+  async login(dto: LoginDto): Promise<{ token: string; refreshToken: string; user: any }> {
     const identifier = dto.identifier.trim();
     const emailNormalized = identifier.toLowerCase();
 
@@ -66,32 +67,44 @@ export class AuthService {
     }
 
     const isMatch = await bcrypt.compare(dto.password, user.password);
-    
-
     if (!isMatch) {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-  if (user.mustChangePassword) {
-    throw new UnauthorizedException('You must change your password before logging in');
-  }
+    if (user.mustChangePassword) {
+      throw new UnauthorizedException('You must change your password before logging in');
+    }
 
-    const secret = this.configService.get<string>('JWT_SECRET');
-    if (!secret) {
-      throw new Error('JWT_SECRET is not defined');
+    const jwtSecret = this.configService.get<string>('JWT_SECRET');
+    const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
+
+    if (!jwtSecret || !refreshSecret) {
+      throw new Error('JWT_SECRET or JWT_REFRESH_SECRET is not defined');
     }
 
     const payload = {
       id: user._id.toString(),
       role: user.role,
     };
-    
-    const token = this.jwtService.sign(payload);
-    
+
+    const token = this.jwtService.sign(payload, {
+      secret: jwtSecret,
+      expiresIn: '1h',
+    });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: refreshSecret,
+      expiresIn: '7d',
+    });
+
+    user.refreshToken = refreshToken;
+    await user.save();
+
     const { password, ...userData } = user.toObject();
 
     return {
       token,
+      refreshToken,
       user: userData,
     };
   }
@@ -112,6 +125,7 @@ export class AuthService {
 
       return { message: 'Logout successful' };
     } catch (err) {
+      console.error('Token verification failed:', err);
       throw new UnauthorizedException('Invalid token');
     }
   }
@@ -198,4 +212,34 @@ async changePassword(username: string, dto: ChangePasswordDto): Promise<any> {
 
     return { message: 'Password changed successfully. You can now log in.' };
   }
+
+  async refreshToken(dto: RefreshTokenDto): Promise<{ accessToken: string }> {
+    const refreshSecret = this.configService.get<string>('JWT_REFRESH_SECRET');
+
+    try {
+      const payload = this.jwtService.verify(dto.refreshToken, {
+        secret: refreshSecret,
+      });
+
+      const user = await this.userModel.findById(payload.id);
+
+      if (!user || user.refreshToken !== dto.refreshToken) {
+        throw new UnauthorizedException('Invalid refresh token');
+      }
+
+      const newAccessToken = this.jwtService.sign(
+        { id: user._id.toString(), role: user.role },
+        {
+          secret: this.configService.get<string>('JWT_SECRET'),
+          expiresIn: '1h',
+        },
+      );
+
+      return { accessToken: newAccessToken };
+    } catch (err) {
+      console.error('Token verification failed:', err);
+      throw new UnauthorizedException('Invalid or expired refresh token');
+    }
+  }
+
 }

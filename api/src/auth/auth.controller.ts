@@ -2,6 +2,7 @@ import { UseGuards, Req, Body, Controller, Post, Patch, Param } from '@nestjs/co
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { Request } from 'express';
+import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { RegisterDto } from './dto/register.dto';
 import { Public } from './decorators/public.decorator';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -51,38 +52,49 @@ export class AuthController {
     return this.authService.logout(userId, req);
   }
 
+  @Public()
+  @Post('refresh-token')
+  @ApiOperation({ summary: 'Accepts a refresh token and returns a new access token' })
+  @ApiBody({ type: RefreshTokenDto })
+  @ApiResponse({ status: 200, description: 'Token refreshed successfully' })
+  @ApiResponse({ status: 401, description: 'Invalid refresh token' })
+  async refreshToken(@Body() dto: RefreshTokenDto) {
+    return this.authService.refreshToken(dto);
+  }
 
-@Public()
-@Post('forgot-password')
-@ApiOperation({ summary: 'Request password reset link by email' })
-@ApiBody({ schema: { example: { email: 'user@example.com' } } })
-@ApiResponse({ status: 200, description: 'Reset email sent' })
-@ApiResponse({ status: 404, description: 'User not found' })
-async forgotPassword(@Body('email') email: string) {
-  return this.authService.forgotPassword(email);
-}
 
-@Public()
-@Post('reset-password')
-@ApiOperation({ summary: 'Reset user password using token' })
-@ApiBody({ type: ResetPasswordDto })
-@ApiResponse({ status: 200, description: 'Password reset successful' })
-@ApiResponse({ status: 400, description: 'Invalid or expired token' })
-async resetPassword(@Body() dto: ResetPasswordDto) {
-  return this.authService.resetPassword(dto.token, dto.newPassword);
-}
 
-@Public()
-@Patch('change-password/:username')
-@ApiOperation({ summary: 'Change password after receiving one-time password' })
-@ApiParam({ name: 'username', type: 'string' })
-@ApiBody({ type: ChangePasswordDto })
-@ApiResponse({ status: 200, description: 'Password changed successfully' })
-@ApiResponse({ status: 400, description: 'Invalid credentials or expired OTP' })
-async changePassword(
-  @Param('username') username: string,
-  @Body() dto: ChangePasswordDto,
-) {
-  return this.authService.changePassword(username, dto);
-}
+  @Public()
+  @Post('forgot-password')
+  @ApiOperation({ summary: 'Request password reset link by email' })
+  @ApiBody({ schema: { example: { email: 'user@example.com' } } })
+  @ApiResponse({ status: 200, description: 'Reset email sent' })
+  @ApiResponse({ status: 404, description: 'User not found' })
+  async forgotPassword(@Body('email') email: string) {
+    return this.authService.forgotPassword(email);
+  }
+
+  @Public()
+  @Post('reset-password')
+  @ApiOperation({ summary: 'Reset user password using token' })
+  @ApiBody({ type: ResetPasswordDto })
+  @ApiResponse({ status: 200, description: 'Password reset successful' })
+  @ApiResponse({ status: 400, description: 'Invalid or expired token' })
+  async resetPassword(@Body() dto: ResetPasswordDto) {
+    return this.authService.resetPassword(dto.token, dto.newPassword);
+  }
+
+  @Public()
+  @Patch('change-password/:username')
+  @ApiOperation({ summary: 'Change password after receiving one-time password' })
+  @ApiParam({ name: 'username', type: 'string' })
+  @ApiBody({ type: ChangePasswordDto })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid credentials or expired OTP' })
+  async changePassword(
+    @Param('username') username: string,
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(username, dto);
+  }
 }

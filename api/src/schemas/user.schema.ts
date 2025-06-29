@@ -59,6 +59,10 @@ export class User {
   @ApiProperty({ example: '665d6ae5e9b6f0e17f463b8f', description: 'MongoDB ObjectId of the user' })
   _id?: Types.ObjectId;
 
+  @Prop()
+  refreshToken?: string;
+
+
     @Prop()
   resetPasswordToken?: string;
 
