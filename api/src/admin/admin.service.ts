@@ -12,6 +12,15 @@ import { ConfigService } from '@nestjs/config';
 export class AdminService {
   constructor(@InjectModel(User.name) private userModel: Model<User>, private configService: ConfigService) {}
 
+  async getUserById(userId: string): Promise<any> {
+    const user = await this.userModel.findById(userId).select('-password -refreshToken');
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    return user;
+  }
+
+
   async addAdmin(dto: any): Promise<any> {
     const { firstname, lastname, email, username, password } = dto;
 

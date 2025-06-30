@@ -62,7 +62,7 @@ import {
       return this.adminService.demoteUser(userId);
     }
   
-  @UseGuards(AuthGuard, RolesGuard)
+    @UseGuards(AuthGuard, RolesGuard)
     @Roles('admin')
     @Patch('promote-to-admin/:userId')
     @ApiOperation({ summary: 'Promote user to an admin' })
@@ -82,7 +82,7 @@ import {
       return this.adminService.getAllUsers();
     }
 
-       @UseGuards(AuthGuard, RolesGuard)
+    @UseGuards(AuthGuard, RolesGuard)
     @Roles('admin')
     @Delete('delete/:userId')
     @ApiOperation({ summary: 'Delete a user from the database' })
@@ -92,15 +92,28 @@ import {
     async delete(@Param('userId') userId: string) {
       return this.adminService.deleteUser(userId);
     }
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('admin')
-  @Post('user')
-  @ApiOperation({ summary: 'Create a new user with a one-time password (5-digit)' })
-  @ApiBody({ type: CreateUserDto })
-  @ApiResponse({ status: 201, description: 'User created successfully' })
-  @ApiResponse({ status: 409, description: 'User already exists' })
-  async createUser(@Body() dto: CreateUserDto) {
-  return this.adminService.createUser(dto);
-}
+    
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin')
+    @Post('user')
+    @ApiOperation({ summary: 'Create a new user with a one-time password (5-digit)' })
+    @ApiBody({ type: CreateUserDto })
+    @ApiResponse({ status: 201, description: 'User created successfully' })
+    @ApiResponse({ status: 409, description: 'User already exists' })
+    async createUser(@Body() dto: CreateUserDto) {
+    return this.adminService.createUser(dto);
+    }
+
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin')
+    @Get('users/:id')
+    @ApiOperation({ summary: 'View a specific user profile by ID' })
+    @ApiParam({ name: 'id', type: 'string', description: 'User ID to retrieve' })
+    @ApiResponse({ status: 200, description: 'User profile retrieved successfully' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    async getUserById(@Param('id') id: string) {
+      return this.adminService.getUserById(id);
+    }
+
   }
   
