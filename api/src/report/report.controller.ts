@@ -162,4 +162,33 @@ export class ReportController {
     return this.reportService.attachEvidence(reportId, files, description);
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('general')
+  @Get('reports/mine')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'General User views reports previously submitted/personal history of what they have reported' })
+  @ApiResponse({ status: 200, description: 'List of your reports' })
+  async getMyReports(@Req() req: Request) {
+    //const user = req['user'];
+    const user = req['user'] as JwtPayload;
+    const userId = user.id;
+    if (!user || !userId) {
+      throw new UnauthorizedException('User not authenticated');
+    }
+
+    return this.reportService.getReportsByUser(userId);
+  }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('admin', 'investigator', 'general')
+  @Get('reports/:id')
+  @ApiBearerAuth() // JWT
+  @ApiOperation({ summary: 'View full details of a specific report' })
+  @ApiParam({ name: 'id', type: 'string', description: 'ID of the report' })
+  @ApiResponse({ status: 200, description: 'Report details retrieved successfully' })
+  @ApiResponse({ status: 404, description: 'Report not found' })
+  async getReportById(@Param('id') id: string) {
+    return this.reportService.getReportById(id);
+  }
+
 }

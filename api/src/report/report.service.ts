@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ForbiddenException, BadRequestException  } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { ForensicService } from '../services/forensic.service';
 import { UpdateAnalysisDto } from './dto/update-analysis.dto';
 import { Report } from '../schemas/report.schema';
@@ -110,4 +110,23 @@ export class ReportService {
     };
   }
 
+  //This assumes the reportModel is correctly injected and that the 
+  // reports have a submittedBy field that stores the user ID.
+  async getReportsByUser(userId: string): Promise<any[]> {
+    const reports = await this.reportModel.find({ submittedBy: userId }).exec();
+    return reports;
+  }
+
+  async getReportById(id: string) {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException('Invalid report ID');
+    }
+
+    const report = await this.reportModel.findById(id).populate('user', '-password');
+    if (!report) {
+      throw new NotFoundException('Report not found');
+    }
+
+    return report;
+  }
 }
