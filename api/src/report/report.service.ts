@@ -129,4 +129,27 @@ export class ReportService {
 
     return report;
   }
+
+  async deleteReport(reportId: string, userId: string): Promise<{ message: string }> {
+    const report = await this.reportModel.findById(reportId);
+
+    if (!report) {
+      throw new NotFoundException('Report not found');
+    }
+
+    //Check ownership
+    if (report.user.toString() !== userId) {
+      throw new ForbiddenException('You are not allowed to delete this report');
+    }
+
+    //Allow delete only if pending
+    if (report.analysisStatus !== 'pending') {
+      throw new BadRequestException('Only pending reports can be deleted');
+    }
+
+    await this.reportModel.findByIdAndDelete(reportId);
+
+    return { message: 'Report deleted successfully' };
+  }
+
 }

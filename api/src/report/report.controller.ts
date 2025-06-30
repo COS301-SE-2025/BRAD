@@ -1,5 +1,5 @@
 import {
-    Controller, Post, Get, Param, Patch, Body, HttpCode, NotFoundException, BadRequestException, UnauthorizedException, UseGuards, Req, ForbiddenException, UploadedFiles, UseInterceptors} from '@nestjs/common';
+    Controller, Post, Get, Param, Delete, Patch, Body, HttpCode, NotFoundException, BadRequestException, UnauthorizedException, UseGuards, Req, ForbiddenException, UploadedFiles, UseInterceptors} from '@nestjs/common';
 import { Request } from 'express';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
@@ -190,5 +190,20 @@ export class ReportController {
   async getReportById(@Param('id') id: string) {
     return this.reportService.getReportById(id);
   }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('general')
+  @Delete('reports/:id')
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete a report (only if owned and status is pending)' })
+  @ApiParam({ name: 'id', type: 'string' })
+  @ApiResponse({ status: 200, description: 'Report deleted successfully' })
+  @ApiResponse({ status: 403, description: 'Unauthorized to delete this report' })
+  @ApiResponse({ status: 404, description: 'Report not found' })
+  async deleteReport(@Param('id') id: string, @Req() req: Request) {
+    const user = req['user'] as JwtPayload;
+    return this.reportService.deleteReport(id, user.id);
+  }
+
 
 }
