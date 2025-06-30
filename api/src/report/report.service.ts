@@ -1,8 +1,10 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException  } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ForensicService } from '../services/forensic.service';
-import { UpdateAnalysisDto } from './dto/update-analysis.dto'
+import { UpdateAnalysisDto } from './dto/update-analysis.dto';
+import { Report } from '../schemas/report.schema';
+import { Request } from 'express';
 
 @Injectable()
 export class ReportService {
@@ -69,10 +71,6 @@ export class ReportService {
   
     return updated;
   }
-  
-  
-  
-  
 
   async updateInvestigatorDecision(id: string, verdict: string) {
     if (!['malicious', 'benign'].includes(verdict))
@@ -83,4 +81,33 @@ export class ReportService {
       { new: true }
     );
   }
+
+  async attachEvidence(reportId: string, files: Express.Multer.File[], description: string): Promise<{ message: string; evidence: any[] }> {
+    const report = await this.reportModel.findById(reportId);
+    if (!report) {
+      throw new NotFoundException('Report not found');
+    }
+
+    if (!files || files.length === 0) {
+      throw new BadRequestException('No files provided');
+    }
+
+    const evidence = files.map(file => ({
+      filename: file.filename,
+      path: file.path,
+      mimetype: file.mimetype,
+      size: file.size,
+      description: description || '',
+      uploadedAt: new Date(),
+    }));
+
+    report.evidence = [...(report.evidence || []), ...evidence];
+    await report.save();
+
+    return {
+      message: 'Files uploaded successfully',
+      evidence,
+    };
+  }
+
 }

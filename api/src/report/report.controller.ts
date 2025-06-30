@@ -1,7 +1,9 @@
 import {
-    Controller, Post, Get, Param, Patch, Body, HttpCode, NotFoundException, BadRequestException, UnauthorizedException, UseGuards, Req, ForbiddenException,
-} from '@nestjs/common';
+    Controller, Post, Get, Param, Patch, Body, HttpCode, NotFoundException, BadRequestException, UnauthorizedException, UseGuards, Req, ForbiddenException, UploadedFiles, UseInterceptors} from '@nestjs/common';
 import { Request } from 'express';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { ReportService } from './report.service';
 import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -10,7 +12,7 @@ import { Roles } from '../auth/decorators/roles.decorator';
 import { BotGuard } from '../auth/guards/bot.guard';
 
 import {
-  ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody, ApiParam,
+  ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiConsumes 
 } from '@nestjs/swagger';
 
 @ApiTags('Reports')
@@ -21,7 +23,7 @@ export class ReportController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('general', 'admin')
   @Post('report')
-  @ApiBearerAuth("JWT") // JWT
+  @ApiBearerAuth("JWT")
   @ApiOperation({ summary: 'Submit a suspicious domain' })
   @ApiBody({ schema: { type: 'object', properties: { domain: { type: 'string' } } } })
   @ApiResponse({ status: 201, description: 'Report submitted successfully' })
@@ -40,7 +42,7 @@ export class ReportController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin', 'investigator', 'general')
   @Get('reports')
-  @ApiBearerAuth() // JWT
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get reports submitted by user or all (admin/investigator)' })
   @ApiResponse({ status: 200, description: 'List of reports' })
   async getReports(@Req() req: Request) {
@@ -115,4 +117,49 @@ export class ReportController {
     if (!req['bot']) throw new UnauthorizedException('No bot credentials found');
     return { success: true, bot: req['bot'] };
   }
+
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('general', 'admin')
+  @Post('reports/:id/evidence')
+  @UseInterceptors(
+    FilesInterceptor('files', 10, {
+      storage: diskStorage({
+        destination: './uploads/evidence',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Attach files/screenshots to a report' })
+  @ApiConsumes('multipart/form-data')
+  @ApiParam({ name: 'id', description: 'Report ID' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        files: {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary',
+          },
+        },
+        description: {
+          type: 'string',
+        },
+      },
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Files uploaded successfully' })
+  async uploadEvidence(
+    @Param('id') reportId: string,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body('description') description: string,
+  ) {
+    return this.reportService.attachEvidence(reportId, files, description);
+  }
+
 }
