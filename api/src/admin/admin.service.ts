@@ -4,6 +4,7 @@ import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { User } from '../schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
@@ -87,6 +88,33 @@ export class AdminService {
     await this.userModel.findByIdAndDelete(userId);
     return { message: 'User deleted successfully' };
   }
+
+  async updateUser(userId: string, dto: UpdateUserDto): Promise<any> {
+    const user = await this.userModel.findById(userId);
+    if (!user) throw new NotFoundException('User not found');
+
+    if (dto.email && dto.email !== user.email) {
+      const emailExists = await this.userModel.findOne({ email: dto.email });
+      if (emailExists && emailExists._id.toString() !== userId) {
+        throw new ConflictException('Email already in use');
+      }
+    }
+
+    if (dto.username && dto.username !== user.username) {
+      const usernameExists = await this.userModel.findOne({ username: dto.username });
+      if (usernameExists && usernameExists._id.toString() !== userId) {
+        throw new ConflictException('Username already in use');
+      }
+    }
+
+    Object.assign(user, dto);
+    await user.save();
+
+    const { password, refreshToken, ...userData } = user.toObject();
+    return userData;
+  }
+
+
   async createUser(dto: CreateUserDto): Promise<any> {
   const { firstname, lastname, email, username,role } = dto;
 

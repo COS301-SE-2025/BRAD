@@ -13,6 +13,7 @@ import {
   import { RolesGuard } from '../auth/guards/roles.guard';
   import { AuthGuard } from '../auth/guards/auth.guard';
   import { AddAdminDto } from '../admin/dto/add-admin.dto';
+  import { UpdateUserDto } from './dto/update-user.dto';
   import { CreateUserDto } from './dto/create-user.dto';
   import {
     ApiTags,
@@ -114,6 +115,23 @@ import {
     async getUserById(@Param('id') id: string) {
       return this.adminService.getUserById(id);
     }
+
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin')
+    @Patch('users/:id')
+    @ApiOperation({ summary: 'Update a user profile by ID' })
+    @ApiParam({ name: 'id', type: 'string', description: 'User ID to update' })
+    @ApiBody({ type: UpdateUserDto })
+    @ApiResponse({ status: 200, description: 'User profile updated successfully' })
+    @ApiResponse({ status: 404, description: 'User not found' })
+    @ApiResponse({ status: 409, description: 'Email or username already in use' })
+    async updateUser(
+      @Param('id') id: string,
+      @Body() dto: UpdateUserDto
+    ) {
+      return this.adminService.updateUser(id, dto);
+    }
+
 
   }
   
