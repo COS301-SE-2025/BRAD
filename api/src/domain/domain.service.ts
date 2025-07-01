@@ -24,4 +24,9 @@ export class DomainService {
 
     return { message: 'Analysis started for report ' + reportId };
   }
+
+  async getAnalysisStatus(reportId: string) {
+    const report = await this.reportModel.findById(reportId).select('analysisStatus analyzed riskScore');
+    return report;
+  }
 }
