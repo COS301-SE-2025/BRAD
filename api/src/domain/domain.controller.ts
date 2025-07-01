@@ -1,4 +1,4 @@
-import { NotFoundException, Controller, Post, Get, Param } from '@nestjs/common';
+import { NotFoundException, InternalServerErrorException, Controller, Post, Get, Param } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiBearerAuth, ApiParam, ApiResponse } from '@nestjs/swagger';
 import { DomainService } from './domain.service';
 
