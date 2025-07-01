@@ -7,9 +7,10 @@
     "express": "^5.1.0",
     "joi": "^17.13.3",
     "js-yaml": "^4.1.0",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "whois-json": "^2.0.4"
   },
   "scripts": {
-  "start:dev": "node_modules/.bin/nest start --watch"
-}
+    "start:dev": "node_modules/.bin/nest start --watch"
+  }
 }
