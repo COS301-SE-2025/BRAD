@@ -29,4 +29,16 @@ export class DomainService {
     const report = await this.reportModel.findById(reportId).select('analysisStatus analyzed riskScore');
     return report;
   }
+
+  async getAnalysisResults(reportId: string) {
+    return this.reportModel.findById(reportId).select({
+      domain: 1,
+      analysis: 1,
+      scrapingInfo: 1,
+      abuseFlags: 1,
+      riskScore: 1,
+      _id: 0,
+    });
+  }
+
 }

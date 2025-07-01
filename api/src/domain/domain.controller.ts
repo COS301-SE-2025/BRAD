@@ -26,4 +26,15 @@ export class DomainController {
     if (!result) throw new NotFoundException('Report not found');
     return result;
   }
+
+  @Get('results/:reportId')
+  @ApiOperation({ summary: 'Get scraped content, metadata, and malware check' })
+  @ApiParam({ name: 'reportId', type: 'string', description: 'ID of the report' })
+  @ApiResponse({ status: 200, description: 'Scraped content and metadata returned' })
+  @ApiResponse({ status: 404, description: 'Report not found' })
+  async getAnalysisResults(@Param('reportId') reportId: string) {
+    const result = await this.domainService.getAnalysisResults(reportId);
+    if (!result) throw new NotFoundException('Report not found');
+    return result;
+  }
 }
