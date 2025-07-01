@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import * as Joi from 'joi';
 import { AdminModule } from './admin/admin.module';
+import { DomainModule } from './domain/domain.module';
 
 
 @Module({
@@ -39,6 +40,7 @@ import { AdminModule } from './admin/admin.module';
     ReportModule,
     AuthModule,
     AdminModule,
+    DomainModule,
   ],
   controllers: [AppController],
   providers: [AppService],

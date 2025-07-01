@@ -15,7 +15,7 @@ import {
   ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody, ApiParam, ApiConsumes 
 } from '@nestjs/swagger';
 
-@ApiTags('Reports')
+@ApiTags('Domain Report Submission')
 @Controller()
 export class ReportController {
   constructor(private readonly reportService: ReportService) {}

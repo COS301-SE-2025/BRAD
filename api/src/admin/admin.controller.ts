@@ -24,7 +24,7 @@ import {
     ApiBody,
   } from '@nestjs/swagger';
   
-  @ApiTags('Admin')
+  @ApiTags('Admin: Role-Based Access & User Management')
   @ApiBearerAuth('JWT-auth') // Applies to all routes in this controller
   @Controller('admin')
   export class AdminController {

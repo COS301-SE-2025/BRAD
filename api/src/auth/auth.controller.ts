@@ -18,8 +18,8 @@ import {
 ApiParam,
 } from '@nestjs/swagger';
 
-@ApiTags('Auth')
-@Controller('auth')
+@ApiTags('User & Authentication')
+@Controller('user and authentication')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
