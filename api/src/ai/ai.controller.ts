@@ -1,4 +1,4 @@
-import { Controller, Post, Get, Param, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Param, HttpException, NotFoundException , HttpStatus } from '@nestjs/common';
 import { AiService } from './ai.service';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
@@ -29,5 +29,14 @@ export class AiController {
   @ApiResponse({ status: 404, description: 'Report or AI risk score not found' })
   async getAiRiskScore(@Param('reportId') reportId: string) {
     return this.aiService.getAiRiskScore(reportId);
+  }
+
+  @Get('similar-domains/:domain')
+  @ApiOperation({ summary: 'Get domains with similar patterns' })
+  @ApiParam({ name: 'domain', type: String })
+  @ApiResponse({ status: 200, description: 'List of similar domains' })
+  @ApiResponse({ status: 404, description: 'No similar domains found' })
+  async getSimilarDomains(@Param('domain') domain: string) {
+    return this.aiService.findSimilarDomains(domain);
   }
 }

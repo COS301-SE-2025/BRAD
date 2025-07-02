@@ -89,7 +89,7 @@ export class AiService {
         const report = await this.reportModel.findById(reportId).lean();
 
         if (!report || !report.analysis?.aiRiskScore) {
-        throw new NotFoundException('AI risk score not found for this report');
+            throw new NotFoundException('AI risk score not found for this report');
         }
 
         const score = report.analysis.aiRiskScore;
@@ -100,9 +100,28 @@ export class AiService {
         'Low';
 
         return {
-        reportId,
-        aiRiskScore: score,
-        classification,
+            reportId,
+            aiRiskScore: score,
+            classification,
+        };
+    }
+
+    async findSimilarDomains(domain: string): Promise<any> {
+        //Basic similarity based on domain prefix or shared tokens
+        const base = domain.split('.')[0]; //e.g., "google" from google.com
+        const regex = new RegExp(base.slice(0, 4), 'i'); //crude match on prefix
+
+        const matches = await this.reportModel.find({
+        domain: { $regex: regex, $ne: domain },
+        }).select('domain -_id').lean();
+
+        if (!matches.length) {
+            throw new NotFoundException('No similar domains found');
+        }
+
+        return {
+            query: domain,
+            similarDomains: matches.map((m) => m.domain),
         };
     }
 
