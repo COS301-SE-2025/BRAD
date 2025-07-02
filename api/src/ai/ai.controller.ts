@@ -1,4 +1,4 @@
-import { Controller, Post, Param, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Post, Get, Param, HttpException, HttpStatus } from '@nestjs/common';
 import { AiService } from './ai.service';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
@@ -20,5 +20,14 @@ export class AiController {
     }
 
     return result;
+  }
+
+  @Get('risk-score/:reportId')
+  @ApiOperation({ summary: 'Return AI-generated risk score and classification' })
+  @ApiParam({ name: 'reportId', type: String })
+  @ApiResponse({ status: 200, description: 'Risk score and classification returned' })
+  @ApiResponse({ status: 404, description: 'Report or AI risk score not found' })
+  async getAiRiskScore(@Param('reportId') reportId: string) {
+    return this.aiService.getAiRiskScore(reportId);
   }
 }

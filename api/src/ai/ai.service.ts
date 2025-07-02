@@ -85,4 +85,25 @@ export class AiService {
         };
     }
 
+    async getAiRiskScore(reportId: string): Promise<any> {
+        const report = await this.reportModel.findById(reportId).lean();
+
+        if (!report || !report.analysis?.aiRiskScore) {
+        throw new NotFoundException('AI risk score not found for this report');
+        }
+
+        const score = report.analysis.aiRiskScore;
+
+        const classification =
+        score > 0.75 ? 'High' :
+        score > 0.4 ? 'Medium' :
+        'Low';
+
+        return {
+        reportId,
+        aiRiskScore: score,
+        classification,
+        };
+    }
+
 }
