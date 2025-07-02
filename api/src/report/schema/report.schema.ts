@@ -42,6 +42,7 @@ export class Report {
       TXT?: string[];
     };
     reverseIp?: string | string[];
+    aiRiskScore?: number;
   };
 
   @Prop({ type: Object, default: null })

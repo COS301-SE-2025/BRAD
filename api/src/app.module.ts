@@ -10,7 +10,7 @@ import * as Joi from 'joi';
 import { AdminModule } from './admin/admin.module';
 import { DomainModule } from './domain/domain.module';
 import { ToolsModule } from './tools/tools.module';
-
+import { AiModule } from './ai/ai.module';
 
 @Module({
   imports: [
@@ -43,6 +43,7 @@ import { ToolsModule } from './tools/tools.module';
     AdminModule,
     DomainModule,
     ToolsModule,
+    AiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
