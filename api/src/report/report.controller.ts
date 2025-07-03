@@ -164,7 +164,7 @@ export class ReportController {
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('general')
-  @Get('reports/mine')
+  @Get('reports/generalUser')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'View past reports and outcomes' })
   @ApiResponse({ status: 200, description: 'List of your reports' })
