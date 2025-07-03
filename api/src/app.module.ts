@@ -12,6 +12,7 @@ import { DomainModule } from './domain/domain.module';
 import { ToolsModule } from './tools/tools.module';
 import { AiModule } from './ai/ai.module';
 import { DashboardModule } from './dashboard/dashboard.module';
+import { WowModule } from './wow_features/wow.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
     ToolsModule,
     AiModule,
     DashboardModule,
+    WowModule,
   ],
   controllers: [AppController],
   providers: [AppService],
