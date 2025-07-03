@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Post } from '@nestjs/common';
 import { WowService } from './wow.service';
 import { ApiTags, ApiOperation, ApiParam, ApiResponse } from '@nestjs/swagger';
 
@@ -20,5 +20,12 @@ export class WowController {
   @ApiParam({ name: 'reportId', description: 'ID of the report' })
   async verifyOnBlockchain(@Param('reportId') reportId: string) {
     return this.wowService.getBlockchainRecord(reportId);
+  }
+
+  @Post('takedown/:reportId')
+  @ApiOperation({ summary: 'Generate registrar takedown request' })
+  @ApiParam({ name: 'reportId', description: 'ID of the report to use' })
+  async generateTakedownRequest(@Param('reportId') reportId: string) {
+    return this.wowService.generateRegistrarTakedown(reportId);
   }
 }

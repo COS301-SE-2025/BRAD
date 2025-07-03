@@ -74,4 +74,36 @@ export class WowService {
     }
     return '0x' + Math.abs(hash).toString(16);
   }
+
+  async generateRegistrarTakedown(reportId: string): Promise<any> {
+    const report = await this.reportModel.findById(reportId).lean<{
+      domain: string;
+      createdAt: Date;
+    }>();
+
+    if (!report) {
+      throw new NotFoundException('Report not found');
+    }
+
+    // Simulate a registrar takedown notice body
+    const notice = `Dear Registrar,
+
+                    We are reporting a domain that appears to be involved in malicious activities.
+
+                    Details:
+                    - Domain: ${report.domain}
+                    - First reported: ${report.createdAt.toISOString()}
+
+                    We kindly request that you investigate this domain and take appropriate action in accordance with your abuse policies.
+
+                    Sincerely,
+                    BRAD Security Team`.trim();
+
+    return {
+      reportId,
+      domain: report.domain,
+      notice,
+      message: 'Takedown request generated (simulated)',
+    };
+  }
 }
