@@ -166,7 +166,7 @@ export class ReportController {
   @Roles('general')
   @Get('reports/mine')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'General User views reports previously submitted/personal history of what they have reported' })
+  @ApiOperation({ summary: 'View past reports and outcomes' })
   @ApiResponse({ status: 200, description: 'List of your reports' })
   async getMyReports(@Req() req: Request) {
     //const user = req['user'];

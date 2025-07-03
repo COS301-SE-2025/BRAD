@@ -85,7 +85,7 @@ export class WowService {
       throw new NotFoundException('Report not found');
     }
 
-    // Simulate a registrar takedown notice body
+    //Simulating a registrar takedown notice body
     const notice = `Dear Registrar,
 
                     We are reporting a domain that appears to be involved in malicious activities.
@@ -106,4 +106,26 @@ export class WowService {
       message: 'Takedown request generated (simulated)',
     };
   }
+
+  async checkTorPresence(domain: string): Promise<any> {
+    const simulatedTorDatabase = [
+        'phishing-portal.onion',
+        'malicious-marketplace.onion',
+        'darkwallet.onion',
+    ];
+
+    const found = simulatedTorDatabase.some((torDomain) =>
+        torDomain.includes(domain),
+    );
+
+    return {
+        domain,
+        foundOnTor: found,
+        matches: found ? [`${domain}.onion`] : [],
+        message: found
+        ? 'Domain appears on known Tor hidden services.'
+        : 'No match found in Tor indexes (simulated)',
+    };
+  }
+
 }
