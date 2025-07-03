@@ -21,4 +21,12 @@ export class DashboardController {
         return this.dashboardService.getHighRiskAlerts();
     }
 
+    @Get('timeline')
+    @ApiOperation({ summary: 'Timeline of reports/analysis' })
+    @ApiResponse({ status: 200, description: 'Chronological list of reports with timestamps' })
+    async getReportTimeline() {
+        return this.dashboardService.getReportTimeline();
+    }
+
+
 }

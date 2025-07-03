@@ -41,4 +41,20 @@ export class DashboardService {
         return alerts;
     }
 
+    async getReportTimeline() {
+        const timeline = await this.reportModel.find({})
+            .sort({ createdAt: -1 })
+            .select('domain createdAt analysisStatus analyzed updatedAt')
+            .lean<{ domain: string; createdAt: Date; updatedAt: Date; analyzed: boolean; analysisStatus: string }[]>();
+
+        return timeline.map((report) => ({
+            domain: report.domain,
+            submittedAt: report.createdAt,
+            lastUpdated: report.updatedAt,
+            analyzed: report.analyzed,
+            status: report.analysisStatus,
+        }));
+    }
+
+
 }
