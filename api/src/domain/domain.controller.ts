@@ -3,7 +3,7 @@ import { ApiTags, ApiOperation, ApiBearerAuth, ApiParam, ApiResponse } from '@ne
 import { DomainService } from './domain.service';
 
 @ApiTags('Domain Scraping & Bot Analysis')
-@Controller('analysis')
+@Controller('scraping_&_analysis')
 export class DomainController {
   constructor(private readonly domainService: DomainService) {}
 

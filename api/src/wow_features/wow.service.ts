@@ -38,4 +38,40 @@ export class WowService {
 
     return sandboxResult;
   }
+
+  async getBlockchainRecord(reportId: string): Promise<any> {
+    const report = await this.reportModel
+    .findById(reportId)
+    .lean<{ _id: string; domain: string; createdAt: Date }>()
+    .exec();
+
+    if (!report) {
+      throw new NotFoundException('Report not found');
+    }
+
+    const simulatedHash = this.generateFakeHash(report);
+
+    return {
+      reportId,
+      domain: report.domain,
+      submittedAt: report.createdAt,
+      hash: simulatedHash,
+      message: 'Simulated blockchain-verifiable hash generated',
+    };
+  }
+
+  private generateFakeHash(report: any): string {
+    const base = `${report._id}-${report.domain}-${report.createdAt}`;
+    return this.hashString(base);
+  }
+
+  private hashString(input: string): string {
+    let hash = 0;
+    for (let i = 0; i < input.length; i++) {
+      const chr = input.charCodeAt(i);
+      hash = (hash << 5) - hash + chr;
+      hash |= 0;
+    }
+    return '0x' + Math.abs(hash).toString(16);
+  }
 }
