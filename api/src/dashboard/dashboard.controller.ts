@@ -1,6 +1,10 @@
-import { Controller, Get } from '@nestjs/common';
+import {UseGuards, Controller, Get, Req} from '@nestjs/common';
 import { DashboardService } from './dashboard.service';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { AuthGuard } from '../auth/guards/auth.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth} from '@nestjs/swagger';
 
 @ApiTags('Investigator Dashboard Tools')
 @Controller('dashboard')
@@ -26,6 +30,17 @@ export class DashboardController {
     @ApiResponse({ status: 200, description: 'Chronological list of reports with timestamps' })
     async getReportTimeline() {
         return this.dashboardService.getReportTimeline();
+    }
+
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('investigator')
+    @Get('dashboard/reports')
+    @ApiBearerAuth()
+    @ApiOperation({ summary: 'Investigator-specific filtered reports' })
+    @ApiResponse({ status: 200, description: 'Filtered reports for investigator' })
+    async getInvestigatorReports(@Req() req: Request) {
+        const user = req['user'] as JwtPayload;
+        return this.dashboardService.getInvestigatorReports(user.id);
     }
 
 

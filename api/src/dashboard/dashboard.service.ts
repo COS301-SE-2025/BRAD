@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Report, ReportSchema } from '../report/schema/report.schema';
-//import { Report } from '../schemas/report.schema';
 
 @Injectable()
 export class DashboardService {
@@ -56,5 +55,22 @@ export class DashboardService {
         }));
     }
 
+    async getInvestigatorReports(userId: string) {
+    
+        const reports = await this.reportModel.find({
+            analysisStatus: { $in: ['pending', 'in-progress'] }
+        })
+        .sort({ createdAt: -1 })
+        .select('domain analysisStatus createdAt investigatorDecision')
+        .lean<{ _id: string; domain: Date; createdAt: Date; investigatorDecision?: 'malicious' | 'benign' | null; analysisStatus: string }[]>();
+
+        return reports.map((report) => ({
+            id: report._id,
+            domain: report.domain,
+            status: report.analysisStatus,
+            submittedAt: report.createdAt,
+            decision: report.investigatorDecision || 'undecided',
+        }));
+    }
 
 }
