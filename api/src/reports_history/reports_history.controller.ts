@@ -1,7 +1,9 @@
-import { Controller, Get, Req, UseGuards, UnauthorizedException } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation } from '@nestjs/swagger';
+import { Controller, Get, Req, UseGuards, UnauthorizedException, Param } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { HistoryService } from './reports_history.service';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
 import { Request } from 'express';
 
 @ApiTags('Reports & History')
@@ -23,5 +25,13 @@ export class HistoryController {
     }
 
     return this.historyService.getReportHistory(userId);
+  }
+
+  @Get(':userId')
+  @Roles('investigator')
+  @ApiOperation({ summary: 'Investigator: View report history by user' })
+  @ApiParam({ name: 'userId', type: String })
+  getUserHistory(@Param('userId') userId: string) {
+    return this.historyService.getReportHistoryByUser(userId);
   }
 }
