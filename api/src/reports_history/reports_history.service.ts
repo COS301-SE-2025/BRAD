@@ -100,5 +100,12 @@ export class HistoryService {
     throw new Error('Unsupported format');
   }
 
+  async getDomainAbuseHistory(domain: string): Promise<any[]> {
+    return this.reportModel
+      .find({ domain })
+      .select('domain createdAt updatedAt analysisStatus investigatorDecision')
+      .sort({ createdAt: -1 })
+      .lean();
+  }
 
 }

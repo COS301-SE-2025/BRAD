@@ -55,4 +55,12 @@ export class HistoryController {
     res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
     res.send(buffer);
   }
+
+  @Get('/analytics/domain-history/:domain')
+  @ApiOperation({ summary: 'Get historical abuse data for a domain' })
+  @ApiParam({ name: 'domain', type: String })
+  async getDomainHistory(@Param('domain') domain: string) {
+    return this.historyService.getDomainAbuseHistory(domain);
+  }
+
 }
