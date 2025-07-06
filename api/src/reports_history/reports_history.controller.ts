@@ -1,10 +1,10 @@
-import { Controller, Get, Req, UseGuards, UnauthorizedException, Param } from '@nestjs/common';
-import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { Controller, Get, Req, Res, Query, UseGuards, NotFoundException, UnauthorizedException, Param } from '@nestjs/common';
+import { ApiTags, ApiBearerAuth, ApiOperation, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { HistoryService } from './reports_history.service';
-import { RolesGuard } from '../auth/guards/roles.guard';
+//import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 
 @ApiTags('Reports & History')
 @ApiBearerAuth('JWT-auth')
@@ -33,5 +33,26 @@ export class HistoryController {
   @ApiParam({ name: 'userId', type: String })
   getUserHistory(@Param('userId') userId: string) {
     return this.historyService.getReportHistoryByUser(userId);
+  }
+
+  @Get('export/:reportId')
+  @ApiOperation({ summary: 'Download report in PDF or CSV' })
+  @ApiParam({ name: 'reportId', type: String })
+  @ApiQuery({ name: 'format', enum: ['pdf', 'csv'], required: true })
+  async exportReport(
+    @Param('reportId') reportId: string,
+    @Query('format') format: 'pdf' | 'csv',
+    @Res({ passthrough: false }) res: Response,
+  ) {
+    const buffer = await this.historyService.exportReport(reportId, format);
+    if (!buffer) throw new NotFoundException('Report not found');
+
+    const contentType =
+      format === 'pdf' ? 'application/pdf' : 'text/csv';
+    const fileName = `report-${reportId}.${format}`;
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `attachment; filename=${fileName}`);
+    res.send(buffer);
   }
 }
