@@ -13,6 +13,7 @@ import { ToolsModule } from './tools/tools.module';
 import { AiModule } from './ai/ai.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { WowModule } from './wow_features/wow.module';
+import { HistoryModule } from './reports_history/reports_history.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { WowModule } from './wow_features/wow.module';
     AiModule,
     DashboardModule,
     WowModule,
+    HistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

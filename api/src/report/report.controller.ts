@@ -164,9 +164,9 @@ export class ReportController {
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('general')
-  @Get('reports/generalUser')
+  @Get('reports/mine')
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'View past reports and outcomes' })
+  @ApiOperation({ summary: 'View reports submitted by current user' })
   @ApiResponse({ status: 200, description: 'List of your reports' })
   async getMyReports(@Req() req: Request) {
     //const user = req['user'];
@@ -204,6 +204,5 @@ export class ReportController {
     const user = req['user'] as JwtPayload;
     return this.reportService.deleteReport(id, user.id);
   }
-
 
 }
