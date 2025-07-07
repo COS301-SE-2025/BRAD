@@ -17,8 +17,10 @@
     "js-yaml": "^4.1.0",
     "mongoose": "^8.16.1",
     "pdfkit": "^0.17.1",
+    "qrcode": "^1.5.4",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
+    "speakeasy": "^2.0.0",
     "swagger-ui-express": "^5.0.1",
     "whois-json": "^2.0.4"
   },
@@ -26,6 +28,8 @@
     "start:dev": "node_modules/.bin/nest start --watch"
   },
   "devDependencies": {
-    "@types/pdfkit": "^0.14.0"
+    "@types/pdfkit": "^0.14.0",
+    "@types/qrcode": "^1.5.5",
+    "@types/speakeasy": "^2.0.10"
   }
 }
