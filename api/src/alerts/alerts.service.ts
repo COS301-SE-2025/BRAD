@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Report, ReportDocument } from '../report/schema/report.schema';
 import { Model } from 'mongoose';
 
 @Injectable()
 export class AlertsService {
+  private subscriptions: { domain: string; email: string }[] = [];
   constructor(
     @InjectModel(Report.name) private reportModel: Model<ReportDocument>,
   ) {}
@@ -45,5 +46,18 @@ export class AlertsService {
     if (score === undefined || score < 0.4) return 'low';
     if (score < 0.7) return 'medium';
     return 'high';
+  }
+
+  async subscribeToAlerts(domain: string, email: string) {
+    if (!domain || !email) {
+      throw new BadRequestException('Domain and email are required');
+    }
+
+    //Store the subscription (this can later be persisted in DB)
+    this.subscriptions.push({ domain, email });
+
+    return {
+      message: `Successfully subscribed ${email} to alerts for ${domain}`,
+    };
   }
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, UseGuards, Post, Body } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AlertsService } from './alerts.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -16,5 +16,14 @@ export class AlertsController {
   @ApiOperation({ summary: 'View all alerts (investigator only)' })
   async getAllAlerts() {
     return this.alertsService.getAllAlerts();
+  }
+
+  @Post('subscribe')
+  @ApiOperation({ summary: 'Subscribe to domain alerts' })
+  async subscribeToAlerts(
+    @Body('domain') domain: string,
+    @Body('email') email: string,
+  ) {
+    return this.alertsService.subscribeToAlerts(domain, email);
   }
 }
