@@ -15,6 +15,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { WowModule } from './wow_features/wow.module';
 import { HistoryModule } from './reports_history/reports_history.module';
 import { AlertsModule } from './alerts/alerts.module';
+import { SecurityModule } from './security/security.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { AlertsModule } from './alerts/alerts.module';
     WowModule,
     HistoryModule,
     AlertsModule,
+    SecurityModule,
   ],
   controllers: [AppController],
   providers: [AppService],
