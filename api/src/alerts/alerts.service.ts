@@ -60,4 +60,23 @@ export class AlertsService {
       message: `Successfully subscribed ${email} to alerts for ${domain}`,
     };
   }
+
+  async unsubscribeFromAlerts(domain: string, email: string) {
+    const initialLength = this.subscriptions.length;
+
+    this.subscriptions = this.subscriptions.filter(
+      (sub) => sub.domain !== domain || sub.email !== email,
+    );
+
+    const removed = this.subscriptions.length !== initialLength;
+
+    if (!removed) {
+      return { message: `No subscription found for ${email} on ${domain}` };
+    }
+
+    return {
+      message: `Unsubscribed ${email} from alerts for ${domain}`,
+    };
+  }
+
 }
