@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import * as speakeasy from 'speakeasy';
@@ -7,6 +7,7 @@ import * as qrcode from 'qrcode';
 @Injectable()
 export class SecurityService {
   private readonly logFilePath = path.join(__dirname, '../../logs/system.log');
+  private userSecrets: Map<string, string> = new Map(); // In-memory for demonstration
 
   getSystemLogs(): string[] {
     try {
@@ -47,5 +48,20 @@ export class SecurityService {
       otpauth_url,
       qrCodeDataURL,
     };
+  }
+
+  async verify2FA(userId: string, token: string): Promise<boolean> {
+    const secret = this.userSecrets.get(userId);
+
+    if (!secret) {
+        throw new NotFoundException('No 2FA secret found for user');
+    }
+
+    return speakeasy.totp.verify({
+        secret,
+        encoding: 'base32',
+        token,
+        window: 1, // allow 1 time-step before or after
+    });
   }
 }
