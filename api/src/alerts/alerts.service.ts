@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Report, ReportDocument } from '../schemas/report.schema';
+import { Report, ReportDocument } from '../report/schema/report.schema';
 import { Model } from 'mongoose';
 
 @Injectable()
 export class AlertsService {
   constructor(
-    @InjectModel(Report.name) private readonly reportModel: Model<ReportDocument>,
+    @InjectModel(Report.name) private reportModel: Model<ReportDocument>,
   ) {}
 
   async getAllAlerts() {

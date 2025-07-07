@@ -6,9 +6,7 @@ import { Report, ReportSchema } from '../report/schema/report.schema';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([
-      { name: Report.name, schema: ReportSchema },
-    ]),
+    MongooseModule.forFeature([{ name: Report.name, schema: ReportSchema }]),
   ],
   controllers: [AlertsController],
   providers: [AlertsService],
