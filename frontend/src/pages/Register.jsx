@@ -57,9 +57,6 @@ const RegisterPage = () => {
 
   return (
     <div className="register-page">
-    <button className="back-button" onClick={() => navigate(-1)}>
-      ← Back
-    </button>
       <div className="robot-section">
         <div className="robot-content">
           <img src={BRAD_robot} alt="BRAD Robot" className="brad-robot" />
