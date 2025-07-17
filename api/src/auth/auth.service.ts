@@ -43,7 +43,7 @@ export class AuthService {
       username,
       email,
       password: hashedPassword,
-      role: 'general',
+      role: 'investigator',
     });
 
     try {

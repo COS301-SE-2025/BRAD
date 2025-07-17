@@ -55,3 +55,33 @@
   font-weight: bold;
   text-decoration: underline;
 }
+
+.welcome-message {
+  margin-top: 1rem;
+  font-size: 1.25rem;
+  color: #cbd5e1;
+  white-space: nowrap;
+  overflow: hidden;
+  width: 0;
+  animation: typing 4s steps(60, end) forwards, blink 0.75s step-end infinite;
+}
+
+@keyframes typing {
+  from {
+    width: 0;
+  }
+  to {
+    width: 60ch;
+  }
+}
+
+@keyframes blink {
+  50% {
+    border-color: transparent;
+  }
+}
+
+.cursor {
+  border-right: 2px solid #38bdf8;
+  animation: blink 0.75s step-end infinite;
+}

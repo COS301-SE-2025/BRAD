@@ -65,6 +65,7 @@ const RegisterPage = () => {
           <img src={BRAD_robot} alt="BRAD Robot" className="brad-robot" />
           <h2 className="welcome-message">
             Welcome new user, create an account with B.R.A.D to get started
+              <span className="cursor"></span>
           </h2>
         </div>
       </div>
