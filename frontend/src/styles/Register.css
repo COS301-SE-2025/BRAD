@@ -17,8 +17,10 @@
 .register-form input {
   padding: 0.75rem;
   font-size: 1rem;
-  border: 1px solid #94a3b8;
+  border: 1px solid #f6f7f8;
   border-radius: 6px;
+  background-color: #ffffff;
+  color: #000000;
 }
 
 .register-form button {
@@ -58,8 +60,8 @@
 
 .welcome-message {
   margin-top: 1rem;
-  font-size: 1.25rem;
-  color: #cbd5e1;
+  font-size: 2rem;
+  color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   width: 0;
@@ -84,4 +86,36 @@
 .cursor {
   border-right: 2px solid #38bdf8;
   animation: blink 0.75s step-end infinite;
+}
+
+.robot-section{
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem;
+}
+
+.form-section {
+  flex: 1;
+  min-width: 0;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 2rem;
+  background: rgba(200, 200, 200, 0.1);
+  backdrop-filter: blur(8px);
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 500px;
+  margin: 2rem;
+  height: 75vh
+}
+
+body {
+  overflow: hidden;
 }
