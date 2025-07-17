@@ -19,7 +19,7 @@ ApiParam,
 } from '@nestjs/swagger';
 
 @ApiTags('User & Authentication')
-@Controller('user and authentication')
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
