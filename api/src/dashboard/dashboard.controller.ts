@@ -83,4 +83,13 @@ export class DashboardController {
         const count = await this.dashboardService.getPendingEvidenceCount();
         return { pendingEvidenceCount: count };
     }
+
+    @Get('total-cases')
+    @ApiOperation({ summary: 'Get total number of cases (open + closed + pending evidence)' })
+    @ApiResponse({ status: 200, description: 'Total number of cases' })
+        async getTotalCasesCount() {
+        const total = await this.dashboardService.getTotalCasesCount();
+        return { totalCases: total };
+    }
+
 }

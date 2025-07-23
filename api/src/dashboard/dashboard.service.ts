@@ -102,4 +102,13 @@ export class DashboardService {
         return this.reportModel.countDocuments({ evidenceStatus: 'pending' });
     }
 
+    async getTotalCasesCount(): Promise<number> {
+        const openCases = await this.reportModel.countDocuments({ status: 'open' });
+        const closedCases = await this.reportModel.countDocuments({ status: 'closed' });
+        const pendingEvidence = await this.reportModel.countDocuments({ evidenceStatus: 'pending' });
+
+        return openCases + closedCases + pendingEvidence;
+    }
+
+
 }
