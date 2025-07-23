@@ -110,5 +110,14 @@ export class DashboardService {
         return openCases + closedCases + pendingEvidence;
     }
 
+    async getProfilePicture(userId: string): Promise<string | null> {
+        const user = await this.userModel.findById(userId).select('profilePicture');
+
+        if (!user || !user.profilePicture) {
+            return null;
+        }
+
+        return user.profilePicture;
+    }
 
 }

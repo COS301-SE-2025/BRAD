@@ -73,7 +73,10 @@ export class User {
   resetPasswordExpires?: Date;
 
   @Prop({ default: false })
-mustChangePassword:boolean;
+  mustChangePassword:boolean;
+
+  @Prop({ required: false })
+  profilePicture?: string;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

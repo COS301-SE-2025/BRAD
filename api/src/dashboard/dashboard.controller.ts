@@ -92,4 +92,17 @@ export class DashboardController {
         return { totalCases: total };
     }
 
+    @Get('profile-picture')
+    @UseGuards(AuthGuard)
+    @ApiOperation({ summary: 'Get current user profile picture' })
+    @ApiResponse({ status: 200, description: 'Profile picture URL or base64 string' })
+    @ApiBearerAuth()
+    async getProfilePicture(@Req() req: Request) {
+    const userId = (req as any).user?.userId;
+    const profilePicture = await this.dashboardService.getProfilePicture(userId);
+
+    return { profilePicture };
+    }
+
+
 }
