@@ -77,4 +77,8 @@ export class DashboardService {
         return this.reportModel.countDocuments({ status: 'open' }).exec();
     }
 
+    async getClosedCasesCount(): Promise<number> {
+        return this.reportModel.countDocuments({ status: 'closed' }).exec();
+    }
+
 }

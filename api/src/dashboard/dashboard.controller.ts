@@ -34,7 +34,7 @@ export class DashboardController {
 
     @UseGuards(AuthGuard, RolesGuard)
     @Roles('investigator')
-    @Get('dashboard/reports')
+    @Get('/reports')
     @ApiBearerAuth()
     @ApiOperation({ summary: 'Investigator-specific filtered reports' })
     @ApiResponse({ status: 200, description: 'Filtered reports for investigator' })
@@ -49,5 +49,13 @@ export class DashboardController {
     async getOpenCasesCount(): Promise<{ openCases: number }> {
         const count = await this.dashboardService.getOpenCasesCount();
         return { openCases: count };
+    }
+
+    @Get('closed-cases/count')
+    @ApiOperation({ summary: 'Get number of closed cases' })
+    @ApiResponse({ status: 200, description: 'Number of closed cases returned successfully' })
+    async getClosedCasesCount(): Promise<{ closedCases: number }> {
+    const count = await this.dashboardService.getClosedCasesCount();
+    return { closedCases: count };
     }
 }
