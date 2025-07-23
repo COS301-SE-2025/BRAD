@@ -73,4 +73,8 @@ export class DashboardService {
         }));
     }
 
+    async getOpenCasesCount(): Promise<number> {
+        return this.reportModel.countDocuments({ status: 'open' }).exec();
+    }
+
 }

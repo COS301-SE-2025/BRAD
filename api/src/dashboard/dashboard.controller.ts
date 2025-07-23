@@ -43,5 +43,11 @@ export class DashboardController {
         return this.dashboardService.getInvestigatorReports(user.id);
     }
 
-
+    @Get('open-cases/count')
+    @ApiOperation({ summary: 'Get number of open cases' })
+    @ApiResponse({ status: 200, description: 'Number of open cases returned successfully' })
+    async getOpenCasesCount(): Promise<{ openCases: number }> {
+        const count = await this.dashboardService.getOpenCasesCount();
+        return { openCases: count };
+    }
 }
