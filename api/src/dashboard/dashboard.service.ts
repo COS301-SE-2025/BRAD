@@ -1,11 +1,13 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Report, ReportSchema } from '../report/schema/report.schema';
+import { User, UserDocument } from '../schemas/user.schema';
 
 @Injectable()
 export class DashboardService {
   constructor(
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
     @InjectModel(Report.name) private reportModel: Model<Report>
   ) {}
 
@@ -79,6 +81,15 @@ export class DashboardService {
 
     async getClosedCasesCount(): Promise<number> {
         return this.reportModel.countDocuments({ status: 'closed' }).exec();
+    }
+
+    async getInvestigatorEmail(userId: string): Promise<{ email: string }> {
+        const user = await this.userModel.findById(userId).select('email role');
+        if (!user || user.role !== 'investigator') {
+        throw new NotFoundException('Investigator not found or unauthorized');
+        }
+
+        return { email: user.email };
     }
 
 }

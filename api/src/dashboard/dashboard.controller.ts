@@ -56,6 +56,15 @@ export class DashboardController {
     @ApiResponse({ status: 200, description: 'Number of closed cases returned successfully' })
     async getClosedCasesCount(): Promise<{ closedCases: number }> {
     const count = await this.dashboardService.getClosedCasesCount();
-    return { closedCases: count };
+        return { closedCases: count };
+    }
+
+    @Get('investigator/email')
+    @ApiOperation({ summary: 'Get email of the current investigator' })
+    @ApiResponse({ status: 200, description: 'Email fetched successfully' })
+    @ApiResponse({ status: 404, description: 'Investigator not found' })
+    async getInvestigatorEmail(@Req() req: Request) {
+        const userId = req['user']?.sub || req['user']?._id;
+        return this.dashboardService.getInvestigatorEmail(userId);
     }
 }
