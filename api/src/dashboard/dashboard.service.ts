@@ -98,4 +98,8 @@ export class DashboardService {
         return { username: user.username };
     }
 
+    async getPendingEvidenceCount(): Promise<number> {
+        return this.reportModel.countDocuments({ evidenceStatus: 'pending' });
+    }
+
 }

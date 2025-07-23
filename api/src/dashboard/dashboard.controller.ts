@@ -75,4 +75,12 @@ export class DashboardController {
         const userId = req['user']?.sub || req['user']?._id;
         return this.dashboardService.getInvestigatorUsername(userId);
     }
+
+    @Get('pending-evidence')
+    @ApiOperation({ summary: 'Get count of reports with pending evidence' })
+    @ApiResponse({ status: 200, description: 'Number of pending evidence reports' })
+    async getPendingEvidenceCount() {
+        const count = await this.dashboardService.getPendingEvidenceCount();
+        return { pendingEvidenceCount: count };
+    }
 }
