@@ -67,4 +67,12 @@ export class DashboardController {
         const userId = req['user']?.sub || req['user']?._id;
         return this.dashboardService.getInvestigatorEmail(userId);
     }
+
+    @Get('investigator-username')
+    @ApiOperation({ summary: 'Get username of the current investigator' })
+    @ApiResponse({ status: 200, description: 'Username retrieved successfully' })
+    async getInvestigatorUsername(@Req() req: Request): Promise<{ username: string }> {
+        const userId = req['user']?.sub || req['user']?._id;
+        return this.dashboardService.getInvestigatorUsername(userId);
+    }
 }

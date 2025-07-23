@@ -92,4 +92,10 @@ export class DashboardService {
         return { email: user.email };
     }
 
+    async getInvestigatorUsername(userId: string): Promise<{ username: string }> {
+        const user = await this.userModel.findById(userId).select('username');
+        if (!user) throw new NotFoundException('User not found');
+        return { username: user.username };
+    }
+
 }
