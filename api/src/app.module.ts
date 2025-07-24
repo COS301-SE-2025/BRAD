@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import * as Joi from 'joi';
 import { AdminModule } from './admin/admin.module';
+import { RedisModule } from './redis/redis.module';
 
 
 @Module({
@@ -39,6 +40,7 @@ import { AdminModule } from './admin/admin.module';
     ReportModule,
     AuthModule,
     AdminModule,
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [AppService],

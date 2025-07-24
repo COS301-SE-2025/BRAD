@@ -5,6 +5,7 @@ import {
   ValidateNested,
   IsBoolean,
   IsArray,
+  IsObject
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -78,6 +79,7 @@ export class UpdateAnalysisDto {
   };
 
   @IsOptional()
+  @IsObject()
   abuseFlags?: {
     suspiciousJS?: string[];
     obfuscatedScripts?: boolean;

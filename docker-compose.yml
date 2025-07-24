@@ -8,17 +8,17 @@ services:
       - ./api:/app
     depends_on:
       - mongo
+      - redis
     environment:
       - MONGO_URI=mongodb://mongo:27017/brad_db
       - JWT_SECRET=brad_super_secret_2025
       - BOT_ACCESS_KEY=secret-bot-key-123
       - PORT=3000
       - NODE_ENV=development
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
       - EMAIL_USER=cos301.cap2@gmail.com
       - EMAIL_PASS=cmzu mhnu dvds sadx
-    # env_file:
-    #   - .env
-
 
   bot:
     build: ./bot
@@ -28,19 +28,19 @@ services:
     depends_on:
       - mongo
       - api
+      - redis
     environment:
       - API_URL=http://api:3000
       - BOT_ACCESS_KEY=secret-bot-key-123
-    # env_file:
-    #   - .env
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_QUEUE=brad:report:queue
 
   frontend:
     build: ./frontend
     container_name: brad-frontend
     ports:
       - "5173:5173"
-    # volumes:
-    #   - ./frontend:/app
     environment:
       - NODE_ENV=development
 
@@ -54,6 +54,13 @@ services:
       - mongo-data:/data/db
       - ./database/mongo.conf:/etc/mongo.conf:ro
     command: mongod --quiet --logpath /var/log/mongodb/mongod.log
+
+  redis:
+    image: redis:7-alpine
+    container_name: brad-redis
+    restart: always
+    ports:
+      - "6379:6379"
 
 volumes:
   mongo-data:

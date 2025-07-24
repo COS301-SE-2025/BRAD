@@ -2,6 +2,35 @@ from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
+def calculate_risk_score(scraping_info: dict, abuse_flags: dict) -> int:
+    score = 0
+
+    # Heavily weighted red flags
+    if abuse_flags.get("malwareDetected"):
+        score += 50
+    if abuse_flags.get("redirectChain", False):
+        score += 20
+    if abuse_flags.get("obfuscatedScripts", False):
+        score += 20
+
+    # Suspicious JavaScript
+    suspicious_js = abuse_flags.get("suspiciousJS", [])
+    score += len(suspicious_js) * 5  # 5 points per suspicious JS snippet
+
+    # Keyword match (phishing indicators)
+    keyword_matches = abuse_flags.get("keywordMatches", 0)
+    score += keyword_matches * 3
+
+    # Similarity to real domains (e.g., absa.co.za)
+    if abuse_flags.get("similarityScore", 0) > 0.8:
+        score += 15
+
+    # Fallback minimum/maximum
+    score = max(score, 10)  # Ensure at least 10 if anything is suspicious
+    score = min(score, 100)  # Cap at 100
+
+    return score
+
 def perform_scraping(domain: str) -> tuple:
     with sync_playwright() as p:
         browser = p.chromium.launch(headless=True)

@@ -2,18 +2,33 @@ import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/commo
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ForensicService } from '../services/forensic.service';
-import { UpdateAnalysisDto } from './dto/update-analysis.dto'
+import { UpdateAnalysisDto } from './dto/update-analysis.dto';
+import { RedisService } from '../redis/redis.service'; 
 
 @Injectable()
 export class ReportService {
   constructor(
     @InjectModel('Report') private reportModel: Model<any>,
-    private forensicService: ForensicService
+    private forensicService: ForensicService,
+    private redisService: RedisService //Inject Redis
   ) {}
 
   async submitReport(domain: string, submittedBy: string) {
     const newReport = new this.reportModel({ domain, submittedBy });
-    return newReport.save();
+    const savedReport = await newReport.save();
+
+    //Enqueue job to Redis
+    await this.redisService.pushToQueue(process.env.REDIS_QUEUE || 'brad:report:queue', {
+    reportId: savedReport._id.toString(),
+    domain: savedReport.domain,
+    });
+
+     console.log(
+    `[API] Queued report ${domain} (${savedReport._id}) for bot analysis.`
+  );
+
+
+    return savedReport;
   }
 
   async getReports(userId: string, role: string) {

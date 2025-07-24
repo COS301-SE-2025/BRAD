@@ -1,43 +1,37 @@
 import os
 import time
-import sys
-import requests
 import json
+import redis
+import requests
 from datetime import datetime, timezone
 from dotenv import load_dotenv
-from utils.analysis import perform_scraping
+
+from utils.analysis import perform_scraping, calculate_risk_score
 from utils.metadata import gather_forensics
-from utils.reporter import fetch_pending_report
 
 load_dotenv()
 
+# Environment
 API_URL = os.getenv("API_URL", "http://localhost:3000")
 AUTH_KEY = os.getenv("BOT_ACCESS_KEY")
-POLL_INTERVAL = 6
+REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
+REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+REDIS_QUEUE = os.getenv("REDIS_QUEUE", "brad:report:queue")
 
-headers = {'Authorization': f"Bot {AUTH_KEY}"}
 if not AUTH_KEY:
     raise RuntimeError("BOT_ACCESS_KEY missing from environment.")
 
-def generate_analysis(domain):
-    forensics_info = gather_forensics(domain)
-    scraping_info, abuse_flags = perform_scraping(domain)
-    
-    analysis = {
-        "domain": domain,
-        "scannedAt": datetime.now(timezone.utc).isoformat(),
-        **forensics_info,
-        "riskScore": 100 if "bank" in domain else 20
-    }
+headers = {'Authorization': f"Bot {AUTH_KEY}"}
+redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT)
 
-    return analysis, scraping_info, abuse_flags
-
+def sanitize_domain(domain: str) -> str:
+    return domain.strip().replace('\u200b', '').replace('\u2060', '')
 
 def serialize(obj):
     if isinstance(obj, dict):
-        return {k: serialize(v) for k, v in obj.items()}
+        return {k: serialize(v) for k, v in obj.items() if v not in (None, [], {}, '')}
     elif isinstance(obj, list):
-        return [serialize(i) for i in obj]
+        return [serialize(i) for i in obj if i not in (None, '', [])]
     elif isinstance(obj, datetime):
         return obj.isoformat()
     return obj
@@ -59,43 +53,50 @@ def report_analysis(report_id, analysis_data, scraping_info, abuse_flags):
         print(f"[BOT] Failed to update analysis: {e}")
         return False
 
+def generate_analysis(domain):
+    domain = sanitize_domain(domain)
+    forensics_info = gather_forensics(domain)
+    scraping_info, abuse_flags = perform_scraping(domain)
+    risk_score = calculate_risk_score(scraping_info, abuse_flags)
 
-def run_bot(run_once=False):
-    print(f"[BOT] BRAD is polling every {POLL_INTERVAL}s...\n")
+    analysis = {
+        "domain": domain,
+        "scannedAt": datetime.now(timezone.utc).isoformat(),
+        **forensics_info,
+        "riskScore": risk_score
+    }
+
+    return analysis, scraping_info, abuse_flags
+
+def run_bot():
+    print(f"[BOT] Listening on Redis queue: {REDIS_QUEUE}")
 
     while True:
         try:
-            headers = {'Authorization': f"Bot {AUTH_KEY}"}
-            report = fetch_pending_report(API_URL, headers)
+            _, raw_data = redis_client.brpop(REDIS_QUEUE, timeout=0)
+            job = json.loads(raw_data)
 
-            if not report:
-                print("No pending reports.")
+            report_id = job.get("reportId")
+            domain = job.get("domain")
+
+            if not report_id or not domain:
+                print(f"[BOT] Skipping invalid job: {job}")
+                continue
+
+            print(f"\n[BOT] Analyzing domain: {domain} (Report ID: {report_id})")
+
+            analysis, scraping, abuse_flags = generate_analysis(domain)
+            success = report_analysis(report_id, analysis, scraping, abuse_flags)
+
+            if success:
+                print(f"[BOT] Submitted analysis for report {report_id}")
             else:
-                report_id = report.get("_id") or report.get("id")
-                domain = report["domain"]
-                print(f"\n[BOT] Analyzing: {domain} (ID: {report_id})")
-                time.sleep(2)
-
-                analysis, scraping, abuse_flags = generate_analysis(domain)
-
-                success = report_analysis(report_id, analysis, scraping, abuse_flags)
-
-                if success:
-                    print(f"[BOT] Submitted analysis for report {report_id}\n")
-                else:
-                    print(f"[BOT] Failed to submit analysis for report {report_id}")
+                print(f"[BOT] Failed to submit analysis for report {report_id}")
 
         except Exception as e:
             print(f"[BOT] Error: {e}")
-            time.sleep(POLL_INTERVAL)
-
-        if run_once:
-            break
-
-        time.sleep(POLL_INTERVAL)
-
-
+            time.sleep(3)
 
 if __name__ == "__main__":
-    print("[BOT] Starting bot...",flush=True)
+    print("[BOT] BRAD Bot started...\n")
     run_bot()
