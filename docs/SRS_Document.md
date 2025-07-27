@@ -1171,13 +1171,13 @@ of the domain based on patterns in threat data and previously seen indicators. T
 the API, which has direct access to the database and enforces access protection.
 - **Report Service**: Compiles the output from previous layers into a structured report, ready for review by investigators.
 
-By structuring backend services in layers, BRAD achieves a clear separation of concerns. Each service can be developed, tested, and modified independently. Sensitive operations—such as AI-based threat assessment and data handling—are encapsulated deeper in the backend (in the API), away from the public interface. This design choice improves system integrity, eases long-term maintenance, and strengthens protection from external threats.
+By structuring backend services in layers, BRAD achieves a clear separation of concerns. Each service can be developed, tested, and modified independently. Sensitive operations such as AI-based threat assessment and data handling are encapsulated deeper in the backend (in the API), away from the public interface. This design choice improves system integrity, eases long-term maintenance, and strengthens protection from external threats.
 
 **Quality** **Requirements** **Addressed:**
 
 1\. **Maintainability**: The bot’s layered services can be updated or replaced individually (e.g., updating malware detection rules) without disrupting other layers.
 
-2\. **Security**: Core logic—such as domain risk assessment and database operations—is isolated within protected backend layers, reducing attack surface.
+2\. **Security**: Core logic such as domain risk assessment and database operations is isolated within protected backend layers, reducing attack surface.
 
 3\. **Reliability**: Layers can be tested in isolation, allowing targeted error detection and ensuring that failures in one component do not cascade through the entire system.
 
