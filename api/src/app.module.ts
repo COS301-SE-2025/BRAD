@@ -1,48 +1,19 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { MongooseModule } from '@nestjs/mongoose';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import { ReportModule } from './report/report.module';
-import { AuthModule } from './auth/auth.module';
-import { JwtModule } from '@nestjs/jwt';
-import * as Joi from 'joi';
-import { AdminModule } from './admin/admin.module';
-import { RedisModule } from './redis/redis.module';
-
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      cache: true,
-      envFilePath: '.env',
-      validationSchema: Joi.object({
-        MONGO_URI: Joi.string().required(),
-        JWT_SECRET: Joi.string().required(),
-        BOT_ACCESS_KEY: Joi.string().required(),
+    BullModule.forRootAsync({
+      useFactory: () => ({
+        redis: {
+          host: process.env.REDIS_HOST,
+          port: parseInt(process.env.REDIS_PORT, 10),
+          password: process.env.REDIS_PASSWORD,
+        },
       }),
     }),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET')
-      }),
-    }),
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGO_URI'),
-      }),
-    }),
-    ReportModule,
-    AuthModule,
-    AdminModule,
-    RedisModule,
+    BullModule.registerQueue({ name: 'reportQueue' }),
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  exports: [BullModule],
 })
-export class AppModule {}
+export class QueueModule {}
