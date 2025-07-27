@@ -34,12 +34,10 @@ export class ReportController {
       // Ensure the uploads directory exists
 
       filename: (req, file, cb) => {
-        console.log('📂 Uploads directory:', path.join(__dirname, '..', '..', '..', '..', '..', '..', 'uploads', 'evidence'));
+       
         const uniqueName = `${uuidv4()}${extname(file.originalname)}`;
         cb(null, uniqueName);
-        console.log('📦 Received file:', file?.originalname ,'as',uniqueName);
-        
-        console.log('📩 Body:', req.body);
+     
       },
     }),
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
@@ -75,7 +73,7 @@ export class ReportController {
 
     // Optional: evidence filename
     const evidencePath = file?.filename;
-console.log(`Submitting report for domain: ${domain}, user: ${userId}, evidence: ${evidencePath}`);
+
     return this.reportService.submitReport(domain, userId, evidencePath);
   }
 
