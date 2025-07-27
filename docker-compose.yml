@@ -17,6 +17,7 @@ services:
       - NODE_ENV=development
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - REDIS_PASSWORD=your_redis_password
       - EMAIL_USER=cos301.cap2@gmail.com
       - EMAIL_PASS=cmzu mhnu dvds sadx
 
@@ -26,15 +27,16 @@ services:
     volumes:
       - ./bot:/app
     depends_on:
-      - mongo
-      - api
       - redis
+      - api
+      - mongo
     environment:
       - API_URL=http://api:3000
       - BOT_ACCESS_KEY=secret-bot-key-123
       - REDIS_HOST=redis
       - REDIS_PORT=6379
-      - REDIS_QUEUE=brad:report:queue
+      - REDIS_PASSWORD=your_redis_password
+    restart: unless-stopped
 
   frontend:
     build: ./frontend
@@ -61,6 +63,12 @@ services:
     restart: always
     ports:
       - "6379:6379"
+    command: redis-server --requirepass "your_redis_password"
+    environment:
+      - REDIS_PASSWORD=your_redis_password
+    volumes:
+    - redis-data:/data
 
 volumes:
   mongo-data:
+  redis-data:
