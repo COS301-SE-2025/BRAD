@@ -6,6 +6,8 @@ services:
       - "3000:3000"
     volumes:
       - ./api:/app
+      - ./uploads:/uploads
+    
     depends_on:
       - mongo
     environment:

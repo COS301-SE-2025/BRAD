@@ -11,10 +11,14 @@ export class ReportService {
     private forensicService: ForensicService
   ) {}
 
-  async submitReport(domain: string, submittedBy: string) {
-    const newReport = new this.reportModel({ domain, submittedBy });
-    return newReport.save();
-  }
+async submitReport(domain: string, submittedBy: string, evidencePath?: string) {
+  const newReport = new this.reportModel({
+    domain,
+    submittedBy,
+    evidence: evidencePath || null
+  });
+  return newReport.save();
+}
 
   async getReports(userId: string, role: string) {
     if (role === 'admin' || role === 'investigator') {

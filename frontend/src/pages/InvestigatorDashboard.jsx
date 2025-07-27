@@ -54,7 +54,7 @@ const InvestigatorDashboard = () => {
     document.title = 'B.R.A.D | Investigator';
   }, []);
 
-  const pending = reports.filter(r => r.analyzed && !r.investigatorDecision);
+  const pending = reports.filter(r => !r.analyzed && !r.investigatorDecision);
   const completed = reports.filter(r => r.investigatorDecision);
 
   return (
@@ -71,9 +71,11 @@ const InvestigatorDashboard = () => {
             {pending.map(report => (
               <div className={`report-card ${report.analysis?.riskScore > 80 ? 'high-risk' : ''}`} key={report._id}>
                 <p><strong>{report.domain}</strong></p>
+                
                 <p>Date: {new Date(report.createdAt).toLocaleString()}</p>
                 <p>Risk Score: {report.analysis?.riskScore ?? 'N/A'}</p>
                 <button className="view-button" onClick={() => setSelectedReport(report)}>View Report</button>
+
               </div>
             ))}
           </div>
@@ -94,10 +96,23 @@ const InvestigatorDashboard = () => {
         </div>
 
         {/* Modal */}
-        {selectedReport && (
-          <div className="modal-overlay">
-            <div className="modal-content">
-              <h3>Analysis for {selectedReport.domain}</h3>
+       {selectedReport && (
+  <div className="modal-overlay">
+    <div className="modal-content">
+
+      {/* ✅ Evidence Image Preview */}
+      {selectedReport?.evidence && (
+        <div className="evidence-preview">
+          <h4>Submitted Evidence</h4>
+          <img
+            src={`http://localhost:3000/uploads/evidence/${selectedReport.evidence}`}
+            alt="Evidence"
+            className="evidence-image"
+          />
+        </div>
+      )}
+
+      <h3>Analysis for {selectedReport.domain}</h3>
 
               {selectedReport.analysis ? (
                 <div className="analysis-details">
