@@ -1,6 +1,9 @@
 import React from 'react';
+import '../styles/Help.css'
+import userIcon from '../assets/user-icon.png'; 
+import bradRobot from '../assets/BRAD_robot.png';
 
-const FAQ = () => {
+const FAQ = ({ searchTerm }) => {
   const ReporterQuestions = [
     {
       question: 'What is B.R.A.D.?',
@@ -13,7 +16,7 @@ const FAQ = () => {
         'After logging in as a Reporter, you can submit a report by entering the suspicious URL and optionally uploading evidence such as screenshots or documents. Click the "Submit" button to finalize your report.'
     },
     {
-      question: 'How are reports analyzed?',
+      question: 'How are reports analysed?',
       answer:
         'Once a report is submitted, it is first evaluated by B.R.A.D.\'s AI bot. Then, an investigator reviews the bot\'s analysis and any attached evidence to make a final decision.'
     },
@@ -26,6 +29,10 @@ const FAQ = () => {
       question: 'Can I track the status of my reports?',
       answer:
         'Yes. As a Reporter, you can view your report history and see which reports are still pending or have been resolved. Resolved reports will also display the final decision and risk score.'
+    },
+    {
+      question: 'How will adding evidence help analysing my report?',
+      answer:'A reporter is able to submit optional evidence in the form of screenshots, documents etc, this can be used to give the Investigator more insight on where the URL wss found, who sent shared the URL etc, this can help the investigator during their analysis of the report and help them give a more accurate report. '
     },
     {
       question: 'Who can I contact for technical support?',
@@ -86,16 +93,26 @@ const FAQ = () => {
     
   ];
 
+  const filtered = ReporterQuestions.filter((q) =>
+    q.question.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div className="faq-section">
-      <h2>Frequently Asked Questions</h2>
-      {ReporterQuestions.map((q, idx) => (
-        <div className="faq-item" key={idx}>
-          <details>
-            <summary>{q.question}</summary>
-            <p>{q.answer}</p>
-          </details>
+    <div className="faq-chat">
+      {filtered.map((q, idx) => (
+        <div key={idx} className="faq-exchange">
+          <div className="faq-user">
+            <img src={userIcon} alt="User" className="faq-avatar" />
+            <div className="faq-question">
+              <p>{q.question}</p>
+            </div>
+          </div>
+          <div className="faq-brad">
+            <div className="faq-answer">
+              <p>{q.answer}</p>
+            </div>
+            <img src={bradRobot} alt="BRAD Robot" className="faq-avatar" />
+          </div>
         </div>
       ))}
     </div>
