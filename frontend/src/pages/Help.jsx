@@ -1,4 +1,5 @@
 import React from 'react';
+import FAQ from '../components/FAQ';
 
 const Help = () => {
   return (
@@ -10,6 +11,8 @@ const Help = () => {
           contact details, and a brief walkthrough of how to use B.R.A.D.
         </p>
       </section>
+
+      <FAQ />
 
       <section className="contact-info">
         <h2>Contact Us</h2>
