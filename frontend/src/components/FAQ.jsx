@@ -62,6 +62,30 @@ const FAQ = () => {
 
   ];
 
+  const adminQuestions = [
+    {
+      question:"What is my role in B.R.A.D as an admin?",
+      answer:"An admin's role in B.R.A.D is to manage users."
+    },
+    {
+      question:"Can I as an Admin add a new user?",
+      answer:"Yes! An admin is able to add a user by enter the user's email and username, that user will receive an email with a OTP and a link to change their password, then that user is able to log in with their user name and newly updated password."
+    },
+    {
+      question:"Can I as an Admin remove a user?",
+      answer:"Yes! As an admin you are able to remove any user accepts another admin."
+    },
+    {
+      question:"Can I as an Admin change the role of a user?",
+      answer:"Yes! An admin is able to change a user's role to reporter, investigator or admin, but not able to change the role of another admin."
+    },
+    {
+      question:"What does managing user's entail?",
+      answer:"Managing users as an admin includes : adding,removing ans changing user's roles as well as being able to search and filter through all user's to view their roles and usernames."
+    }
+    
+  ];
+
 
   return (
     <div className="faq-section">
