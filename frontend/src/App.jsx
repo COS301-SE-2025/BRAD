@@ -28,7 +28,7 @@ function App() {
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/change-password" element={<ChangePassword />} />
-        <Route path="/help" element={<Help />} />
+        <Route path="/help/:role" element={<Help />} />
         {/* Add more routes here */}
       </Routes>
     </Router>

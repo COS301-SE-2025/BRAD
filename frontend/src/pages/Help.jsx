@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import FAQ from '../components/FAQ';
 import '../styles/Help.css';
 
 const Help = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const { role } = useParams();
 
   return (
     <div className="help-page">
@@ -25,9 +27,7 @@ const Help = () => {
       
       </div>
 
-      
-
-      <FAQ searchTerm={searchTerm} />
+      <FAQ searchTerm={searchTerm} role={role} />
     </div>
   );
 };
