@@ -20,11 +20,7 @@ const InvestigatorNavbar = () => {
         <li>
           <button onClick={() => navigate('/investigator')}>Reports</button>
         </li>
-        <li>
-                  <a href={UserManual} target="_blank" rel="noopener noreferrer">
-                    <button>Help Menu</button>
-                  </a>
-                </li>
+        <li><button onClick={() => navigate('/help/investigator')}>Help menu</button></li>
         <li>
           <button onClick={() => navigate('/investigator/settings')}>Investigator Settings</button>
         </li>
