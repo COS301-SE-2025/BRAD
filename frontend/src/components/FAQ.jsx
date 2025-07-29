@@ -1,7 +1,7 @@
 import React from 'react';
 
 const FAQ = () => {
-  const questions = [
+  const ReporterQuestions = [
     {
       question: 'What is B.R.A.D.?',
       answer:
@@ -34,10 +34,39 @@ const FAQ = () => {
     }
   ];
 
+  const investigatorQuestions = [
+    {
+        question:'What is the role of an investigator in B.R.A.D ?',
+        answer:"An Investigator's role in B.R.A.D is to use the bot's result after analysing the report to give a clear analysis of the report by reviewing evidence like screenshots or documents etc, leaving a comment to advise the reporter on how to continue"
+    },
+    {
+        question:"How can I as an Investigator view the result of the bot's response ?",
+        answer:"As soon as a report is submitted by a user, the bot is launched to analyse this report and then the bot's is available to an investigator to review on their dashboard under pending reports, click view report to start the investigation process"
+    },
+    {
+        question:"What type of information will I as an Investigator be able to see from the bot's response",
+        answer:'When viewing a report to start the investigation, an Investigator will be able to see the following information : date scanned, risk score, malware detection, IP Address, Registar, SSL Validation, WHOIS owner, Raw WHOIS data, SND records, Structure information, crawled links, Raw HTML and evidence submitted by reporter as well as number of red flags.'
+    },
+    {
+        question:'How can an Investigator use the optional evidence a reporter submitted ?',
+        answer:'A reporter is able to submit optional evidence in the form of screenshots, documents etc, this can be used to give the Investigator more insight on where the URL wss found, who sent shared the URL etc, this can help the investigator during their analysis of the report and help them give a more accurate report. '
+    },
+    {
+        question:'Can I as the Investigator relaunch the bot to my specifications? ',
+        answer:'Yes! An Investigator is able to relaunch the bot to receive a more accurate response according to more specific specifications '
+    },
+    {
+        question:'Do I as the Investigator have the final say of what the result of the analysis is ?',
+        answer:"Yes! The user who submitted the report will only be able to view the analysis of the Investigator and never the bot's response, this means that any user's with malicious intent are not able to use B.R.A.D to help them protect against our bot. "
+    }
+
+  ];
+
+
   return (
     <div className="faq-section">
       <h2>Frequently Asked Questions</h2>
-      {questions.map((q, idx) => (
+      {ReporterQuestions.map((q, idx) => (
         <div className="faq-item" key={idx}>
           <details>
             <summary>{q.question}</summary>
