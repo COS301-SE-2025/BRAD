@@ -105,5 +105,3 @@ All containers are connected via an internal Docker network, ensuring secure com
 - For production, consider using a reverse proxy (e.g., Nginx) for TLS termination and additional access control.
 
 ---
-
-_This deployment model is designed to meet the system’s quality requirements for security, compliance, reliability, scalability, and maintainability as outlined in the SRS._
