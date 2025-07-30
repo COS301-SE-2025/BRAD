@@ -24,6 +24,29 @@
   font-size: 1rem;
 }
 
+.contact-section {
+  margin-top: 1rem;
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.contact-item {
+  font-size: 0.95rem;
+  color: white;
+}
+
+.contact-item a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.contact-item a:hover {
+  text-decoration: underline;
+}
+
 .help-description {
   padding: 2rem;
   text-align: center;
