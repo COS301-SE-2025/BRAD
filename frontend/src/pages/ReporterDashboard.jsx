@@ -112,8 +112,12 @@ const [showImageModal, setShowImageModal] = useState(false);
           >
             <p>Attach Optional Evidence</p>
             <div className="drop-area">
-              Drag & Drop files here<br />or
+              <p>Drag & Drop files here or </p>
+              <label htmlFor="file-upload" className="custom-file-button">
+                Choose Files
+              </label>
               <input
+                id="file-upload"
                 type="file"
                 multiple
                 onChange={handleFileChange}

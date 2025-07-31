@@ -10,7 +10,7 @@ const ScrapingInfoViewer = ({ scrapingInfo }) => {
     { id: 'structured', label: 'Structured Info' },
     { id: 'crawled', label: 'Crawled Links' },
     { id: 'raw', label: 'Raw HTML' },
-    { id: 'screenshot', label: 'Screenshot' },
+    { id: 'screenshot', label: 'Screenshot' }
   ];
 
   const renderStructured = () => {
@@ -22,14 +22,14 @@ const ScrapingInfoViewer = ({ scrapingInfo }) => {
     } = scrapingInfo.structuredInfo || {};
 
     return (
-      <>
+      <div className="scraping-section">
         <p><strong>Headings:</strong> {headings.join(', ') || 'None'}</p>
         <p><strong>Links:</strong> {links.length}</p>
         <p><strong>Forms:</strong> {forms.length}</p>
 
         <p><strong>Red Flags:</strong></p>
         {redFlags.suspiciousJS?.length > 0 ? (
-          <ul className="list-disc pl-5">
+          <ul>
             {redFlags.suspiciousJS.map((code, i) => (
               <li key={i}><code>{code}</code></li>
             ))}
@@ -37,13 +37,13 @@ const ScrapingInfoViewer = ({ scrapingInfo }) => {
         ) : <p>None</p>}
 
         {redFlags.obfuscatedScripts && (
-          <p className="text-red-600">⚠️ Obfuscated Scripts Detected</p>
+          <p className="scraping-flag-warning">⚠️ Obfuscated Scripts Detected</p>
         )}
 
         {redFlags.redirectChain?.length > 0 && (
           <div>
             <p><strong>Redirect Chain:</strong></p>
-            <ul className="list-disc pl-5">
+            <ul>
               {redFlags.redirectChain.map((url, i) => (
                 <li key={i}>{url}</li>
               ))}
@@ -52,47 +52,56 @@ const ScrapingInfoViewer = ({ scrapingInfo }) => {
         )}
 
         {redFlags.usesMetaRefresh && (
-          <p className="text-yellow-600">⚠️ Meta Refresh Detected</p>
+          <p className="scraping-flag-info">⚠️ Meta Refresh Detected</p>
         )}
 
         {redFlags.suspiciousInlineEvents?.length > 0 && (
           <div>
             <p><strong>Suspicious Inline Events:</strong></p>
-            <ul className="list-disc pl-5">
+            <ul>
               {redFlags.suspiciousInlineEvents.map((evt, i) => (
                 <li key={i}><code>{evt}</code></li>
               ))}
             </ul>
           </div>
         )}
-      </>
+      </div>
     );
   };
 
   const renderCrawledLinks = () => (
-    <ul className="list-disc pl-5">
-      {scrapingInfo.crawledLinks?.map((link, i) => (
-        <li key={i}><a href={link} target="_blank" rel="noopener noreferrer">{link}</a></li>
-      ))}
-    </ul>
+    <div className="scraping-section">
+      <ul>
+        {scrapingInfo.crawledLinks?.map((link, i) => (
+          <li key={i}>
+            <a href={link} target="_blank" rel="noopener noreferrer">
+              {link}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 
   const renderRawHtml = () => (
-    <pre className="bg-gray-900 text-white text-sm p-3 overflow-auto max-h-96 rounded">
-      <code>{scrapingInfo.htmlRaw || 'No HTML available.'}</code>
-    </pre>
+    <div className="scraping-section">
+      <pre>
+        <code>{scrapingInfo.htmlRaw || 'No HTML available.'}</code>
+      </pre>
+    </div>
   );
 
   const renderScreenshot = () => (
-    scrapingInfo.screenshotPath ? (
-      <img
-      src={`http://localhost:3000${scrapingInfo.screenshotPath}`}
-      alt="Screenshot"
-      className="max-w-full border rounded"
-    />
-    ) : (
-      <p>No screenshot available.</p>
-    )
+    <div className="scraping-section">
+      {scrapingInfo.screenshotPath ? (
+        <img
+          src={`http://localhost:3000${scrapingInfo.screenshotPath}`}
+          alt="Screenshot"
+        />
+      ) : (
+        <p>No screenshot available.</p>
+      )}
+    </div>
   );
 
   const renderActiveTab = () => {
@@ -106,24 +115,20 @@ const ScrapingInfoViewer = ({ scrapingInfo }) => {
   };
 
   return (
-    <div className="mt-6 border border-gray-300 p-4 rounded bg-white shadow">
-      <h2 className="text-lg font-semibold mb-3">Scraping & Crawling Data</h2>
+    <div className="scraping-info-viewer">
+      <h2>Scraping & Crawling Data</h2>
 
       {scrapingInfo.summary && (
-        <div className="mb-3 p-2 bg-yellow-100 text-yellow-800 border border-yellow-400 rounded">
+        <div className="scraping-summary">
           <strong>Summary:</strong> {scrapingInfo.summary}
         </div>
       )}
 
-      <div className="flex gap-3 mb-4">
+      <div className="scraping-tabs">
         {tabs.map(tab => (
           <button
             key={tab.id}
-            className={`px-3 py-1 rounded transition ${
-              activeTab === tab.id
-                ? 'bg-blue-600 text-white'
-                : 'bg-gray-200 hover:bg-gray-300'
-            }`}
+            className={activeTab === tab.id ? 'active' : ''}
             onClick={() => setActiveTab(tab.id)}
           >
             {tab.label}
@@ -131,7 +136,7 @@ const ScrapingInfoViewer = ({ scrapingInfo }) => {
         ))}
       </div>
 
-      <div>{renderActiveTab()}</div>
+      {renderActiveTab()}
     </div>
   );
 };
