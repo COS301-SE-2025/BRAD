@@ -56,7 +56,7 @@ const [activeImage, setActiveImage] = useState(null);
     document.title = 'B.R.A.D | Investigator';
   }, []);
 
-  const pending = reports.filter(r => !r.analyzed && !r.investigatorDecision);
+  const pending = reports.filter(r => r.analyzed && !r.investigatorDecision);
   const completed = reports.filter(r => r.investigatorDecision);
 
   return (
@@ -82,7 +82,6 @@ const [activeImage, setActiveImage] = useState(null);
             ))}
           </div>
 
-          {/* Completed */}
           <div className="report-column">
             <h3>Reviewed Reports</h3>
             {completed.length === 0 && <p>No completed reports yet.</p>}
