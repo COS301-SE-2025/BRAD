@@ -10,6 +10,8 @@ const InvestigatorDashboard = () => {
   const [showWhois, setShowWhois] = useState(false);
   const [showDns, setShowDns] = useState(false);
   const [showScraping, setShowScraping] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
+const [activeImage, setActiveImage] = useState(null);
 
 
   useEffect(() => {
@@ -54,7 +56,7 @@ const InvestigatorDashboard = () => {
     document.title = 'B.R.A.D | Investigator';
   }, []);
 
-  const pending = reports.filter(r => !r.analyzed && !r.investigatorDecision);
+  const pending = reports.filter(r => r.analyzed && !r.investigatorDecision);
   const completed = reports.filter(r => r.investigatorDecision);
 
   return (
@@ -80,7 +82,6 @@ const InvestigatorDashboard = () => {
             ))}
           </div>
 
-          {/* Completed */}
           <div className="report-column">
             <h3>Reviewed Reports</h3>
             {completed.length === 0 && <p>No completed reports yet.</p>}
@@ -100,19 +101,35 @@ const InvestigatorDashboard = () => {
   <div className="modal-overlay">
     <div className="modal-content">
 
-      {/* ✅ Evidence Image Preview */}
-      {selectedReport?.evidence && (
-        <div className="evidence-preview">
-          <h4>Submitted Evidence</h4>
-          <img
-            src={`http://localhost:3000/uploads/evidence/${selectedReport.evidence}`}
-            alt="Evidence"
-            className="evidence-image"
-          />
-        </div>
-      )}
+
+
 
       <h3>Analysis for {selectedReport.domain}</h3>
+
+{selectedReport?.evidence?.length > 0 && (
+  <div className="evidence-preview">
+    <h4>Submitted Evidence</h4>
+    {selectedReport.evidence.map((filename, index) => (
+      <div
+        key={index}
+        onClick={() => {
+          setActiveImage(filename);
+          setShowImageModal(true);
+        }}
+        style={{
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '4px 0',
+        }}
+      >
+        <span role="img" aria-label="image">🖼️</span>
+        <span style={{ color: 'black', textDecoration: 'none' }}>{filename}</span>
+      </div>
+    ))}
+  </div>
+)}
 
               {selectedReport.analysis ? (
                 <div className="analysis-details">
@@ -234,6 +251,29 @@ const InvestigatorDashboard = () => {
             </div>
           </div>
         )}
+
+{showImageModal && activeImage && (
+  <div className="modal-overlay" onClick={() => setShowImageModal(false)}>
+    <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+      <h4>Evidence Preview: {activeImage}</h4>
+      <img
+        src={`http://localhost:3000/static/uploads/evidence/${activeImage}`}
+        alt="Evidence Full"
+        style={{ maxWidth: '80%', maxHeight: '80vh', borderRadius: '5px' }}
+      />
+      <button
+        className="close-button"
+        style={{ marginTop: '5px' }}
+        onClick={() => setShowImageModal(false)}
+      >
+        Close
+      </button>
+    </div>
+  </div>
+)}
+
+
+
       </div>
     </div>
   );
