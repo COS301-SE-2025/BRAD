@@ -1,6 +1,5 @@
 import {
-    UploadedFile,UploadedFiles,
-  UseInterceptors, Controller, Post, Get, Param, Patch, Body, HttpCode, NotFoundException, BadRequestException, UnauthorizedException, UseGuards, Req, ForbiddenException,
+    Controller, Post, Get, Param, Patch, Body, HttpCode, NotFoundException, BadRequestException, UnauthorizedException, UseGuards, Req, ForbiddenException,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { ReportService } from './report.service';
@@ -9,16 +8,10 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { BotGuard } from '../auth/guards/bot.guard';
-import { FileInterceptor,FilesInterceptor } from '@nestjs/platform-express';
-import {
-  ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody, ApiParam,ApiConsumes,
-} from '@nestjs/swagger';
-import { diskStorage } from 'multer';
-import { v4 as uuidv4 } from 'uuid';
-import * as path from 'path';
-import Multer from 'multer';
-import { extname } from 'path';
 
+import {
+  ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody, ApiParam,
+} from '@nestjs/swagger';
 
 @ApiTags('Reports')
 @Controller()
@@ -28,45 +21,12 @@ export class ReportController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('general', 'admin')
   @Post('report')
-  @UseInterceptors(FilesInterceptor('evidence',5,{
-    storage: diskStorage({
-      destination: path.join(__dirname, '..', '..','..', '..', '..','..','uploads', 'evidence'),
-      // Ensure the uploads directory exists
-
-      filename: (req, file, cb) => {
-       
-        const uniqueName = `${uuidv4()}${extname(file.originalname)}`;
-        cb(null, uniqueName);
-     
-      },
-    }),
-    limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
-  }))
-  @ApiBearerAuth("JWT-auth")
-  @ApiConsumes('multipart/form-data')
-  @ApiOperation({ summary: 'Submit a suspicious domain with optional screenshot evidence' })
-  @ApiBody({
-    schema: {
-      type: 'object',
-      properties: {
-        domain: { type: 'string' },
-        evidence: {
-          type: 'array',
-          items: {
-            type: 'string',
-            format: 'binary'
-          }
-        }
-      }
-    }
-  })
+  @ApiBearerAuth("JWT") // JWT
+  @ApiOperation({ summary: 'Submit a suspicious domain' })
+  @ApiBody({ schema: { type: 'object', properties: { domain: { type: 'string' } } } })
   @ApiResponse({ status: 201, description: 'Report submitted successfully' })
   @ApiResponse({ status: 400, description: 'Missing domain or user ID' })
-  async submit(
-    @Req() req: Request,
-    @Body('domain') domain: string,
-    @UploadedFiles() files?: Multer.File[] | Multer.File,
-  ) {
+  async submit(@Req() req: Request, @Body('domain') domain: string) {
     const user = req['user'] as JwtPayload;
     const userId = user?.id;
 
@@ -74,10 +34,7 @@ export class ReportController {
       throw new BadRequestException('Domain and authenticated user ID are required');
     }
 
-    // Optional: evidence filename
-    const evidencePaths = files?.map(file => file.filename) || [];
-
-    return this.reportService.submitReport(domain, userId, evidencePaths);
+    return this.reportService.submitReport(domain, userId);
   }
 
   @UseGuards(AuthGuard, RolesGuard)

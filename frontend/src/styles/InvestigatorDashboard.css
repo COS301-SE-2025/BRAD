@@ -95,141 +95,135 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 10, 30, 0.7);
+  background-color: rgba(0, 0, 0, 0.6);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-  overflow-y: auto;
-  padding: 20px;
 }
 
 .modal-content {
-  background-color: #f5faff;
-  color: #001f3f;
-  border-radius: 10px;
-  padding: 25px;
-  max-width: 900px;
-  width: 100%;
-  max-height: 95vh;
+  background-color: #fff;
+  width: 80%;
+  max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  padding: 2rem;
+  border-radius: 10px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
   position: relative;
 }
 
-.modal-content h3,
-.modal-content h4 {
-  margin-top: 0;
-  margin-bottom: 12px;
-  color: #003366;
-}
-
 .analysis-details p {
-  margin: 6px 0;
+  margin: 0.3rem 0;
+  font-size: 0.95rem;
+  color: #374151;
 }
 
-.evidence-preview {
-  background-color: #e6f7ff;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  border: 1px solid #b3e0ff;
+.modal-buttons {
+  margin-top: 1.2rem;
+}
+
+.modal-buttons button {
+  margin-right: 1rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 0.95rem;
+}
+
+button.malicious {
+  background-color: #e74c3c;
+  color: white;
+}
+
+button.malicious:hover {
+  background-color: #c0392b;
+}
+
+button.benign {
+  background-color: #2ecc71;
+  color: white;
+}
+
+button.benign:hover {
+  background-color: #27ae60;
+}
+
+.close-button {
+  margin-top: 1.5rem;
+  background: #9ca3af;
+  padding: 0.5rem 1rem;
+  color: white;
+  border: none;
+  border-radius: 6px;
+}
+
+.close-button:hover {
+  background-color: #6b7280;
 }
 
 .toggle-button {
-  background-color: #004c99;
-  color: #fff;
+  margin-top: 1rem;
   padding: 6px 12px;
-  border: none;
+  background-color: #eee;
+  border: 1px solid #ccc;
   border-radius: 5px;
-  margin-top: 10px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 0.9rem;
 }
 
 .toggle-button:hover {
-  background-color: #0066cc;
+  background-color: #ddd;
 }
 
-.whois-table,
+.whois-table-wrapper {
+  margin-top: 0.5rem;
+  max-height: 300px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 6px;
+  background-color: #fafafa;
+}
+
+.whois-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+  font-size: 0.85rem;
+  color: black;
+}
+
+.whois-table td {
+  border: 1px solid #ddd;
+  padding: 6px 10px;
+  vertical-align: top;
+}
+
+.whois-table td:first-child {
+  font-weight: bold;
+  background-color: #f5f5f5;
+  width: 30%;
+}
+
 .dns-table {
   width: 100%;
   border-collapse: collapse;
   margin-top: 10px;
+  font-size: 14px;
+  color: black;
 }
 
-.whois-table td,
-.dns-table td,
-.dns-table th {
+.dns-table th,
+.dns-table td {
+  border: 1px solid #ddd;
   padding: 8px;
-  border: 1px solid #cce0f5;
-  text-align: left;
-  font-size: 14px;
 }
 
 .dns-table th {
-  background-color: #cce6ff;
-}
-
-.whois-section,
-.dns-section {
-  margin-top: 20px;
-}
-
-.modal-buttons {
-  margin-top: 20px;
-  display: flex;
-  gap: 15px;
-}
-
-.modal-buttons button {
-  padding: 10px 16px;
+  background-color: #f9f9f9;
   font-weight: bold;
-  font-size: 14px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
 }
 
-.modal-buttons .malicious {
-  background-color: #cc0000;
-  color: #fff;
-}
-
-.modal-buttons .malicious:hover {
-  background-color: #990000;
-}
-
-.modal-buttons .benign {
-  background-color: #28a745;
-  color: white;
-}
-
-.modal-buttons .benign:hover {
-  background-color: #1e7e34;
-}
-
-.close-button {
-  background-color: #888;
-  color: #fff;
-  padding: 6px 14px;
-  margin-top: 15px;
-  border-radius: 5px;
-  border: none;
-  cursor: pointer;
-  float: right;
-}
-
-.close-button:hover {
-  background-color: #666;
-}
-
-.modal-content img {
-  display: block;
-  max-width: 100%;
-  height: auto;
-  margin-top: 15px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+.dns-table-wrapper {
+  margin-top: 1rem;
 }
