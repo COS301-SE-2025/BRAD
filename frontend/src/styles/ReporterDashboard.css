@@ -147,3 +147,22 @@
 .modal-content button:hover {
   background-color: #0077b6;
 }
+.drop-area {
+  border: 2px dashed #ccc;
+  padding: 20px;
+  text-align: center;
+  border-radius: 10px;
+  margin-top: 10px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+
+.file-input {
+  display: block;
+  margin: 10px auto;
+}
+
+.file-list {
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
