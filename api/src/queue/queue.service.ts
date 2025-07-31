@@ -1,38 +1,24 @@
+import { HttpService } from '@nestjs/axios';
 import { Injectable } from '@nestjs/common';
-import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
+import { firstValueFrom } from 'rxjs';
 
 @Injectable()
 export class QueueService {
- 
-    constructor(@InjectQueue('reportQueue') private readonly reportQueue: Queue) {}
+  constructor(private readonly http: HttpService) {}
 
-  async addReportJob(
-    data: Record<string, any>,
-    opts: {
-      jobId?: string;
-      delay?: number;
-      attempts?: number;
-    } = {},
-  ) {
+  async queueToFastAPI(domain: string, reportId: string) {
+    const fastApiUrl = process.env.FASTAPI_URL;
+    const payload = { domain, report_id: reportId };
+
     try {
-      const job = await this.reportQueue.add('analyze', data, {
-        jobId: opts.jobId,
-        delay: opts.delay ?? 0,
-        attempts: opts.attempts ?? 3,
-        backoff: {
-          type: 'exponential',
-          delay: 2000,
-        },
-        removeOnComplete: true,
-        removeOnFail: false,
-      });
-
-      console.log(`Job [${job.name}] added to reportQueue with ID: ${job.id}`);
-      return job;
+      const res = await firstValueFrom(
+        this.http.post(`${fastApiUrl}/queue`, payload),
+      );
+      return res.data;
     } catch (err) {
-      console.log('Failed to enqueue report job', err);
+      console.error('[QueueService] Failed to queue:', err.message);
       throw err;
     }
   }
 }
+

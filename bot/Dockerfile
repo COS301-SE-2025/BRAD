@@ -9,7 +9,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy source code
-COPY . .
+COPY ./src ./src
 
 # Unbuffer Python output for real-time logs
 ENV PYTHONUNBUFFERED=1
@@ -18,4 +18,4 @@ ENV PYTHONUNBUFFERED=1
 RUN playwright install --with-deps
 
 # Run the bot
-CMD ["python", "src/bot.py", "pytest", "tests/integration/test_bot_integration.py", "-v"]
+CMD ["dramatiq", "src.worker", "--processes", "1", "--threads", "1"]

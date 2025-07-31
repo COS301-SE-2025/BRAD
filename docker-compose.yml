@@ -3,12 +3,13 @@ services:
     build: ./api
     container_name: brad-api
     ports:
-      - "${PORT}:${PORT}"
+      - "${PORT}:${PORT}" 
     volumes:
       - ./api:/app
       - ./uploads:/uploads
     depends_on:
       - mongo
+      - fastapi-queue
     env_file:
       - .env
 
@@ -21,9 +22,20 @@ services:
       - redis
       - api
       - mongo
-      - api
     env_file:
       - .env
+
+  fastapi-queue:
+    build: ./fastapi-queue
+    container_name: brad-fastapi
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    volumes:
+      - ./fastapi-queue:/app
 
   frontend:
     build: ./frontend
@@ -50,11 +62,11 @@ services:
     restart: always
     ports:
       - "6379:6379"
-    command: redis-server --requirepass "your_redis_password"
+    command: redis-server --requirepass "${REDIS_PASSWORD}"
     environment:
-      - REDIS_PASSWORD=your_redis_password
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
     volumes:
-    - redis-data:/data
+      - redis-data:/data
 
 volumes:
   mongo-data:

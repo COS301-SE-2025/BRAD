@@ -3,6 +3,7 @@ import API from '../api/axios';
 import '../styles/InvestigatorDashboard.css';
 import InvestigatorNavbar from '../components/InvestigatorNavbar';
 import ScrapingInfoViewer from '../components/ScrapingInfoViewer';
+import ForensicReportBlock from '../components/ForensicReportBlock'
 
 const InvestigatorDashboard = () => {
   const [reports, setReports] = useState([]);
@@ -132,106 +133,17 @@ const [activeImage, setActiveImage] = useState(null);
 )}
 
               {selectedReport.analysis ? (
-                <div className="analysis-details">
-                  <p><strong>Scanned At:</strong> {new Date(selectedReport.analysis.scannedAt).toLocaleString()}</p>
-                  <p><strong>Risk Score:</strong> {selectedReport.analysis.riskScore}</p>
-                  <p><strong>Malware Detected:</strong> {selectedReport.analysis.malwareDetected ? "Yes" : "No"}</p>
-                  <p><strong>IP Address:</strong> {selectedReport.analysis.ip}</p>
-                  <p><strong>Registrar:</strong> {selectedReport.analysis.registrar}</p>
-                  <p><strong>SSL Valid:</strong> {selectedReport.analysis.sslValid ? "Yes" : "No"}</p>
-                  <p><strong>WHOIS Owner:</strong> {selectedReport.analysis.whoisOwner}</p>
-                  <p><strong>Summary:</strong> {selectedReport.analysis.summary}</p>
+                <>
+                  <ForensicReportBlock analysis={selectedReport.analysis} />
 
-                  {selectedReport.analysis.whoisRaw && (
-                    <div className="whois-section">
-                      <button className="toggle-button" onClick={() => setShowWhois(prev => !prev)}>
-                        {showWhois ? 'Hide WHOIS Raw Data ▲' : 'Show WHOIS Raw Data ▼'}
-                      </button>
-
-                      {showWhois && (
-                        <div className="whois-table-wrapper">
-                          <table className="whois-table">
-                            <tbody>
-                              {Object.entries(selectedReport.analysis.whoisRaw).map(([key, value]) => (
-                                <tr key={key}>
-                                  <td><strong>{key}</strong></td>
-                                  <td>{Array.isArray(value) ? value.join(', ') : String(value)}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-                    </div>
-                  )}
-                  
-                  {selectedReport.analysis?.dns && (
-                    <div className="dns-section">
-                      <button className="toggle-button" onClick={() => setShowDns(prev => !prev)}>
-                        {showDns ? 'Hide DNS Records ▲' : 'Show DNS Records ▼'}
-                      </button>
-
-                      {showDns && (
-                        <div className="dns-table-wrapper">
-                          <h4>DNS Records</h4>
-                          <table className="dns-table">
-                            <thead>
-                              <tr>
-                                <th>Type</th>
-                                <th>Value</th>
-                              </tr>
-                            </thead>
-                            <tbody>
-                              {Object.entries(selectedReport.analysis.dns).flatMap(([recordType, values]) =>
-                                Array.isArray(values)
-                                  ? values.map((val, idx) => (
-                                      <tr key={`${recordType}-${idx}`}>
-                                        <td>{recordType}</td>
-                                        <td>{val}</td>
-                                      </tr>
-                                    ))
-                                  : [
-                                      <tr key={recordType}>
-                                        <td>{recordType}</td>
-                                        <td>{String(values)}</td>
-                                      </tr>
-                                    ]
-                              )}
-
-                              {/* Reverse IP Info */}
-                              {selectedReport.analysis.reverseIp && (
-                                <>
-                                  <tr>
-                                    <th colSpan={2} style={{ textAlign: 'left' }}>Reverse IP</th>
-                                  </tr>
-                                  {Array.isArray(selectedReport.analysis.reverseIp)
-                                    ? selectedReport.analysis.reverseIp.map((domain, idx) => (
-                                        <tr key={`reverse-${idx}`}>
-                                          <td>Domain</td>
-                                          <td>{domain}</td>
-                                        </tr>
-                                      ))
-                                    : (
-                                      <tr>
-                                        <td>Domain</td>
-                                        <td>{selectedReport.analysis.reverseIp}</td>
-                                      </tr>
-                                    )}
-                                </>
-                              )}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                  <div className="section-separator" />
 
                   <ScrapingInfoViewer
                     scrapingInfo={selectedReport.scrapingInfo}
                     showScraping={showScraping}
                     setShowScraping={setShowScraping}
                   />
-                </div>
+                </>
               ) : (
                 <p>No analysis available.</p>
               )}

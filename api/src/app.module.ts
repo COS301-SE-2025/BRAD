@@ -9,13 +9,12 @@ import { JwtModule } from '@nestjs/jwt';
 import * as Joi from 'joi';
 import { AdminModule } from './admin/admin.module';
 import { StatisticsModule } from './statistics/statistics.module';
-
-import { BullModule } from '@nestjs/bull';
-import { QueueModule } from './queue/queue.module'; // ✅ your global queue setup
+import { HttpModule } from '@nestjs/axios';
+import { QueueModule } from './queue/queue.module'; // your FastAPI wrapper
 
 @Module({
   imports: [
-    // Load & validate env variables
+    // Load & validate environment variables
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
@@ -24,13 +23,11 @@ import { QueueModule } from './queue/queue.module'; // ✅ your global queue set
         MONGO_URI: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
         BOT_ACCESS_KEY: Joi.string().required(),
-        REDIS_HOST: Joi.string().required(),
-        REDIS_PORT: Joi.number().required(),
-        REDIS_PASSWORD: Joi.string().allow('').optional(),
+        FASTAPI_URL: Joi.string().required(), 
       }),
     }),
 
-    // JWT Auth Setup
+    // JWT auth
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -39,28 +36,19 @@ import { QueueModule } from './queue/queue.module'; // ✅ your global queue set
       }),
     }),
 
-    // MongoDB Setup
+    // MongoDB connection
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGO_URI'),
+      useFactory: async (config: ConfigService) => ({
+        uri: config.get<string>('MONGO_URI'),
       }),
     }),
 
-    // Redis Queue Setup (QueueModule wraps this and the queue logic)
-    BullModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (configService: ConfigService) => ({
-        redis: {
-          host: configService.get<string>('REDIS_HOST'),
-          port: configService.get<number>('REDIS_PORT'),
-          password: configService.get<string>('REDIS_PASSWORD'),
-        },
-      }),
-    }),
+    // HTTP client for FastAPI communication
+    HttpModule,
 
+    // Modules
     QueueModule,        
     ReportModule,
     AuthModule,

@@ -8,12 +8,13 @@ import { UserModule } from '../users/user.module';
 import { AuthModule } from '../auth/auth.module';
 import { QueueModule } from '../queue/queue.module';
 
+
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: 'Report', schema: ReportSchema }]),
     UserModule,
     AuthModule,
-    QueueModule, 
+    QueueModule,
   ],
   controllers: [ReportController],
   providers: [ReportService, ForensicService],

@@ -13,22 +13,27 @@ export class ReportService {
     private readonly queueService: QueueService
   ) {}
 
-async submitReport(domain: string, submittedBy: string, evidenceFiles?: string[]) {
-  const newReport = new this.reportModel({
-    domain,
-    submittedBy,
-    evidence: evidenceFiles || []
-  });
-  const savedReport = await newReport.save();
-
-    await this.queueService.addReportJob({
-      reportId: savedReport._id.toString(),
-      domain: savedReport.domain,
+  async submitReport(domain: string, submittedBy: string, evidenceFiles?: string[]) {
+    const newReport = new this.reportModel({
+      domain,
+      submittedBy,
+      evidence: evidenceFiles || [],
     });
 
-    console.log(`[API] Queued report ${domain} (${savedReport._id}) for bot analysis.`);
+    const savedReport = await newReport.save();
+
+    // Call FastAPI queue service via HTTP
+    try {
+      await this.queueService.queueToFastAPI(savedReport.domain, savedReport._id.toString());
+      console.log(`[API] Queued report ${domain} (${savedReport._id}) for bot analysis.`);
+    } catch (err) {
+      console.error(`[API] Failed to queue report ${domain}:`, err.message);
+      // Optional: Decide if you want to delete or flag the report
+    }
+
     return savedReport;
-}
+  }
+
 
 
   async getReports(userId: string, role: string) {
@@ -61,34 +66,29 @@ async submitReport(domain: string, submittedBy: string, evidenceFiles?: string[]
   }
 
   async updateAnalysis(id: string, updateDto: UpdateAnalysisDto): Promise<Report> {
-    const updated = await this.reportModel.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          analysis: updateDto.analysis,
-          scrapingInfo: updateDto.scrapingInfo,
-          abuseFlags: updateDto.abuseFlags,
-          riskScore: updateDto.riskScore,
-          whois: updateDto.whois,
-          analyzed: true,
-          analysisStatus: updateDto.analysisStatus || 'done',
-          updatedAt: new Date(),
-        },
+  const updated = await this.reportModel.findByIdAndUpdate(
+    id,
+    {
+      $set: {
+        analysis: updateDto.analysis,
+        scrapingInfo: updateDto.scrapingInfo,
+        abuseFlags: updateDto.abuseFlags,
+        analyzed: true,
+        analysisStatus: updateDto.analysisStatus || 'done',
+        updatedAt: new Date(),
       },
-      { new: true },
-    );
-  
-    if (!updated) {
-      throw new NotFoundException(`Report with id ${id} not found`);
-    }
-  
-    return updated;
-  }
-  
-  
-  
-  
+    },
+    { new: true },
+  );
 
+  if (!updated) {
+    throw new NotFoundException(`Report with id ${id} not found`);
+  }
+
+  return updated;
+  }
+
+  
   async updateInvestigatorDecision(id: string, verdict: string) {
     if (!['malicious', 'benign'].includes(verdict))
       throw new Error('Invalid verdict');

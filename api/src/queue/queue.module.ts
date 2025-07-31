@@ -1,15 +1,14 @@
-import { Module, Global } from '@nestjs/common';
-import { BullModule } from '@nestjs/bull';
+import { Module } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
 import { QueueService } from './queue.service';
 
-@Global()
 @Module({
-  imports: [
-    BullModule.registerQueue({
-      name: 'reportQueue',
-    }),
-  ],
+  imports: [HttpModule],
   providers: [QueueService],
-  exports: [BullModule, QueueService],
+  exports: [QueueService],  // Export the service so it can be injected elsewhere
 })
 export class QueueModule {}
+
+
+// This module provides the QueueService which handles communication with the FastAPI queue
+// It uses HttpModule to make HTTP requests to the FastAPI endpoint for queuing reports.

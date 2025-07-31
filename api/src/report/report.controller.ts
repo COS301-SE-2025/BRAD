@@ -110,12 +110,11 @@ export class ReportController {
   @Patch('reports/:id/analysis')
   async updateAnalysis(@Param('id') id: string, @Body() body: any) {
     return this.reportService.updateAnalysis(id, {
-      analysis: body.analysis,
-      scrapingInfo: body.scrapingInfo,
-      riskScore: body.analysis?.riskScore,
-      whois: body.analysis?.whois || body.whois,
-      analysisStatus: body.analysisStatus,
-    });
+    analysis: body.analysis,               // full ForensicReport dict
+    scrapingInfo: body.scrapingInfo,       // from perform_scraping
+    abuseFlags: body.abuseFlags,           // flags found during scraping
+    analysisStatus: body.analysisStatus,   // "done"/"error"
+  });
   }
   
   @UseGuards(AuthGuard, RolesGuard)
