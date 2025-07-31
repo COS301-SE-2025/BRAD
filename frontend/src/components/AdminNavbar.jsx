@@ -17,11 +17,7 @@ const AdminNavbar = ({ setView }) => {
       <ul className="nav-link">
         <li><button onClick={() => setView('create')}>Create User</button></li>
         <li><button onClick={() => setView('manage')}>Manage User Roles</button></li>
-        <li>
-                  <a href={UserManual} target="_blank" rel="noopener noreferrer">
-                    <button>Help Menu</button>
-                  </a>
-                </li>
+        <li><button onClick={() => navigate('/help/admin')}>Help menu</button></li>
         <li><button onClick={() => navigate('/login')}>Logout</button></li>
       </ul>
     </div>

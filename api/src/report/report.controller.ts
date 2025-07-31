@@ -1,5 +1,5 @@
 import {
-    UploadedFile,
+    UploadedFile,UploadedFiles,
   UseInterceptors, Controller, Post, Get, Param, Patch, Body, HttpCode, NotFoundException, BadRequestException, UnauthorizedException, UseGuards, Req, ForbiddenException,
 } from '@nestjs/common';
 import { Request } from 'express';
@@ -9,7 +9,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { BotGuard } from '../auth/guards/bot.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor,FilesInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags, ApiBearerAuth, ApiOperation, ApiResponse, ApiBody, ApiParam,ApiConsumes,
 } from '@nestjs/swagger';
@@ -28,18 +28,16 @@ export class ReportController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('general', 'admin')
   @Post('report')
-  @UseInterceptors(FileInterceptor('evidence', {
+  @UseInterceptors(FilesInterceptor('evidence',5,{
     storage: diskStorage({
       destination: path.join(__dirname, '..', '..','..', '..', '..','..','uploads', 'evidence'),
       // Ensure the uploads directory exists
 
       filename: (req, file, cb) => {
-        console.log('📂 Uploads directory:', path.join(__dirname, '..', '..', '..', '..', '..', '..', 'uploads', 'evidence'));
+       
         const uniqueName = `${uuidv4()}${extname(file.originalname)}`;
         cb(null, uniqueName);
-        console.log('📦 Received file:', file?.originalname ,'as',uniqueName);
-        
-        console.log('📩 Body:', req.body);
+     
       },
     }),
     limits: { fileSize: 5 * 1024 * 1024 }, // 5MB limit
@@ -53,8 +51,11 @@ export class ReportController {
       properties: {
         domain: { type: 'string' },
         evidence: {
-          type: 'string',
-          format: 'binary'
+          type: 'array',
+          items: {
+            type: 'string',
+            format: 'binary'
+          }
         }
       }
     }
@@ -64,7 +65,7 @@ export class ReportController {
   async submit(
     @Req() req: Request,
     @Body('domain') domain: string,
-    @UploadedFile() file?: Multer.File
+    @UploadedFiles() files?: Multer.File[] | Multer.File,
   ) {
     const user = req['user'] as JwtPayload;
     const userId = user?.id;
@@ -74,9 +75,9 @@ export class ReportController {
     }
 
     // Optional: evidence filename
-    const evidencePath = file?.filename;
-console.log(`Submitting report for domain: ${domain}, user: ${userId}, evidence: ${evidencePath}`);
-    return this.reportService.submitReport(domain, userId, evidencePath);
+    const evidencePaths = files?.map(file => file.filename) || [];
+
+    return this.reportService.submitReport(domain, userId, evidencePaths);
   }
 
   @UseGuards(AuthGuard, RolesGuard)
