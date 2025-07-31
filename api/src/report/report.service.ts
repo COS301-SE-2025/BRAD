@@ -11,11 +11,11 @@ export class ReportService {
     private forensicService: ForensicService
   ) {}
 
-async submitReport(domain: string, submittedBy: string, evidencePath?: string) {
+async submitReport(domain: string, submittedBy: string, evidenceFiles?: string[]) {
   const newReport = new this.reportModel({
     domain,
     submittedBy,
-    evidence: evidencePath || null
+    evidence: evidenceFiles || []
   });
   return newReport.save();
 }
