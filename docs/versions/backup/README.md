@@ -39,7 +39,7 @@ This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)**
 ## Repository Structure
 
 ```
-📂 MP4
+📂 BRAD
 ├── 📂 frontend/            # UI
 ├── 📂 docs/                # Documentation
 ├── 📄 README.md            # Project overview
