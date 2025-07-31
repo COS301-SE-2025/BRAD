@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { JwtModule } from '@nestjs/jwt';
 import * as Joi from 'joi';
 import { AdminModule } from './admin/admin.module';
+import { StatisticsModule } from './statistics/statistics.module';
 
 import { BullModule } from '@nestjs/bull';
 import { QueueModule } from './queue/queue.module'; // ✅ your global queue setup
@@ -64,6 +65,7 @@ import { QueueModule } from './queue/queue.module'; // ✅ your global queue set
     ReportModule,
     AuthModule,
     AdminModule,
+    StatisticsModule,
   ],
 
   controllers: [AppController],

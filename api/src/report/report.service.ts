@@ -13,9 +13,13 @@ export class ReportService {
     private readonly queueService: QueueService
   ) {}
 
-  async submitReport(domain: string, submittedBy: string) {
-    const newReport = new this.reportModel({ domain, submittedBy });
-    const savedReport = await newReport.save();
+async submitReport(domain: string, submittedBy: string, evidenceFiles?: string[]) {
+  const newReport = new this.reportModel({
+    domain,
+    submittedBy,
+    evidence: evidenceFiles || []
+  });
+  const savedReport = await newReport.save();
 
     await this.queueService.addReportJob({
       reportId: savedReport._id.toString(),
@@ -24,7 +28,7 @@ export class ReportService {
 
     console.log(`[API] Queued report ${domain} (${savedReport._id}) for bot analysis.`);
     return savedReport;
-  }
+}
 
 
   async getReports(userId: string, role: string) {

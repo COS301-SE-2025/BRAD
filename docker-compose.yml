@@ -3,23 +3,14 @@ services:
     build: ./api
     container_name: brad-api
     ports:
-      - "3000:3000"
+      - "${PORT}:${PORT}"
     volumes:
       - ./api:/app
+      - ./uploads:/uploads
     depends_on:
       - mongo
-      - redis
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/brad_db
-      - JWT_SECRET=brad_super_secret_2025
-      - BOT_ACCESS_KEY=secret-bot-key-123
-      - PORT=3000
-      - NODE_ENV=development
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=your_redis_password
-      - EMAIL_USER=cos301.cap2@gmail.com
-      - EMAIL_PASS=cmzu mhnu dvds sadx
+    env_file:
+      - .env
 
   bot:
     build: ./bot
@@ -30,13 +21,9 @@ services:
       - redis
       - api
       - mongo
-    environment:
-      - API_URL=http://api:3000
-      - BOT_ACCESS_KEY=secret-bot-key-123
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=your_redis_password
-    restart: unless-stopped
+      - api
+    env_file:
+      - .env
 
   frontend:
     build: ./frontend
