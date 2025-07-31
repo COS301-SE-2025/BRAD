@@ -906,15 +906,14 @@ usability by allowing a focused and responsive interface. It also
 supports security and compliance by ensuring that sensitive operations
 are handled server-side under controlled conditions.
 
-The Layered Architecture organizes the BRAD bot into distinct backend layers: 
-the Scrape Service Layer (responsible for fetching and parsing submitted domains), 
-Malware Detection Layer (examines domains for malicious content), AI Analysis Layer 
-(classifies and scores domain risk based on trained models), and Report Generation 
-Layer (produces and logs investigation reports). This structure improves maintainability, 
-as each layer handles a specific subtask and can be updated or debugged independently. 
-It also enhances reliability, as issues in one layer such as scraping do not directly 
-affect the functioning of others. Security is reinforced by isolating sensitive processes 
-within these internal layers, reducing exposure to external threats.
+The Layered Architecture organizes BRAD into logical layers: the
+presentation layer (user interface), application layer (API and
+Gatekeeper), business logic layer (analysis and classification), and
+data layer (databases and logs). This improves maintainability, as each
+layer can be updated independently and reliability as issues in one
+layer don’t directly affect others. It also enhances security by
+restricting access to sensitive data handling within backend layers
+only.
 
 The Pipe and Filter Pattern structures the backend analysis workflow as
 a clear processing pipeline: Scrape → Malware Detection → AI Risk
@@ -1159,28 +1158,23 @@ without compromising backend integrity.
 
 > **Layered** **Architecture**
 
-The BRAD system applies a Layered Architecture within its backend, which includes both the API and the bot, to organize tasks 
-into sequential, logical layers. This layered structure supports the execution of grouped subtasks in a defined order, 
-improving modularity and control throughout the domain investigation process.
-
-In the bot, the layered execution pipeline consists of:
-
-- **Scrape Service**: Retrieves and collects data from the submitted domain.
-- **Malware Detection Service**: Scans the scraped domain content for known malware signatures or suspicious behavior.
-- **AI Analysis Service** *(executed within the API)*: Uses artificial intelligence to classify and assess the **risk level** 
-of the domain based on patterns in threat data and previously seen indicators. This logic is kept secure by running it inside 
-the API, which has direct access to the database and enforces access protection.
-- **Report Service**: Compiles the output from previous layers into a structured report, ready for review by investigators.
-
-By structuring backend services in layers, BRAD achieves a clear separation of concerns. Each service can be developed, tested, and modified independently. Sensitive operations such as AI-based threat assessment and data handling are encapsulated deeper in the backend (in the API), away from the public interface. This design choice improves system integrity, eases long-term maintenance, and strengthens protection from external threats.
+The system adopts a Layered Architecture to structure its internal logic
+into four distinct layers: the presentation layer (UI), application
+layer (API gateway and authentication), business logic layer (scraping
+and risk analysis), and data layer (databases and logs). This separation
+improves maintainability, because changes in one layer (e.g., updating
+the UI) do not ripple across unrelated layers. It also supports security
+by isolating sensitive logic in backend layers that are not exposed to
+users. Furthermore, reliability is strengthened, as each layer is
+testable in isolation, reducing the likelihood of cascading failures.
 
 **Quality** **Requirements** **Addressed:**
 
-1\. **Maintainability**: The bot’s layered services can be updated or replaced individually (e.g., updating malware detection rules) without disrupting other layers.
+1\. **Maintainability**: Developers can make changes to one layer (e.g., UI) without affecting others.
 
-2\. **Security**: Core logic such as domain risk assessment and database operations is isolated within protected backend layers, reducing attack surface.
+2\. **Security**: Sensitive operations are encapsulated in deeper layers, reducing attack surface.
 
-3\. **Reliability**: Layers can be tested in isolation, allowing targeted error detection and ensuring that failures in one component do not cascade through the entire system.
+3\. **Reliability**: Layered isolation makes failures easier to contain and debug.
 
 > **Pipe** **and** **Filter** **Pattern**
 
@@ -1236,7 +1230,7 @@ functional but secure, adaptable, and resilient in the face of
 ever-evolving cyber-security threats.
 
 <img src="./images/architectureDiagram.png"
-style="width:7.59514in;height:6.24167in" />
+style="width:6.59514in;height:3.24167in" />
 
 <p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 

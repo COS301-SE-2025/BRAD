@@ -10,6 +10,8 @@ import UserSettings from './pages/UserSettings';
 import AdminDashboard from './pages/AdminDashboard';
 import ChangePassword from './pages/ChangePassword';
 import ResetPasswordPage from './pages/ResetPasswordPage';
+import InvestigatorStats from './pages/InvestigatorStats';
+import Help from './pages/Help';
 import './App.css';
 
 function App() {
@@ -25,8 +27,11 @@ function App() {
         <Route path="/settings" element={<UserSettings />} />
         <Route path="/investigator/settings" element={<UserSettings />} />
         <Route path="/admin" element={<AdminDashboard />} />
-         <Route path="/reset-password" element={<ResetPasswordPage />} />
-          <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/help/:role" element={<Help />} />
+        <Route path="/investigator/stats" element={<InvestigatorStats />} />
+
         {/* Add more routes here */}
       </Routes>
     </Router>
