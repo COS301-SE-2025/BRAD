@@ -46,7 +46,7 @@ const LoginPage = () => {
 
 
     if (user.role === 'investigator') {
-      navigate('/investigator');
+      navigate('/investigator/stats');
     } else if (user.role === 'admin') {
       navigate('/admin');
     } else {

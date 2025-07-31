@@ -18,6 +18,9 @@ const InvestigatorNavbar = () => {
       {/* Investigator Navigation Links */}
       <ul className="nav-link">
         <li>
+          <button onClick={() => navigate('/investigator/stats')}>Dashboard</button>
+        </li>
+        <li>
           <button onClick={() => navigate('/investigator')}>Reports</button>
         </li>
         <li><button onClick={() => navigate('/help/investigator')}>Help menu</button></li>
