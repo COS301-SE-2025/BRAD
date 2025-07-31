@@ -906,14 +906,15 @@ usability by allowing a focused and responsive interface. It also
 supports security and compliance by ensuring that sensitive operations
 are handled server-side under controlled conditions.
 
-The Layered Architecture organizes BRAD into logical layers: the
-presentation layer (user interface), application layer (API and
-Gatekeeper), business logic layer (analysis and classification), and
-data layer (databases and logs). This improves maintainability, as each
-layer can be updated independently and reliability as issues in one
-layer don’t directly affect others. It also enhances security by
-restricting access to sensitive data handling within backend layers
-only.
+The Layered Architecture organizes the BRAD bot into distinct backend layers: 
+the Scrape Service Layer (responsible for fetching and parsing submitted domains), 
+Malware Detection Layer (examines domains for malicious content), AI Analysis Layer 
+(classifies and scores domain risk based on trained models), and Report Generation 
+Layer (produces and logs investigation reports). This structure improves maintainability, 
+as each layer handles a specific subtask and can be updated or debugged independently. 
+It also enhances reliability, as issues in one layer such as scraping do not directly 
+affect the functioning of others. Security is reinforced by isolating sensitive processes 
+within these internal layers, reducing exposure to external threats.
 
 The Pipe and Filter Pattern structures the backend analysis workflow as
 a clear processing pipeline: Scrape → Malware Detection → AI Risk
