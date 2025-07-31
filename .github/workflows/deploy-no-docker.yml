@@ -2,8 +2,7 @@ name: CI (No Docker)
 
 on:
   push:
-    branches: []
-    # branches: [main, dev]
+    branches: [main, dev]
   workflow_dispatch:
 
 jobs:

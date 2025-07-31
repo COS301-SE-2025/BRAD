@@ -10,16 +10,6 @@ export class Report {
   @Prop({ required: true, trim: true })
   domain: string;
 
- @ApiProperty({
-  description: 'Optional screenshot or file evidence',
-  example: ['uploads/evidence/file1.png', 'uploads/evidence/file2.png'],
-  required: false,
-  type: [String],
-})
-@Prop({ type: [String], default: [] })
-evidence: string[];
-
-
   @ApiProperty({ example: '665c861c8b23919a3f823fa1', type: String })
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   submittedBy: Types.ObjectId;

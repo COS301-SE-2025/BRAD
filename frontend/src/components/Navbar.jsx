@@ -16,7 +16,11 @@ const Navbar = () => {
 
       <ul className="nav-link">
         <li><button onClick={() => navigate('/dashboard')}>Report</button></li>
-        <li><button onClick={() => navigate('/help/reporter')}>Help menu</button></li>
+        <li>
+          <a href={UserManual} target="_blank" rel="noopener noreferrer">
+            <button>Help Menu</button>
+          </a>
+        </li>
         <li><button onClick={() => navigate('/settings')}>User Settings</button></li>
         <li>
           <button

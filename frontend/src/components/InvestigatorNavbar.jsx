@@ -18,12 +18,13 @@ const InvestigatorNavbar = () => {
       {/* Investigator Navigation Links */}
       <ul className="nav-link">
         <li>
-          <button onClick={() => navigate('/investigator/stats')}>Dashboard</button>
-        </li>
-        <li>
           <button onClick={() => navigate('/investigator')}>Reports</button>
         </li>
-        <li><button onClick={() => navigate('/help/investigator')}>Help menu</button></li>
+        <li>
+                  <a href={UserManual} target="_blank" rel="noopener noreferrer">
+                    <button>Help Menu</button>
+                  </a>
+                </li>
         <li>
           <button onClick={() => navigate('/investigator/settings')}>Investigator Settings</button>
         </li>
