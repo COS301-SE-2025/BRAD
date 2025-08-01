@@ -32,27 +32,7 @@ All containers are connected via an internal Docker network, ensuring secure com
 
 ## Deployment Diagram
 
-```
-+-------------------+         +-------------------+
-|                   |         |                   |
-|    Web Browser    | <-----> |   Frontend (5173) |
-|                   |         |   (React)         |
-+-------------------+         +-------------------+
-                                       |
-                                       v
-                             +-------------------+
-                             |                   |
-                             |    API (3000)     |
-                             |   (Node.js)       |
-                             +-------------------+
-                              ^               |
-                              |               v
-+-------------------+         |       +-------------------+
-|                   |         |       |                   |
-|    Bot            |---------+------>|   MongoDB (27017) |
-|   (Python)        |                 |                   |
-+-------------------+                 +-------------------+
-```
+![Deployment Diagram](deployment-model.png)
 
 ## Quality Requirements Support
 
