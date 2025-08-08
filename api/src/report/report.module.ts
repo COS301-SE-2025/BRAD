@@ -8,6 +8,7 @@ import { UserModule } from '../users/user.module';
 import { AuthModule } from '../auth/auth.module';
 import { QueueModule } from '../queue/queue.module';
 
+import { StatisticsService } from 'src/statistics/statistics.service';
 
 @Module({
   imports: [
@@ -18,5 +19,6 @@ import { QueueModule } from '../queue/queue.module';
   ],
   controllers: [ReportController],
   providers: [ReportService, ForensicService],
+    exports: [MongooseModule]
 })
 export class ReportModule {}

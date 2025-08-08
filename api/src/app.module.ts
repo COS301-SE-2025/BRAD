@@ -12,6 +12,7 @@ import { StatisticsModule } from './statistics/statistics.module';
 import { HttpModule } from '@nestjs/axios';
 import { QueueModule } from './queue/queue.module'; // your FastAPI wrapper
 
+
 @Module({
   imports: [
     // Load & validate environment variables
