@@ -1,15 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import API from '../api/axios';
-import '../styles/InvestigatorDashboard.css';
 import InvestigatorNavbar from '../components/InvestigatorNavbar';
 import ScrapingInfoViewer from '../components/ScrapingInfoViewer';
 import ForensicReportBlock from '../components/ForensicReportBlock'
+import '../styles/InvestigatorDashboard.css';
 
 const InvestigatorDashboard = () => {
   const [reports, setReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
-  const [showWhois, setShowWhois] = useState(false);
-  const [showDns, setShowDns] = useState(false);
   const [showScraping, setShowScraping] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
 const [activeImage, setActiveImage] = useState(null);

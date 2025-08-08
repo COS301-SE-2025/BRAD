@@ -83,7 +83,7 @@ def process_report(data):
         forensic_Data.run()
 
         # 2. Perform scraping & abuse flag extraction
-        scraping_info, abuse_flags = perform_scraping(domain)
+        scraping_info, abuse_flags = perform_scraping(domain, report_id)
 
         # 3. Send to API
         if report_analysis(report_id, forensic_Data, scraping_info, abuse_flags):

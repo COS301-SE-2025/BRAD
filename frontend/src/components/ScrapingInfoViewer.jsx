@@ -91,18 +91,31 @@ const ScrapingInfoViewer = ({ scrapingInfo }) => {
     </div>
   );
 
-  const renderScreenshot = () => (
-    <div className="scraping-section">
-      {scrapingInfo.screenshotPath ? (
-        <img
-          src={`http://localhost:3000${scrapingInfo.screenshotPath}`}
-          alt="Screenshot"
-        />
-      ) : (
-        <p>No screenshot available.</p>
-      )}
-    </div>
-  );
+  const renderScreenshot = () => {
+    const baseUrl = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000';
+    const path = `/static/${scrapingInfo.screenshotPath}`;
+    console.log("screenshotPath:", scrapingInfo.screenshotPath);
+    console.log("Image URL:", `${baseUrl}${path}`);
+
+
+
+    return (
+      <div className="scraping-section">
+        {scrapingInfo.screenshotPath ? (
+          <img
+            src={`${baseUrl}${path}`}
+            alt="Screenshot"
+            className="scraping-screenshot"
+            onError={(e) => {
+              e.target.onerror = null;
+            }}
+          />
+        ) : (
+          <p>No screenshot available.</p>
+        )}
+      </div>
+    );
+  };
 
   const renderActiveTab = () => {
     switch (activeTab) {
