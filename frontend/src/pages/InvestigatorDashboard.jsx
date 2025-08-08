@@ -50,7 +50,6 @@ const InvestigatorDashboard = ({ view }) => {
     <div className="investigator-dashboard">
       <InvestigatorNavbar />
       <div className="dashboard-main">
-        <h2 className="dashboard-heading">Welcome, Investigator</h2>
 
         {view === 'pending' && <PendingReports reports={reports} onSelect={setSelectedReport} />}
         {view === 'reviewed' && <ReviewedReports reports={reports} onSelect={setSelectedReport} />}

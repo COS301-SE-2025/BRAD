@@ -27,7 +27,7 @@ const InvestigatorStats = () => {
     { name: 'Resolved reports', value: summary.pendingEvidence },
   ];
 
-  const COLORS = ['#ff6b6b', '#4dabf7', '#fcd34d'];
+  const COLORS = ['#460279ff', '#4dabf7', '#d39430ff'];
 
   const barData = [
     { month: 'Jan', cases: 80 },

@@ -2,7 +2,6 @@ import React from 'react';
 import '../styles/Navbar.css';
 import { useNavigate } from 'react-router-dom';
 import BRAD_robot from '../assets/BRAD_robot.png';
-import UserManual from '../assets/B.R.A.D-User-Manual.pdf'
 
 const Navbar = () => {
   const navigate = useNavigate();
