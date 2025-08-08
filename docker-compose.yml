@@ -11,6 +11,8 @@ services:
       - mongo
     env_file:
       - .env
+    networks:
+      - brad_net
 
   bot:
     build: ./bot
@@ -22,6 +24,8 @@ services:
       - api
     env_file:
       - .env
+    networks:
+      - brad_net
 
   frontend:
     build: ./frontend
@@ -30,9 +34,11 @@ services:
       - "5173:5173"
     environment:
       - NODE_ENV=development
+    networks:
+      - brad_net
 
   mongo:
-    image: mongo
+    image: mongo:4.4
     container_name: brad-mongo
     restart: always
     ports:
@@ -41,6 +47,13 @@ services:
       - mongo-data:/data/db
       - ./database/mongo.conf:/etc/mongo.conf:ro
     command: mongod --quiet --logpath /var/log/mongodb/mongod.log
+    networks:
+      - brad_net
 
 volumes:
   mongo-data:
+
+networks:
+  brad_net:
+    driver: bridge
+    name: brad_network
