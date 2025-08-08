@@ -23,16 +23,21 @@ function App() {
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/dashboard" element={<ReporterDashboard />} />
         <Route path="/about" element={<AboutPage />} />
+
+        {/* Investigator */}
         <Route path="/investigator" element={<InvestigatorDashboard />} />
-        <Route path="/settings" element={<UserSettings />} />
+        <Route path="/investigator/pending" element={<InvestigatorDashboard view="pending" />} />
+        <Route path="/investigator/reviewed" element={<InvestigatorDashboard view="reviewed" />} />
         <Route path="/investigator/settings" element={<UserSettings />} />
+        <Route path="/investigator/stats" element={<InvestigatorStats />} />
+
+        {/* General  */}
+        <Route path="/settings" element={<UserSettings />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/help/:role" element={<Help />} />
-        <Route path="/investigator/stats" element={<InvestigatorStats />} />
 
-        {/* Add more routes here */}
       </Routes>
     </Router>
   );
