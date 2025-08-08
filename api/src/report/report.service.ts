@@ -37,6 +37,15 @@ async submitReport(domain: string, submittedBy: string, evidenceFiles?: string[]
     throw new ForbiddenException('Role not permitted to view reports');
   }
   
+    async getReportsByUsername(username: string, role: string): Promise<any[]> {
+    if (role === 'admin' || role === 'investigator') {
+      return this.reportModel.find().populate('submittedBy', 'username');
+    }
+  
+
+  
+    throw new ForbiddenException('Role not permitted to view reports');
+  }
 
   async analyzeReport(id: string) {
     const report = await this.reportModel.findById(id);

@@ -7,6 +7,7 @@ import { ForensicService } from '../services/forensic.service';
 import { UserModule } from '../users/user.module'; 
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthModule } from '../auth/auth.module';
+import { StatisticsService } from 'src/statistics/statistics.service';
 
 @Module({
   imports: [
@@ -16,5 +17,6 @@ import { AuthModule } from '../auth/auth.module';
   ],
   controllers: [ReportController],
   providers: [ReportService, ForensicService],
+    exports: [MongooseModule]
 })
 export class ReportModule {}
