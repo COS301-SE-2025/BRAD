@@ -81,19 +81,43 @@ const InvestigatorDashboard = ({ view }) => {
               {/* Analysis */}
               {selectedReport.analysis ? (
                 <div className="analysis-details">
-                  <p><strong>Scanned At:</strong> {new Date(selectedReport.analysis.scannedAt).toLocaleString()}</p>
-                  <p><strong>Risk Score:</strong> {selectedReport.analysis.riskScore}</p>
-                  <p><strong>Malware Detected:</strong> {selectedReport.analysis.malwareDetected ? "Yes" : "No"}</p>
-                  <p><strong>IP Address:</strong> {selectedReport.analysis.ip}</p>
-                  <p><strong>Registrar:</strong> {selectedReport.analysis.registrar}</p>
-                  <p><strong>SSL Valid:</strong> {selectedReport.analysis.sslValid ? "Yes" : "No"}</p>
-                  <p><strong>WHOIS Owner:</strong> {selectedReport.analysis.whoisOwner}</p>
-                  <p><strong>Summary:</strong> {selectedReport.analysis.summary}</p>
+                  <div className="analysis-cards">
+                    <div className="analysis-card">
+                      🕒 <span className="card-label">Scanned At:</span>
+                      <span className="card-value">{new Date(selectedReport.analysis.scannedAt).toLocaleString()}</span>
+                    </div>
+                    <div className="analysis-card risk">
+                      🚨 <span className="card-label">Risk Score:</span>
+                      <span className="card-value">{selectedReport.analysis.riskScore}</span>
+                    </div>
+                    <div className="analysis-card">
+                      🦠 <span className="card-label">Malware Detected:</span>
+                      <span className="card-value">{selectedReport.analysis.malwareDetected ? "Yes" : "No"}</span>
+                    </div>
+                    <div className="analysis-card">
+                      🌐 <span className="card-label">IP Address:</span>
+                      <span className="card-value">{selectedReport.analysis.ip}</span>
+                    </div>
+                    <div className="analysis-card">
+                      🏢 <span className="card-label">Registrar:</span>
+                      <span className="card-value">{selectedReport.analysis.registrar}</span>
+                    </div>
+                    <div className="analysis-card">
+                      🔒 <span className="card-label">SSL Valid:</span>
+                      <span className="card-value">{selectedReport.analysis.sslValid ? "Yes" : "No"}</span>
+                    </div>
+                    <div className="analysis-card">
+                      👤 <span className="card-label">WHOIS Owner:</span>
+                      <span className="card-value">{selectedReport.analysis.whoisOwner}</span>
+                    </div>
+                  </div>
+
+                  <p className="analysis-summary"><strong>📝 Summary:</strong> {selectedReport.analysis.summary}</p>
 
                   {selectedReport.analysis.whoisRaw && (
                     <div className="whois-section">
                       <button className="toggle-button" onClick={() => setShowWhois(prev => !prev)}>
-                        {showWhois ? 'Hide WHOIS Raw Data ▲' : 'Show WHOIS Raw Data ▼'}
+                        {showWhois ? '📄 Hide WHOIS Raw Data ▲' : '📄 Show WHOIS Raw Data ▼'}
                       </button>
                       {showWhois && (
                         <div className="whois-table-wrapper">
@@ -115,7 +139,7 @@ const InvestigatorDashboard = ({ view }) => {
                   {selectedReport.analysis?.dns && (
                     <div className="dns-section">
                       <button className="toggle-button" onClick={() => setShowDns(prev => !prev)}>
-                        {showDns ? 'Hide DNS Records ▲' : 'Show DNS Records ▼'}
+                        {showDns ? '🌍 Hide DNS Records ▲' : '🌍 Show DNS Records ▼'}
                       </button>
                       {showDns && (
                         <div className="dns-table-wrapper">
@@ -150,6 +174,7 @@ const InvestigatorDashboard = ({ view }) => {
                     setShowScraping={setShowScraping}
                   />
                 </div>
+
               ) : (
                 <p>No analysis available.</p>
               )}
