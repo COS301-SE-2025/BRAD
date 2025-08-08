@@ -94,4 +94,4 @@ docker-compose down -v
 
 Our previous installation is also accessible that shows installation of individual components to run without docker.
 
-[BRAD-Developer-Guide](../../version2/BRAD-Developer-Guide.pdf)
+[BRAD-Developer-Guide](../versions/version2/BRAD-Developer-Guide.pdf)
