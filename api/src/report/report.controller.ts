@@ -30,7 +30,7 @@ export class ReportController {
   @Post('report')
   @UseInterceptors(FilesInterceptor('evidence',5,{
     storage: diskStorage({
-     destination: path.join(__dirname, '..', '..','..', '..', '..','..','uploads', 'evidence'),
+     destination: path.join(__dirname, '..', '..','uploads', 'evidence'),
 
       
       // Ensure the uploads directory exists
@@ -112,12 +112,11 @@ export class ReportController {
   @Patch('reports/:id/analysis')
   async updateAnalysis(@Param('id') id: string, @Body() body: any) {
     return this.reportService.updateAnalysis(id, {
-      analysis: body.analysis,
-      scrapingInfo: body.scrapingInfo,
-      riskScore: body.analysis?.riskScore,
-      whois: body.analysis?.whois || body.whois,
-      analysisStatus: body.analysisStatus,
-    });
+    analysis: body.analysis,               // full ForensicReport dict
+    scrapingInfo: body.scrapingInfo,       // from perform_scraping
+    abuseFlags: body.abuseFlags,           // flags found during scraping
+    analysisStatus: body.analysisStatus,   // "done"/"error"
+  });
   }
   
   @UseGuards(AuthGuard, RolesGuard)

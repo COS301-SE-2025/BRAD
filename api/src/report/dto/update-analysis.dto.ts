@@ -5,8 +5,16 @@ import {
   ValidateNested,
   IsBoolean,
   IsArray,
+  IsObject,
+  IsEnum
 } from 'class-validator';
 import { Type } from 'class-transformer';
+
+enum AnalysisStatus {
+  Pending = 'pending',
+  Done = 'done',
+  Failed = 'failed'
+}
 
 class RedFlagsDto {
   @IsOptional()
@@ -17,6 +25,24 @@ class RedFlagsDto {
   @IsOptional()
   @IsBoolean()
   obfuscatedScripts?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  redirectChain?: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  usesMetaRefresh?: boolean;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  suspiciousInlineEvents?: string[];
+
+  @IsOptional()
+  @IsBoolean()
+  captchaDetected?: boolean;
 }
 
 class StructuredInfoDto {
@@ -61,34 +87,70 @@ class ScrapingInfoDto {
   crawledLinks?: string[];
 }
 
-export class UpdateAnalysisDto {
+class ForensicsStatsDto {
   @IsOptional()
-  analysis?: Record<string, any>;
+  @IsNumber()
+  domain_age_days?: number;
 
   @IsOptional()
-  scrapingInfo?: {
-    htmlRaw?: string;
-    screenshotPath?: string;
-    structuredInfo?: {
-      headings?: string[];
-      links?: string[];
-      forms?: string[];
-    };
-    crawledLinks?: string[];
+  @IsString()
+  domain_created?: string;
+
+  @IsOptional()
+  @IsNumber()
+  ssl_days_remaining?: number;
+
+  @IsOptional()
+  @IsObject()
+  dns?: {
+    mx_count?: number;
+    ns_count?: number;
+    has_spf?: boolean;
+    has_dmarc?: boolean;
   };
+}
+
+class AnalysisDto {
+  @IsOptional()
+  @IsString()
+  domain?: string;
 
   @IsOptional()
-  abuseFlags?: {
-    suspiciousJS?: string[];
-    obfuscatedScripts?: boolean;
-    redirectChain?: string[];
-    usesMetaRefresh?: boolean;
-    suspiciousInlineEvents?: string[];
-    captchaDetected?: boolean;
-  };
+  @IsString()
+  ip?: string;
 
   @IsOptional()
-  whois?: Record<string, any>;
+  @IsString()
+  reverseIp?: string;
+
+  @IsOptional()
+  @IsObject()
+  whoisRaw?: Record<string, any>;
+
+  @IsOptional()
+  @IsString()
+  registrar?: string;
+
+  @IsOptional()
+  @IsString()
+  whoisOwner?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  sslValid?: boolean;
+
+  @IsOptional()
+  @IsString()
+  sslExpires?: string;
+
+  @IsOptional()
+  @IsObject()
+  dns?: Record<string, any>;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ForensicsStatsDto)
+  stats?: ForensicsStatsDto;
 
   @IsOptional()
   @IsNumber()
@@ -96,6 +158,37 @@ export class UpdateAnalysisDto {
 
   @IsOptional()
   @IsString()
-  analysisStatus?: string;
+  riskLevel?: string;
+
+  @IsOptional()
+  @IsObject()
+  riskReasons?: Record<string, string>;
+
+  @IsOptional()
+  @IsObject()
+  geo?: Record<string, any>;
+
+  @IsOptional()
+  @IsString()
+  timestamp?: string;
 }
 
+export class UpdateAnalysisDto {
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => AnalysisDto)
+  analysis?: AnalysisDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ScrapingInfoDto)
+  scrapingInfo?: ScrapingInfoDto;
+
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => RedFlagsDto)
+  abuseFlags?: RedFlagsDto;
+
+  @IsEnum(AnalysisStatus)
+  analysisStatus: AnalysisStatus;
+}
