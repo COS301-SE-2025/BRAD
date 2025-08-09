@@ -415,3 +415,7 @@
   align-items: center;
   gap: 0.4rem;
 }
+
+.confirmation-modal {
+  z-index: 9999; /* above report modal */
+}

@@ -5,6 +5,7 @@ import InvestigatorNavbar from '../components/InvestigatorNavbar';
 import PendingReports from '../components/PendingReports';
 import ReviewedReports from '../components/ReviewedReports';
 import ScrapingInfoViewer from '../components/ScrapingInfoViewer';
+import Notification from "../components/Notification";
 
 const InvestigatorDashboard = ({ view }) => {
   const [reports, setReports] = useState([]);
@@ -14,13 +15,24 @@ const InvestigatorDashboard = ({ view }) => {
   const [showScraping, setShowScraping] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [activeImage, setActiveImage] = useState(null);
+  const [notification, setNotification] = useState(null);
+
+  const [confirmModal, setConfirmModal] = useState({
+    visible: false,
+    action: null,
+    message: ""
+  });
+
+  const showNotification = (type, message) => {
+    setNotification(prev => prev ? prev : { type, message });
+  };
 
   const fetchReports = async () => {
     try {
       const res = await API.get('/reports');
       setReports(res.data);
     } catch (err) {
-      console.error("Error fetching reports:", err);
+      showNotification("error", "Failed to fetch reports. Please try again.");
     }
   };
 
@@ -35,14 +47,15 @@ const InvestigatorDashboard = ({ view }) => {
   }, []);
 
   const handleDecision = async (id, verdict) => {
-    const confirm = window.confirm(`Are you sure you want to mark this report as ${verdict.toUpperCase()}?`);
-    if (!confirm) return;
+    setConfirmModal({ visible: false, action: null, message: "" });
+    setSelectedReport(null);
+
     try {
       await API.patch(`/report/${id}/decision`, { verdict });
-      setSelectedReport(null);
       fetchReports();
+      showNotification("success", `Report marked as "${verdict}".`);
     } catch (err) {
-      console.error("Error submitting decision:", err);
+      showNotification("error", "Error submitting decision. Please retry.");
     }
   };
 
@@ -50,16 +63,23 @@ const InvestigatorDashboard = ({ view }) => {
     <div className="investigator-dashboard">
       <InvestigatorNavbar />
       <div className="dashboard-main">
-
         {view === 'pending' && <PendingReports reports={reports} onSelect={setSelectedReport} />}
         {view === 'reviewed' && <ReviewedReports reports={reports} onSelect={setSelectedReport} />}
 
-        {/* Modal */}
+        {notification && (
+          <Notification
+            type={notification.type}
+            message={notification.message}
+            onClose={() => setNotification(null)}
+          />
+        )}
+
+        {/* Report Modal */}
         {selectedReport && (
           <div className="modal-overlay">
             <div className="modal-content">
               <h3>Analysis for {selectedReport.domain}</h3>
-              {/* Evidence */}
+
               {selectedReport?.evidence?.length > 0 && (
                 <div className="evidence-preview">
                   <h4>Submitted Evidence</h4>
@@ -78,7 +98,7 @@ const InvestigatorDashboard = ({ view }) => {
                   ))}
                 </div>
               )}
-              {/* Analysis */}
+
               {selectedReport.analysis ? (
                 <div className="analysis-details">
                   <div className="analysis-cards">
@@ -174,17 +194,34 @@ const InvestigatorDashboard = ({ view }) => {
                     setShowScraping={setShowScraping}
                   />
                 </div>
-
               ) : (
                 <p>No analysis available.</p>
               )}
 
               {!selectedReport.investigatorDecision && (
                 <div className="modal-buttons">
-                  <button className="malicious" onClick={() => handleDecision(selectedReport._id, 'malicious')}>
+                  <button
+                    className="malicious"
+                    onClick={() =>
+                      setConfirmModal({
+                        visible: true,
+                        message: `Are you sure you want to mark this report as MALICIOUS?`,
+                        action: () => handleDecision(selectedReport._id, 'malicious')
+                      })
+                    }
+                  >
                     Mark as Malicious
                   </button>
-                  <button className="benign" onClick={() => handleDecision(selectedReport._id, 'benign')}>
+                  <button
+                    className="benign"
+                    onClick={() =>
+                      setConfirmModal({
+                        visible: true,
+                        message: `Are you sure you want to mark this report as SAFE?`,
+                        action: () => handleDecision(selectedReport._id, 'benign')
+                      })
+                    }
+                  >
                     Mark as Safe
                   </button>
                 </div>
@@ -206,6 +243,20 @@ const InvestigatorDashboard = ({ view }) => {
                 style={{ maxWidth: '80%', maxHeight: '80vh', borderRadius: '5px' }}
               />
               <button className="close-button" onClick={() => setShowImageModal(false)}>Close</button>
+            </div>
+          </div>
+        )}
+
+        {/* Confirmation Modal — always on top */}
+        {confirmModal.visible && (
+          <div className="modal-overlay confirmation-modal">
+            <div className="modal-content">
+              <h3>Confirm Action</h3>
+              <p>{confirmModal.message}</p>
+              <div className="modal-buttons">
+                <button className="benign" onClick={confirmModal.action}>Yes</button>
+                <button className="malicious" onClick={() => setConfirmModal({ visible: false, action: null, message: "" })}>Cancel</button>
+              </div>
             </div>
           </div>
         )}
