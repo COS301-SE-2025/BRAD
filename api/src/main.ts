@@ -43,18 +43,18 @@ async function bootstrap() {
   });
 
   // Serve /screenshots
-  const screenshotsPath = join(__dirname, '..', '..', 'screenshots');
-console.log('Serving screenshots from:', screenshotsPath);
+  const screenshotsPath = join(__dirname, '..','..', 'screenshots');
+  console.log('Serving screenshots from:', screenshotsPath);
 
-app.use(
-  '/static/screenshots',
-  express.static(screenshotsPath, {
-    setHeaders: (res) => {
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
-    },
-  }),
-);
+  app.use(
+    '/static/screenshots',
+    express.static(screenshotsPath, {
+      setHeaders: (res) => {
+        res.setHeader('Access-Control-Allow-Origin', '*');
+        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+      },
+    }),
+  );
 
 
 

@@ -18,7 +18,7 @@ def calculate_risk_score(scraping_info: dict, abuse_flags: dict) -> int:
     return min(max(score, 10), 100)
 
 def perform_scraping(domain: str, report_id: str) -> tuple:
-    screenshot_dir = "/app/static/screenshots"
+    screenshot_dir = "/app/screenshots"
     os.makedirs(screenshot_dir, exist_ok=True)
 
     filename = f"{report_id}_{int(time.time())}.png"
