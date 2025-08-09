@@ -3,6 +3,8 @@ import '../styles/ScrapingInfoViewer.css';
 
 const ScrapingInfoViewer = ({ scrapingInfo }) => {
   const [activeTab, setActiveTab] = useState('structured');
+  const [showScreenshotModal, setShowScreenshotModal] = useState(false);
+  const [activeScreenshot, setActiveScreenshot] = useState("");
 
   if (!scrapingInfo) return <p>No scraping data available.</p>;
 
@@ -91,18 +93,105 @@ const ScrapingInfoViewer = ({ scrapingInfo }) => {
     </div>
   );
 
-  const renderScreenshot = () => (
-    <div className="scraping-section">
-      {scrapingInfo.screenshotPath ? (
-        <img
-          src={`http://localhost:3000${scrapingInfo.screenshotPath}`}
-          alt="Screenshot"
-        />
-      ) : (
-        <p>No screenshot available.</p>
-      )}
-    </div>
-  );
+  const renderScreenshot = () => {
+    const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+    const path = `/static/${scrapingInfo.screenshotPath}`;
+    const imageUrl = `${baseUrl}${path}`;
+
+    //console.log("screenshotPath:", scrapingInfo.screenshotPath);
+    //console.log("Image URL:", imageUrl);
+
+    return (
+      <>
+        <div className="scraping-section">
+          {scrapingInfo.screenshotPath ? (
+            <img
+              src={imageUrl}
+              alt="Screenshot"
+              className="scraping-screenshot"
+              style={{
+                cursor: "pointer",
+                maxWidth: "250px",
+                borderRadius: "5px",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.2)"
+              }}
+              onClick={() => {
+                setActiveScreenshot(imageUrl);
+                setShowScreenshotModal(true);
+              }}
+              onError={(e) => {
+                e.target.onerror = null;
+              }}
+            />
+          ) : (
+            <p>No screenshot available.</p>
+          )}
+        </div>
+
+        {showScreenshotModal && activeScreenshot && (
+          <div
+            className="modal-overlay"
+            onClick={() => setShowScreenshotModal(false)}
+            style={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              width: "100vw",
+              height: "100vh",
+              background: "rgba(0,0,0,0.8)",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              zIndex: 1000
+            }}
+          >
+            <div
+              className="modal-content"
+              onClick={(e) => e.stopPropagation()}
+              style={{
+                background: "#fff",
+                padding: "20px",
+                borderRadius: "8px",
+                maxWidth: "90%",
+                maxHeight: "90%",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center"
+              }}
+            >
+              <h4 style={{ marginBottom: "10px" }}>
+                Screenshot Preview
+              </h4>
+              <img
+                src={activeScreenshot}
+                alt="Screenshot Full"
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "80vh",
+                  borderRadius: "5px"
+                }}
+              />
+              <button
+                className="close-button"
+                style={{
+                  marginTop: "10px",
+                  padding: "8px 16px",
+                  background: "#333",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: "4px",
+                  cursor: "pointer"
+                }}
+                onClick={() => setShowScreenshotModal(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  };
 
   const renderActiveTab = () => {
     switch (activeTab) {
