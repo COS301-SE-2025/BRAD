@@ -1,7 +1,7 @@
 import React, { useState,useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import '../styles/UserSettings.css';
-import Navbar from '../components/Navbar';
+import Navbar from '../components/ReporterNavbar';
 import InvestigatorNavbar from '../components/InvestigatorNavbar';
 
 const UserSettings = () => {

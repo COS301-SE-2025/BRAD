@@ -183,3 +183,88 @@
   margin-top: 10px;
   font-size: 0.9rem;
 }
+
+.reporter-dashboard, .report-page {
+  display: flex;
+  background: linear-gradient(to bottom right, #000814, #001f3f);
+  min-height: 100vh;
+}
+
+.dashboard-main {
+  flex: 1;
+  padding: 20px;
+  color: white;
+}
+
+.dashboard-greeting {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+.settings-btn {
+  background: #005f73;
+  border: none;
+  padding: 10px 15px;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-bottom: 20px;
+}
+
+.settings-btn:hover {
+  background: #0a9396;
+}
+
+.history-list {
+  margin-top: 10px;
+}
+
+.history-item {
+  display: flex;
+  justify-content: space-between;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  margin-bottom: 8px;
+  border-radius: 6px;
+}
+
+.history-item .domain {
+  font-weight: bold;
+}
+
+.history-item .status {
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.status.pending {
+  background: orange;
+}
+
+.status.reviewed {
+  background: green;
+}
+
+.report-form input[type="text"], 
+.report-form input[type="file"] {
+  display: block;
+  margin-bottom: 10px;
+  padding: 8px;
+  width: 100%;
+  border-radius: 6px;
+  border: none;
+}
+
+.report-form button {
+  background: #005f73;
+  border: none;
+  padding: 10px 15px;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.report-form button:hover {
+  background: #0a9396;
+}
+

@@ -4,6 +4,7 @@ import LandingPage from './pages/Landing';
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import ReporterDashboard from './pages/ReporterDashboard';
+import ReportPage from './pages/ReportPage';
 import AboutPage from './pages/About';
 import InvestigatorDashboard from './pages/InvestigatorDashboard';
 import UserSettings from './pages/UserSettings';
@@ -21,8 +22,11 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/dashboard" element={<ReporterDashboard />} />
         <Route path="/about" element={<AboutPage />} />
+
+        {/* Reporter routes */}
+        <Route path="/dashboard" element={<ReporterDashboard />} />
+        <Route path="/report" element={<ReportPage />} />
 
         {/* Investigator */}
         <Route path="/investigator" element={<InvestigatorDashboard />} />
