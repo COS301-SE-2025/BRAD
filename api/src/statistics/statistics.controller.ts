@@ -1,6 +1,7 @@
 import {
     UploadedFile,UploadedFiles,
   UseInterceptors, Controller, Post, Get, Param, Patch, Body, HttpCode, NotFoundException, BadRequestException, UnauthorizedException, UseGuards, Req, ForbiddenException,
+  Query,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { StatisticsService } from './statistics.service';
@@ -72,5 +73,94 @@ export class StatisticsController {
         return this.statisticsService.getMostReportedDomain();
     }
 
-    // }
-}
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin', 'investigator')
+    @Get('reports-marked-as-malicious')
+    @ApiBearerAuth("JWT-auth")
+    @ApiOperation({ summary: 'Get reports marked as malicious' })
+    @ApiResponse({ status: 200, description: 'Reports marked as malicious' })
+    async getReportsMarkedAsMalicious(@Req() req: Request) {
+        const user=req['user'] as JwtPayload;
+       
+        const role=user?.role;
+        return this.statisticsService.getReportsMarkedAsMalicious(role);
+    }
+
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin', 'investigator')
+    @Get('reports-marked-as-safe')
+    @ApiBearerAuth("JWT-auth")
+    @ApiOperation({ summary: 'Get reports marked as safe' })
+    @ApiResponse({ status: 200, description: 'Reports marked as safe' })
+    async getReportsMarkedAsSafe(@Req() req: Request) {
+        const user=req['user'] as JwtPayload;
+
+        const role=user?.role;
+        return this.statisticsService.getReportsMarkedAsSafe(role);
+    }
+
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin', 'investigator')
+    @Get('reports-by-month')
+    @ApiBearerAuth("JWT-auth")
+    @ApiOperation({ summary: 'Get reports by month' })
+    @ApiResponse({ status: 200, description: 'Reports by month' })
+    async getReportsByMonth(@Req() req: Request, @Query('month') month: number) {
+        const user=req['user'] as JwtPayload;
+
+        const role=user?.role;
+        return this.statisticsService.getReportCountByMonth(role, month);
+    }
+
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin', 'investigator')
+    @Get('reports-submitted-today')
+    @ApiBearerAuth("JWT-auth")
+    @ApiOperation({ summary: 'Get reports submitted today' })
+    @ApiResponse({ status: 200, description: 'Reports submitted today' })
+    async getReportsSubmittedToday(@Req() req: Request) {
+        const user=req['user'] as JwtPayload;
+
+        const role=user?.role;
+        return this.statisticsService.getReportSubmittedToday(role);
+    }
+
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin')
+    @Get('no-of-investigators')
+    @ApiBearerAuth("JWT-auth")
+    @ApiOperation({ summary: 'Get number of investigators' })
+    @ApiResponse({ status: 200, description: 'Number of investigators' })
+    async getNoOfInvestigators(@Req() req: Request) {
+        const user=req['user'] as JwtPayload;
+
+        const role=user?.role;
+        return this.statisticsService.getNoOfInvestigators(role);
+    }
+
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin')
+    @Get('no-of-admins')
+    @ApiBearerAuth("JWT-auth")
+    @ApiOperation({ summary: 'Get number of admins' })
+    @ApiResponse({ status: 200, description: 'Number of admins' })
+    async getNoOfAdmins(@Req() req: Request) {
+        const user=req['user'] as JwtPayload;
+
+        const role=user?.role;
+        return this.statisticsService.getNoOfAdmins(role);
+    }
+
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin')
+    @Get('no-of-general-users')
+    @ApiBearerAuth("JWT-auth")
+    @ApiOperation({ summary: 'Get number of general users' })
+    @ApiResponse({ status: 200, description: 'Number of general users' })
+    async getNoOfGeneralUsers(@Req() req: Request) {
+        const user=req['user'] as JwtPayload;
+
+        const role=user?.role;
+        return this.statisticsService.getNoOfGeneralUsers(role);
+    }
+    }
