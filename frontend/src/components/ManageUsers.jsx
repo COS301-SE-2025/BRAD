@@ -1,30 +1,38 @@
 import React, { useState } from 'react';
+import ConfirmationModal from '../components/ConfirmationModal'; 
 
 const ManageUsers = ({ users, updateRole, removeUser }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState('all');
 
-const handleRoleChange = (userId, currentRole, newRole,username) => {
-  if (newRole === currentRole) return;
+  const [modalData, setModalData] = useState({
+    isOpen: false,
+    message: '',
+    onConfirm: null
+  });
 
-  const confirmChange = window.confirm(
-    `Are you sure you want to change "${username}"s role from "${currentRole}" to "${newRole}"?`
-  );
+  const openModal = (message, onConfirm) => {
+    setModalData({ isOpen: true, message, onConfirm });
+  };
 
-  if (confirmChange) {
-    updateRole(userId, currentRole, newRole);
-  }
-};
+  const closeModal = () => {
+    setModalData({ isOpen: false, message: '', onConfirm: null });
+  };
 
-const handleRemove = (userId, username) => {
-  const confirmDelete = window.confirm(
-    `Are you sure you want to permanently remove "${username}"?`
-  );
+  const handleRoleChange = (userId, currentRole, newRole, username) => {
+    if (newRole === currentRole) return;
+    openModal(
+      `Are you sure you want to change "${username}"'s role from "${currentRole}" to "${newRole}"?`,
+      () => updateRole(userId, currentRole, newRole)
+    );
+  };
 
-  if (confirmDelete) {
-    removeUser(userId);
-  }
-};
+  const handleRemove = (userId, username) => {
+    openModal(
+      `Are you sure you want to permanently remove "${username}"?`,
+      () => removeUser(userId)
+    );
+  };
 
   // Filter based on search and role
   const filteredUsers = users.filter((user) => {
@@ -39,23 +47,23 @@ const handleRemove = (userId, username) => {
 
       {/* Filters */}
       <div className="filter-section">
-            <input
-            type="text"
-            placeholder="Search by username..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="user-search-input"
-            />
-            <select
-            value={roleFilter}
-            onChange={(e) => setRoleFilter(e.target.value)}
-            className="role-filter-select"
-            >
-            <option value="all">All Roles</option>
-            <option value="reporter">Reporter</option>
-            <option value="investigator">Investigator</option>
-            <option value="admin">Admin</option>
-            </select>
+        <input
+          type="text"
+          placeholder="Search by username..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="user-search-input"
+        />
+        <select
+          value={roleFilter}
+          onChange={(e) => setRoleFilter(e.target.value)}
+          className="role-filter-select"
+        >
+          <option value="all">All Roles</option>
+          <option value="general">General</option>
+          <option value="investigator">Investigator</option>
+          <option value="admin">Admin</option>
+        </select>
       </div>
 
       {/* Table */}
@@ -69,34 +77,35 @@ const handleRemove = (userId, username) => {
           </tr>
         </thead>
         <tbody>
-       {filteredUsers.map((user) => (
-  <tr key={user._id}>
-    <td>{user.username}</td>
-    <td>{user.role}</td>
-    <td>
-      <select
-        className="role-change"
-        value={user.role}
-        onChange={(e) =>
-          handleRoleChange(user._id, user.role, e.target.value,user.username)
-        } 
-        disabled={user.role === 'admin'}
-      >
-        <option value="reporter">Reporter</option>
-        <option value="investigator">Investigator</option>
-        <option value="admin">Admin</option>
-      </select>
-    </td>
-    <td>
-      <button
-        className="remove-button"
-       onClick={() => handleRemove(user._id, user.username)}  
-      >
-        Remove
-      </button>
-    </td>
-  </tr>
-))}
+          {filteredUsers.map((user) => (
+            <tr key={user._id}>
+              <td>{user.username}</td>
+              <td>{user.role}</td>
+              <td>
+                <select
+                  className="role-change"
+                  value={user.role}
+                  onChange={(e) =>
+                    handleRoleChange(user._id, user.role, e.target.value, user.username)
+                  }
+                  disabled={user.role === 'admin'}
+                >
+                  <option value="general">General</option>
+                  <option value="investigator">Investigator</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </td>
+              <td>
+                <button
+                  className="remove-button"
+                  disabled={user.role === 'admin'}
+                  onClick={() => handleRemove(user._id, user.username)}
+                >
+                  Remove
+                </button>
+              </td>
+            </tr>
+          ))}
 
           {filteredUsers.length === 0 && (
             <tr>
@@ -107,6 +116,18 @@ const handleRemove = (userId, username) => {
           )}
         </tbody>
       </table>
+
+      {/* Confirmation Modal */}
+      {modalData.isOpen && (
+        <ConfirmationModal
+          message={modalData.message}
+          onConfirm={() => {
+            modalData.onConfirm();
+            closeModal();
+          }}
+          onCancel={closeModal}
+        />
+      )}
     </div>
   );
 };
