@@ -1,28 +1,53 @@
 import logging
+import os
 import sys
-from logging.handlers import RotatingFileHandler
+import contextvars
 
-LOG_FORMAT = "%(asctime)s [%(levelname)s] [%(name)s] %(message)s"
-DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+# -------- Correlation ID (per job) --------
+report_id_ctx = contextvars.ContextVar("report_id", default="-")
 
-def get_logger(name: str, log_file: str = "bot.log", max_bytes: int = 5_000_000, backup_count: int = 3) -> logging.Logger:
+class JobContextFilter(logging.Filter):
+    def filter(self, record: logging.LogRecord) -> bool:
+        record.report_id = report_id_ctx.get()
+        return True
+
+# -------- Formatter helpers --------
+class PlainFormatter(logging.Formatter):
+    def __init__(self):
+        super().__init__(
+            fmt="%(asctime)s [%(levelname)s] [%(name)s] [rid=%(report_id)s] %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+
+def get_logger(name: str) -> logging.Logger:
     logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
 
-    if logger.handlers:  # prevent duplicate logs
+    # Avoid duplicate handlers + stop propagation to root (kills duplicate lines)
+    if logger.handlers:
         return logger
+    logger.propagate = False
 
-    # Console output (for Docker logs)
-    console_handler = logging.StreamHandler(sys.stdout)
-    console_handler.setLevel(logging.INFO)
-    console_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=DATE_FORMAT))
+    # Levels & format toggles
+    level_name = os.getenv("LOG_LEVEL", "INFO").upper()
+    use_json = os.getenv("LOG_JSON", "0") == "1"
 
-    # Rotating file logs
-    file_handler = RotatingFileHandler(log_file, maxBytes=max_bytes, backupCount=backup_count)
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(logging.Formatter(LOG_FORMAT, datefmt=DATE_FORMAT))
+    logger.setLevel(getattr(logging, level_name, logging.INFO))
 
-    logger.addHandler(console_handler)
-    logger.addHandler(file_handler)
+    stream = logging.StreamHandler(sys.stdout)
+    stream.setLevel(logger.level)
+    stream.addFilter(JobContextFilter())
 
+    if use_json:
+        # Optional JSON output (requires python-json-logger). Falls back to plain if missing.
+        try:
+            from pythonjsonlogger import jsonlogger
+            stream.setFormatter(jsonlogger.JsonFormatter(
+                "%(asctime)s %(levelname)s %(name)s %(report_id)s %(message)s"
+            ))
+        except Exception:
+            stream.setFormatter(PlainFormatter())
+    else:
+        stream.setFormatter(PlainFormatter())
+
+    logger.addHandler(stream)
     return logger
