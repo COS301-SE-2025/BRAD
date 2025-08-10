@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/ReporterDashboard.css';
 import ReporterNavbar from '../components/ReporterNavbar';
+import Notification from '../components/Notification';
 import API from '../api/axios';
 
 const ReporterDashboard = () => {
@@ -12,14 +13,21 @@ const ReporterDashboard = () => {
   const [evidenceFiles, setEvidenceFiles] = useState([]);
   const [activeImage, setActiveImage] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
+  const [notification, setNotification] = useState(null);
+
 
   const MAX_FILES = 5;
+
+  const showNotification = (type, message) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 4000);
+  };
 
   const handleFileChange = (e) => {
     const newFiles = Array.from(e.target.files);
     const combined = [...evidenceFiles, ...newFiles];
     if (combined.length > MAX_FILES) {
-      alert('You can only attach up to 5 files.');
+      showNotification('error', 'You can only attach up to 5 files.');
       setEvidenceFiles(combined.slice(0, MAX_FILES));
     } else {
       setEvidenceFiles(combined);
@@ -31,7 +39,7 @@ const ReporterDashboard = () => {
     const droppedFiles = Array.from(e.dataTransfer.files);
     const combined = [...evidenceFiles, ...droppedFiles];
     if (combined.length > MAX_FILES) {
-      alert('You can only attach up to 5 files.');
+      showNotification('error', 'You can only attach up to 5 files.');
       setEvidenceFiles(combined.slice(0, MAX_FILES));
     } else {
       setEvidenceFiles(combined);
@@ -43,7 +51,7 @@ const ReporterDashboard = () => {
   };
 
   const submitReport = async () => {
-    if (!domain) return alert('Please enter a domain/URL');
+    if (!domain) return showNotification('error', 'Please enter a domain/URL');
 
     const formData = new FormData();
     formData.append('domain', domain);
@@ -60,10 +68,10 @@ const ReporterDashboard = () => {
 
       setDomain('');
       setEvidenceFiles([]);
-      alert('Report submitted successfully!');
+      showNotification('success', 'Report submitted successfully!');
       setTimeout(() => fetchReports(), 1000);
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to submit report');
+      showNotification('error', err.response?.data?.message || 'Failed to submit report');
     }
   };
 
@@ -90,6 +98,15 @@ const ReporterDashboard = () => {
     <div className="dashboard-container">
       <ReporterNavbar />
       <div className="dashboard-content">
+
+        {notification && (
+          <Notification
+            type={notification.type}
+            message={notification.message}
+            onClose={() => setNotification(null)}
+          />
+        )}
+
         <div className="submit-section">
           <h2>Submit Suspicious URL</h2>
           <div className="url-input-group">

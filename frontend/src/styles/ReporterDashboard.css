@@ -324,6 +324,19 @@
   max-width: 90%;
   box-shadow: 0 5px 20px rgba(0,0,0,0.3);
   text-align: left;
+  position: relative;
+  animation: scaleIn 0.25s ease-out;
+}
+
+@keyframes scaleIn {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
 
 .analysis-modal h3 {
