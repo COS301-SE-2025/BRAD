@@ -22,10 +22,16 @@ services:
     volumes:
       - ./bot:/app
       - ./screenshots:/app/screenshots
+      - ./logs/bot:/app/logs
     depends_on:
       - redis
       - api
       - mongo
+    environment:
+      - LOG_TO_FILE=1
+      - LOG_DIR=/app/logs
+      - LOG_FILE_MAX_BYTES=5242880
+      - LOG_BACKUP_COUNT=5
     env_file:
       - .env
     networks:

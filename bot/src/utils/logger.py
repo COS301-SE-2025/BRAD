@@ -1,7 +1,13 @@
-import logging
-import os
-import sys
-import contextvars
+#logger.py
+"""
+Centralized logging setup for the bot.
+- Provides a logger with correlation ID support for job tracking.
+- Configures both console and file handlers with appropriate formatters.
+"""
+
+
+import logging, os, sys, contextvars, pathlib
+from logging.handlers import RotatingFileHandler
 
 # -------- Correlation ID (per job) --------
 report_id_ctx = contextvars.ContextVar("report_id", default="-")
@@ -21,33 +27,47 @@ class PlainFormatter(logging.Formatter):
 
 def get_logger(name: str) -> logging.Logger:
     logger = logging.getLogger(name)
-
-    # Avoid duplicate handlers + stop propagation to root (kills duplicate lines)
     if logger.handlers:
         return logger
     logger.propagate = False
 
-    # Levels & format toggles
     level_name = os.getenv("LOG_LEVEL", "INFO").upper()
     use_json = os.getenv("LOG_JSON", "0") == "1"
-
     logger.setLevel(getattr(logging, level_name, logging.INFO))
 
+    # stdout handler (existing)
     stream = logging.StreamHandler(sys.stdout)
     stream.setLevel(logger.level)
     stream.addFilter(JobContextFilter())
-
-    if use_json:
-        # Optional JSON output (requires python-json-logger). Falls back to plain if missing.
-        try:
-            from pythonjsonlogger import jsonlogger
-            stream.setFormatter(jsonlogger.JsonFormatter(
-                "%(asctime)s %(levelname)s %(name)s %(report_id)s %(message)s"
-            ))
-        except Exception:
-            stream.setFormatter(PlainFormatter())
-    else:
-        stream.setFormatter(PlainFormatter())
+    # set JSON or plain formatter (same as you have now) ...
+    # stream.setFormatter(...)
 
     logger.addHandler(stream)
+
+    # file handler (new)
+    if os.getenv("LOG_TO_FILE", "1") == "1":
+        log_dir = os.getenv("LOG_DIR", "/app/logs")
+        pathlib.Path(log_dir).mkdir(parents=True, exist_ok=True)
+
+        max_bytes = int(os.getenv("LOG_FILE_MAX_BYTES", "5242880"))  # 5MB
+        backup_count = int(os.getenv("LOG_BACKUP_COUNT", "5"))
+        log_path = os.path.join(log_dir, os.getenv("LOG_FILE_NAME", "bot.log"))
+
+        fh = RotatingFileHandler(log_path, maxBytes=max_bytes, backupCount=backup_count)
+        fh.setLevel(logger.level)
+        fh.addFilter(JobContextFilter())
+        # use same formatter as stream
+        try:
+            if use_json:
+                from pythonjsonlogger import jsonlogger
+                fh.setFormatter(jsonlogger.JsonFormatter(
+                    "%(asctime)s %(levelname)s %(name)s %(report_id)s %(message)s"
+                ))
+            else:
+                fh.setFormatter(PlainFormatter())
+        except Exception:
+            fh.setFormatter(PlainFormatter())
+
+        logger.addHandler(fh)
+
     return logger
