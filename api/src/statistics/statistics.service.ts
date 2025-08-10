@@ -1,4 +1,4 @@
-import { Injectable ,ForbiddenException} from '@nestjs/common';
+import { Injectable ,ForbiddenException,BadRequestException} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 
@@ -58,27 +58,44 @@ async getPendingReportsCount(userid:string, role:string): Promise<number> {
     }
     return this.reportModel.countDocuments({ investigatorDecision: 'safe' });
   }
-async getReportSubmittedMonthly(role:string): Promise<any[]> {
-    if(role !== 'admin' && role !== 'investigator') {
-      throw new ForbiddenException('Role not permitted to view statistics');
-    }
-    return this.reportModel.aggregate([
-      {
-        $group: {
-          _id: { $month: '$createdAt' },
-          count: { $sum: 1 }
-        }
-      },
-      {
-        $project: {
-          month: '$_id',
-          count: 1,
-          _id: 0
-        }
-      },
-      { $sort: { month: 1 } }
-    ]);
+async getReportCountByMonth(role: string, month: number): Promise<{ month: number; count: number }> {
+  if (role !== 'admin' && role !== 'investigator') {
+    throw new ForbiddenException('Role not permitted to view statistics');
   }
+
+  if (month < 1 || month > 12) {
+    throw new BadRequestException('Invalid month. Must be between 1 and 12.');
+  }
+
+  const result = await this.reportModel.aggregate([
+    {
+      $addFields: {
+        reportMonth: { $month: '$createdAt' }
+      }
+    },
+    {
+      $match: {
+        reportMonth: month
+      }
+    },
+    {
+      $group: {
+        _id: '$reportMonth',
+        count: { $sum: 1 }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        month: '$_id',
+        count: 1
+      }
+    }
+  ]);
+
+  return result[0] || { month, count: 0 };
+}
+
 
 async getReportSubmittedToday(role:string): Promise<number> {
     if(role !== 'admin' && role !== 'investigator') {
