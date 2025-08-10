@@ -10,6 +10,7 @@ from dramatiq.brokers.redis import RedisBroker
 from .forensics.report import ForensicReport
 from .utils.analysis import perform_scraping
 from src.utils.logger import get_logger, report_id_ctx
+from src.utils.job_logging_middleware import JobLoggingMiddleware
 
 
 # ─── Logger ───
@@ -39,6 +40,7 @@ redis_broker = RedisBroker(
     port=REDIS_PORT,
     password=os.getenv("REDIS_PASSWORD") or None
 )
+redis_broker.add_middleware(JobLoggingMiddleware())
 dramatiq.set_broker(redis_broker)
 logger.info("Redis broker set successfully.")
 
@@ -84,12 +86,11 @@ def process_report(data):
         logger.warning(f"Skipping invalid job payload: {data}")
         return
 
-    # --- Correlation ID for this job ---
-    token = report_id_ctx.set(report_id)
     t0 = time.perf_counter()
+    logger.debug(f"Received job payload: {data}")
+    logger.info(f"[BOT] Starting analysis for {domain} (Report ID: {report_id})")
 
     try:
-        logger.info(f"[BOT] Starting analysis for {domain} (Report ID: {report_id})")
         domain = sanitize_domain(domain)
 
         # 1) Forensics
@@ -106,17 +107,12 @@ def process_report(data):
         # 3) Send to API
         if report_analysis(report_id, forensic_data, scraping_info, abuse_flags):
             elapsed_ms = int((time.perf_counter() - t0) * 1000)
-            logger.info(
-                f"[BOT] Report {report_id} successfully analyzed "
-                f"(risk={forensic_data.risk_level}, score={forensic_data.risk_score}, {elapsed_ms}ms)"
-            )
+            logger.info(f"[BOT] Report {report_id} successfully analyzed "
+                        f"(risk={forensic_data.risk_level}, score={forensic_data.risk_score}, {elapsed_ms}ms)")
         else:
             logger.warning(f"[BOT] Report {report_id} analysis completed but failed to update API.")
-
     except Exception as e:
         logger.error(f"[BOT] Analysis failed for {domain}: {e}", exc_info=True)
         raise
-    finally:
-        # Always clear the correlation ID for the thread
-        report_id_ctx.reset(token)
+
 
