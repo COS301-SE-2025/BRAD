@@ -1,51 +1,78 @@
 .navbar {
-  width: 120px;
-  background: rgba(173, 216, 230, 0.25);
+  width: 70px;
+  background:  rgba(173, 216, 230, 0.25);
   color: white;
   display: flex;
   flex-direction: column;
-  padding: 1.5rem 1rem;
-  align-items: center;
-  margin-left: 10px;
+  padding: 1rem 0.5rem;
+  align-items: flex-start;
+  transition: width 0.3s ease;
+  overflow-x: hidden;
+}
+
+.navbar:hover {
+  width: 220px;
 }
 
 .brand-section {
   text-align: center;
   margin-bottom: 2rem;
+  width: 100%;
 }
 
 .nav-logo {
-  height: 80px;
+  height: 50px;
   margin-bottom: 0.5rem;
 }
 
 .nav-title {
-  font-size: 1.25rem;
+  font-size: 1rem;
   font-weight: bold;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.navbar:hover .nav-title {
+  opacity: 1;
 }
 
 .nav-link {
   list-style: none;
   padding: 0;
   width: 100%;
+  margin: 0;
 }
 
 .nav-link li {
-  margin-bottom: 1rem;
-}
-
-.nav-link button {
-  width: 100%;
-  padding: 0.6rem;
-  font-size: 1rem;
-  background-color: transparent;
-  color: white;
-  border: 1px solid white;
-  border-radius: 6px;
+  margin-bottom: 0.5rem;
   cursor: pointer;
-  transition: background 0.2s;
 }
 
-.nav-link button:hover {
-  background-color: rgba(255, 255, 255, 0.2);
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.nav-icon {
+  font-size: 1.2rem;
+  min-width: 30px;
+  text-align: center;
+}
+
+.nav-text {
+  margin-left: 0.8rem;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.navbar:hover .nav-text {
+  opacity: 1;
+}
+
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.15);
 }
