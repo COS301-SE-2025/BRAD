@@ -9,7 +9,7 @@ import {
 
 const InvestigatorStats = () => {
   const [timeFrame, setTimeFrame] = useState('Monthly');
-  const investigatorName = 'Username';
+  const user = JSON.parse(localStorage.getItem('user')) || { username: 'Reporter' };
 
   const summary = {
     total: 112,
@@ -27,7 +27,7 @@ const InvestigatorStats = () => {
     { name: 'Resolved reports', value: summary.pendingEvidence },
   ];
 
-  const COLORS = ['#ff6b6b', '#4dabf7', '#fcd34d'];
+  const COLORS = ['#460279ff', '#4dabf7', '#d39430ff'];
 
   const barData = [
     { month: 'Jan', cases: 80 },
@@ -51,7 +51,7 @@ const InvestigatorStats = () => {
         <div className="welcome-box">
           <FaUserCircle className="user-icon" />
           <h1 className="welcome-text">
-            Welcome, {investigatorName} <span className="wave">👋</span>
+            Welcome, {user.username} <span className="wave">👋</span>
           </h1>
         </div>
 
