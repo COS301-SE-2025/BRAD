@@ -11,7 +11,6 @@ const AdminNavbar = ({ setView }) => {
     { label: 'Create User', icon: <FaUserPlus />, onClick: () => setView('create') },
     { label: 'Manage User Roles', icon: <FaUsersCog />, onClick: () => setView('manage') },
     { label: 'Help Menu', icon: <FaQuestionCircle />, onClick: () => navigate('/help/admin') },
-    { label: 'User Settings', icon: <FaUserCog />, onClick: () => navigate('/settings') },
     { label: 'Logout', icon: <FaSignOutAlt />, onClick: () => navigate('/login'), logout: true },
   ];
 
