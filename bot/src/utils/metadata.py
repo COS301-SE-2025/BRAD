@@ -5,6 +5,17 @@ import tldextract
 import dns.resolver
 from datetime import datetime
 
+def safe_whois_lookup(domain, timeout=5):
+    try:
+        # Set default timeout globally (affects underlying socket)
+        socket.setdefaulttimeout(timeout)
+        result = whois.whois(domain)
+        return result
+    except Exception as e:
+        print(f"[BOT] WHOIS lookup failed: {e}")
+        return None
+
+
 def gather_forensics(domain: str) -> dict:
     # Clean domain
     domain = domain.replace("http://", "").replace("https://", "").split("//")[0]
@@ -24,7 +35,7 @@ def gather_forensics(domain: str) -> dict:
         #print(w)
         registrar = w.registrar or "Unavailable"
         whois_owner = w.org or w.name or "Unknown"
-        whois_raw = dict(w.items())
+        whois_raw = dict(w)
     except Exception as e:
         print(f"[BOT] WHOIS lookup failed: {e}")
         registrar = "Unavailable"

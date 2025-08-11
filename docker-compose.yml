@@ -3,59 +3,92 @@ services:
     build: ./api
     container_name: brad-api
     ports:
-      - "3000:3000"
+      - "${API_PORT}:${API_PORT}" 
     volumes:
       - ./api:/app
-      - ./uploads:/uploads
-    
+      - ./uploads:/usr/src/app/uploads
+      - ./screenshots:/usr/src/app/screenshots
     depends_on:
       - mongo
-    environment:
-      - MONGO_URI=mongodb://mongo:27017/brad_db
-      - JWT_SECRET=brad_super_secret_2025
-      - BOT_ACCESS_KEY=secret-bot-key-123
-      - PORT=3000
-      - NODE_ENV=development
-      - EMAIL_USER=cos301.cap2@gmail.com
-      - EMAIL_PASS=cmzu mhnu dvds sadx
-    # env_file:
-    #   - .env
-
+      - fastapi-queue
+    env_file:
+      - .env
+    networks:
+      - brad_net
 
   bot:
     build: ./bot
     container_name: brad-bot
     volumes:
       - ./bot:/app
+      - ./screenshots:/app/screenshots
     depends_on:
-      - mongo
+      - redis
       - api
-    environment:
-      - API_URL=http://api:3000
-      - BOT_ACCESS_KEY=secret-bot-key-123
-    # env_file:
-    #   - .env
+      - mongo
+    env_file:
+      - .env
+    networks:
+      - brad_net
+
+  fastapi-queue:
+    build: ./fastapi-queue
+    container_name: brad-fastapi
+    ports:
+      - "${FASTAPI_PORT}:${FASTAPI_PORT}" 
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    volumes:
+      - ./fastapi-queue:/app
+    networks:
+      - brad_net
 
   frontend:
     build: ./frontend
     container_name: brad-frontend
     ports:
       - "5173:5173"
-    # volumes:
-    #   - ./frontend:/app
     environment:
       - NODE_ENV=development
+    networks:
+      - brad_net
 
   mongo:
-    image: mongo
+    image: mongo:4.4
     container_name: brad-mongo
-    restart: always
+    restart: unless-stopped
     ports:
       - "27018:27017"
     volumes:
       - mongo-data:/data/db
       - ./database/mongo.conf:/etc/mongo.conf:ro
     command: mongod --quiet --logpath /var/log/mongodb/mongod.log
+    networks:
+      - brad_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: brad-redis
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    command: redis-server --requirepass "${REDIS_PASSWORD}"
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    networks:
+      - brad_net
 
 volumes:
   mongo-data:
+  redis-data:
+
+networks:
+  brad_net:
+    driver: bridge
+    name: brad_network

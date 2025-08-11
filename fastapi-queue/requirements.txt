@@ -1,0 +1,4 @@
+fastapi
+uvicorn
+dramatiq[redis]
+python-dotenv

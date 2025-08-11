@@ -29,30 +29,12 @@ evidence: string[];
   analyzed: boolean;
 
   @ApiProperty({
-    description: 'Analysis metadata',
-    nullable: true,
+    description: 'Full forensic analysis result (ForensicReport.to_dict())',
     type: Object,
+    nullable: true,
   })
   @Prop({ type: Object, default: null })
-  analysis?: {
-    domain?: string;
-    scannedAt?: Date | string;
-    title?: string;
-    malwareDetected?: boolean;
-    summary?: string;
-    ip?: string;
-    registrar?: string;
-    whoisOwner?: string;
-    whoisRaw?: Record<string, any>;
-    sslValid?: boolean;
-    sslExpires?: string;
-    dns?: {
-      MX?: string[];
-      NS?: string[];
-      TXT?: string[];
-    };
-    reverseIp?: string | string[];
-  };
+  analysis: Record<string, any>;
 
   @Prop({ type: Object, default: null })
   scrapingInfo?: {
@@ -90,22 +72,6 @@ evidence: string[];
   @Prop({ type: String, enum: ['malicious', 'benign', null], default: null })
   investigatorDecision: 'malicious' | 'benign' | null;
 
-  @ApiProperty({
-    description: 'Raw WHOIS data stored as key-value JSON',
-    type: Object,
-    required: false,
-    nullable: true,
-  })
-  @Prop({ type: Object, default: null })
-  whoisRaw?: Record<string, any>;
-
-  @ApiProperty({
-    description: 'Reverse IP results — either a single string or list of domains',
-    type: [String],
-    required: false,
-  })
-  @Prop({ type: [String], default: undefined }) // allow flexibility
-  reverseIp?: string[] | string;
 }
 
 export const ReportSchema = SchemaFactory.createForClass(Report);

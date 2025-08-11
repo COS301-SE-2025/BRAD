@@ -354,6 +354,11 @@
   border-radius: 8px;
 }
 
+.section-separator {
+  margin: 1rem 0;
+  border-top: 1px dashed #aaa;
+}
+
 .scraping-section ul {
   padding-left: 1.25rem;
   list-style-type: disc;
@@ -418,4 +423,92 @@
 
 .confirmation-modal {
   z-index: 9999; /* above report modal */
+}
+
+/* Forensic Block */
+.forensic-block {
+  margin-top: 1.5rem;
+  background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.08));
+  border-radius: 10px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  color: #fff;
+}
+
+.forensic-block h4 {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #4fd1c5;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.forensic-block p {
+  margin: 0.4rem 0;
+  font-size: 0.95rem;
+}
+
+.forensic-block strong {
+  color: #fcd34d;
+}
+
+.stats-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.stats-section p {
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.6rem 0.8rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+.risk-section {
+  margin-top: 1.2rem;
+  padding: 1rem;
+  background: rgba(255, 99, 71, 0.1);
+  border-left: 4px solid #ff6b6b;
+  border-radius: 6px;
+}
+
+.risk-section strong {
+  color: #ff6b6b;
+}
+
+.risk-breakdown {
+  margin-top: 0.6rem;
+  background: rgba(0,0,0,0.25);
+  padding: 0.8rem;
+  border-radius: 6px;
+}
+
+.risk-breakdown h5 {
+  margin-bottom: 0.4rem;
+  color: #ff6b6b;
+}
+
+.risk-breakdown ul {
+  padding-left: 1.2rem;
+  margin: 0;
+  list-style-type: disc;
+}
+
+.forensic-block .toggle-button {
+  background-color: #004c99;
+  color: #fff;
+  padding: 6px 12px;
+  border: none;
+  border-radius: 5px;
+  margin-top: 10px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.forensic-block .toggle-button:hover {
+  background-color: #0066cc;
 }

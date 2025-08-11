@@ -1,17 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import API from '../api/axios';
-import '../styles/InvestigatorDashboard.css';
 import InvestigatorNavbar from '../components/InvestigatorNavbar';
 import PendingReports from '../components/PendingReports';
 import ReviewedReports from '../components/ReviewedReports';
 import ScrapingInfoViewer from '../components/ScrapingInfoViewer';
 import Notification from "../components/Notification";
+import ForensicReportBlock from '../components/ForensicReportBlock'; // ✅ imported here
+import '../styles/InvestigatorDashboard.css';
 
 const InvestigatorDashboard = ({ view }) => {
   const [reports, setReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
-  const [showWhois, setShowWhois] = useState(false);
-  const [showDns, setShowDns] = useState(false);
   const [showScraping, setShowScraping] = useState(false);
   const [showImageModal, setShowImageModal] = useState(false);
   const [activeImage, setActiveImage] = useState(null);
@@ -80,6 +79,7 @@ const InvestigatorDashboard = ({ view }) => {
             <div className="modal-content">
               <h3>Analysis for {selectedReport.domain}</h3>
 
+              {/* Evidence Preview */}
               {selectedReport?.evidence?.length > 0 && (
                 <div className="evidence-preview">
                   <h4>Submitted Evidence</h4>
@@ -90,7 +90,13 @@ const InvestigatorDashboard = ({ view }) => {
                         setActiveImage(filename);
                         setShowImageModal(true);
                       }}
-                      style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', padding: '4px 0' }}
+                      style={{
+                        cursor: 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '4px 0'
+                      }}
                     >
                       <span role="img" aria-label="image">🖼️</span>
                       <span style={{ color: 'black' }}>{filename}</span>
@@ -100,100 +106,16 @@ const InvestigatorDashboard = ({ view }) => {
               )}
 
               {selectedReport.analysis ? (
-                <div className="analysis-details">
-                  <div className="analysis-cards">
-                    <div className="analysis-card">
-                      🕒 <span className="card-label">Scanned At:</span>
-                      <span className="card-value">{new Date(selectedReport.analysis.scannedAt).toLocaleString()}</span>
-                    </div>
-                    <div className="analysis-card risk">
-                      🚨 <span className="card-label">Risk Score:</span>
-                      <span className="card-value">{selectedReport.analysis.riskScore}</span>
-                    </div>
-                    <div className="analysis-card">
-                      🦠 <span className="card-label">Malware Detected:</span>
-                      <span className="card-value">{selectedReport.analysis.malwareDetected ? "Yes" : "No"}</span>
-                    </div>
-                    <div className="analysis-card">
-                      🌐 <span className="card-label">IP Address:</span>
-                      <span className="card-value">{selectedReport.analysis.ip}</span>
-                    </div>
-                    <div className="analysis-card">
-                      🏢 <span className="card-label">Registrar:</span>
-                      <span className="card-value">{selectedReport.analysis.registrar}</span>
-                    </div>
-                    <div className="analysis-card">
-                      🔒 <span className="card-label">SSL Valid:</span>
-                      <span className="card-value">{selectedReport.analysis.sslValid ? "Yes" : "No"}</span>
-                    </div>
-                    <div className="analysis-card">
-                      👤 <span className="card-label">WHOIS Owner:</span>
-                      <span className="card-value">{selectedReport.analysis.whoisOwner}</span>
-                    </div>
-                  </div>
-
-                  <p className="analysis-summary"><strong>📝 Summary:</strong> {selectedReport.analysis.summary}</p>
-
-                  {selectedReport.analysis.whoisRaw && (
-                    <div className="whois-section">
-                      <button className="toggle-button" onClick={() => setShowWhois(prev => !prev)}>
-                        {showWhois ? '📄 Hide WHOIS Raw Data ▲' : '📄 Show WHOIS Raw Data ▼'}
-                      </button>
-                      {showWhois && (
-                        <div className="whois-table-wrapper">
-                          <table className="whois-table">
-                            <tbody>
-                              {Object.entries(selectedReport.analysis.whoisRaw).map(([key, value]) => (
-                                <tr key={key}>
-                                  <td><strong>{key}</strong></td>
-                                  <td>{Array.isArray(value) ? value.join(', ') : String(value)}</td>
-                                </tr>
-                              ))}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {selectedReport.analysis?.dns && (
-                    <div className="dns-section">
-                      <button className="toggle-button" onClick={() => setShowDns(prev => !prev)}>
-                        {showDns ? '🌍 Hide DNS Records ▲' : '🌍 Show DNS Records ▼'}
-                      </button>
-                      {showDns && (
-                        <div className="dns-table-wrapper">
-                          <h4>DNS Records</h4>
-                          <table className="dns-table">
-                            <tbody>
-                              {Object.entries(selectedReport.analysis.dns).map(([recordType, values]) =>
-                                Array.isArray(values)
-                                  ? values.map((val, idx) => (
-                                      <tr key={`${recordType}-${idx}`}>
-                                        <td>{recordType}</td>
-                                        <td>{val}</td>
-                                      </tr>
-                                    ))
-                                  : (
-                                      <tr key={recordType}>
-                                        <td>{recordType}</td>
-                                        <td>{String(values)}</td>
-                                      </tr>
-                                    )
-                              )}
-                            </tbody>
-                          </table>
-                        </div>
-                      )}
-                    </div>
-                  )}
+                <>
+                  {/* ✅ Replaced giant inline block with reusable component */}
+                  <ForensicReportBlock analysis={selectedReport.analysis} />
 
                   <ScrapingInfoViewer
                     scrapingInfo={selectedReport.scrapingInfo}
                     showScraping={showScraping}
                     setShowScraping={setShowScraping}
                   />
-                </div>
+                </>
               ) : (
                 <p>No analysis available.</p>
               )}
@@ -247,7 +169,7 @@ const InvestigatorDashboard = ({ view }) => {
           </div>
         )}
 
-        {/* Confirmation Modal — always on top */}
+        {/* Confirmation Modal */}
         {confirmModal.visible && (
           <div className="modal-overlay confirmation-modal">
             <div className="modal-content">
