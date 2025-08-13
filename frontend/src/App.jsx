@@ -36,7 +36,7 @@ function App() {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute allowedRoles={['reporter']}>
+            <ProtectedRoute allowedRoles={['general']}>
               <ReporterDashboard />
             </ProtectedRoute>
           }
@@ -44,7 +44,7 @@ function App() {
         <Route
           path="/report"
           element={
-            <ProtectedRoute allowedRoles={['reporter']}>
+            <ProtectedRoute allowedRoles={['general']}>
               <ReportPage />
             </ProtectedRoute>
           }
@@ -106,7 +106,7 @@ function App() {
         <Route
           path="/settings"
           element={
-            <ProtectedRoute allowedRoles={['admin', 'investigator', 'reporter']}>
+            <ProtectedRoute allowedRoles={['admin', 'investigator', 'general']}>
               <UserSettings />
             </ProtectedRoute>
           }
@@ -114,7 +114,7 @@ function App() {
         <Route
           path="/change-password"
           element={
-            <ProtectedRoute allowedRoles={['admin', 'investigator', 'reporter']}>
+            <ProtectedRoute allowedRoles={['admin', 'investigator', 'general']}>
               <ChangePassword />
             </ProtectedRoute>
           }
