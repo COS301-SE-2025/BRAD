@@ -26,6 +26,18 @@ const InvestigatorDashboard = ({ view }) => {
     setNotification(prev => prev ? prev : { type, message });
   };
 
+  const handleCloseReport = async () => {
+  if (selectedReport && !selectedReport.investigatorDecision) {
+    try {
+      await API.post(`/reports/${selectedReport._id}/release`);
+    } catch (error) {
+      console.error("Failed to release report:", error);
+    }
+  }
+  setSelectedReport(null);
+};
+
+
   const fetchReports = async () => {
     try {
       const res = await API.get('/reports');
@@ -62,7 +74,7 @@ const InvestigatorDashboard = ({ view }) => {
     <div className="investigator-dashboard">
       <InvestigatorNavbar />
       <div className="dashboard-main">
-        {view === 'pending' && <PendingReports reports={reports} onSelect={setSelectedReport} />}
+        {view === 'pending' && <PendingReports reports={reports} setReports={setReports} onSelect={setSelectedReport} />}
         {view === 'reviewed' && <ReviewedReports reports={reports} onSelect={setSelectedReport} />}
 
         {notification && (
@@ -149,7 +161,7 @@ const InvestigatorDashboard = ({ view }) => {
                 </div>
               )}
 
-              <button className="close-button" onClick={() => setSelectedReport(null)}>Close</button>
+              <button className="close-button" onClick={handleCloseReport}>Close</button>
             </div>
           </div>
         )}

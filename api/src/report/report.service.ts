@@ -39,7 +39,7 @@ export class ReportService {
   async getReports(userId: string, role: string) {
     if (role === 'admin' || role === 'investigator') {
       // Admins and investigators can view all reports
-      return this.reportModel.find().populate('submittedBy', 'username');
+      return this.reportModel.find().populate('submittedBy', 'username').populate('reviewedBy', 'username');
     }
   
     if (role === 'general') {
@@ -90,6 +90,8 @@ export class ReportService {
     { new: true },
   );
 
+  
+
   if (!updated) {
     throw new NotFoundException(`Report with id ${id} not found`);
   }
@@ -98,13 +100,48 @@ export class ReportService {
   }
 
   
-  async updateInvestigatorDecision(id: string, verdict: string) {
-    if (!['malicious', 'benign'].includes(verdict))
-      throw new Error('Invalid verdict');
-    return this.reportModel.findByIdAndUpdate(
-      id,
-      { investigatorDecision: verdict },
-      { new: true }
-    );
+async updateDecisionAndReviewer(id: string, verdict: string, reviewedById: string) {
+  if (!['malicious', 'benign'].includes(verdict)) {
+    throw new Error('Invalid verdict');
   }
+
+  const updated = await this.reportModel.findByIdAndUpdate(
+    id,
+    { investigatorDecision: verdict, reviewedBy: reviewedById },
+    { new: true }
+  );
+
+  if (!updated) {
+    throw new NotFoundException(`Report with id ${id} not found`);
+  }
+
+  return updated;
+}
+async claimReport(id: string, reviewedById: string) {
+  const report = await this.reportModel.findById(id);
+  if (!report) throw new NotFoundException('Report not found');
+
+  const updated = await this.reportModel.findByIdAndUpdate(
+    id,
+    { analysisStatus: 'in-progress', reviewedBy: reviewedById },
+    { new: true }
+  );
+
+  return updated;
+}
+
+
+async releaseReport(reportId: string, investigatorId: string) {
+  const report = await this.reportModel.findOneAndUpdate(
+    { _id: reportId, analysisStatus: 'in-progress', reviewedBy: investigatorId },
+    { analysisStatus: 'pending', reviewedBy: null },
+    { new: true }
+  );
+  
+  if (!report) {
+    throw new Error('Cannot release report: either not claimed by you or not in-progress');
+  }
+
+  return report;
+}
 }

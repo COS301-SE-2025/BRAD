@@ -37,14 +37,34 @@ async getPendingReportsCount(userid:string, role:string): Promise<number> {
     }
     throw new ForbiddenException('Role not permitted to view statistics');
   }
-  async getMostReportedDomain(): Promise<string | null> {
-    const result = await this.reportModel.aggregate([
-      { $group: { _id: '$domain', count: { $sum: 1 } } },
-      { $sort: { count: -1 } },
-      { $limit: 1 }
-    ]);
-    return result.length > 0 ? result[0]._id : null;
-  }
+async getDomainsReportedMoreThanOnce(): Promise<{ domain: string; count: number }[]> {
+  const results = await this.reportModel.aggregate([
+    {
+      $group: {
+        _id: '$domain',        // group by domain
+        count: { $sum: 1 }      // count how many times it appears
+      }
+    },
+    {
+      $match: {
+        count: { $gt: 1 }       // keep only those with more than 1 occurrence
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        domain: '$_id',
+        count: 1
+      }
+    },
+    {
+      $sort: { count: -1 }      // optional: sort by count descending
+    }
+  ]);
+
+  return results;
+}
+
 
   async getReportsMarkedAsMalicious(role:string): Promise<number> {
     if(role !== 'admin' && role !== 'investigator') {

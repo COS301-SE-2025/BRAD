@@ -12,6 +12,12 @@ const ReviewedReports = ({ reports, onSelect }) => {
         {reviewed.map(report => (
           <div className="report-card-grid reviewed" key={report._id}>
             <p className="report-domain">{report.domain}</p>
+            <p className="report-submitter">
+              Submitted by: {report.submittedBy?.username || 'Unknown'}
+            </p>
+            <p className="report-reviewer">
+              Reviewed by: {report.reviewedBy?.username || 'Unknown'}
+            </p>
             <p className="report-date">
               <FaCalendarAlt style={{ marginRight: '6px', color: '#fff' }} />
               {new Date(report.createdAt).toLocaleString()}
