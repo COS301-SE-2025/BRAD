@@ -57,14 +57,14 @@ const RegisterPage = () => {
 
   return (
     <div className="register-page">
-    <button className="back-button" onClick={() => navigate(-1)}>
-      ← Back
-    </button>
       <div className="robot-section">
         <div className="robot-content">
           <img src={BRAD_robot} alt="BRAD Robot" className="brad-robot" />
           <h2 className="welcome-message">
-            Welcome new user, create an account with B.R.A.D to get started
+            Hey there! Ready to join the B.R.A.D family? <br />
+            Create your account and <br />
+            start your journey with us!
+              <span className="cursor"></span>
           </h2>
         </div>
       </div>
