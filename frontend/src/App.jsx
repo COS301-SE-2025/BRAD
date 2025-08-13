@@ -4,6 +4,7 @@ import LandingPage from './pages/Landing';
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
 import ReporterDashboard from './pages/ReporterDashboard';
+import ReportPage from './pages/ReportPage';
 import AboutPage from './pages/About';
 import InvestigatorDashboard from './pages/InvestigatorDashboard';
 import UserSettings from './pages/UserSettings';
@@ -21,18 +22,26 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/dashboard" element={<ReporterDashboard />} />
         <Route path="/about" element={<AboutPage />} />
+
+        {/* Reporter routes */}
+        <Route path="/dashboard" element={<ReporterDashboard />} />
+        <Route path="/report" element={<ReportPage />} />
+
+        {/* Investigator */}
         <Route path="/investigator" element={<InvestigatorDashboard />} />
-        <Route path="/settings" element={<UserSettings />} />
+        <Route path="/investigator/pending" element={<InvestigatorDashboard view="pending" />} />
+        <Route path="/investigator/reviewed" element={<InvestigatorDashboard view="reviewed" />} />
         <Route path="/investigator/settings" element={<UserSettings />} />
+        <Route path="/investigator/stats" element={<InvestigatorStats />} />
+
+        {/* General  */}
+        <Route path="/settings" element={<UserSettings />} />
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
         <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/help/:role" element={<Help />} />
-        <Route path="/investigator/stats" element={<InvestigatorStats />} />
 
-        {/* Add more routes here */}
       </Routes>
     </Router>
   );

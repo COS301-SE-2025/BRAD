@@ -3,25 +3,47 @@ services:
     build: ./api
     container_name: brad-api
     ports:
-      - "${PORT}:${PORT}"
+      - "${API_PORT}:${API_PORT}" 
     volumes:
       - ./api:/app
-      - ./uploads:/uploads
+      - ./uploads:/usr/src/app/uploads
+      - ./screenshots:/usr/src/app/screenshots
     depends_on:
       - mongo
+      - fastapi-queue
     env_file:
       - .env
+    networks:
+      - brad_net
 
   bot:
     build: ./bot
     container_name: brad-bot
     volumes:
       - ./bot:/app
+      - ./screenshots:/app/screenshots
     depends_on:
-      - mongo
+      - redis
       - api
+      - mongo
     env_file:
       - .env
+    networks:
+      - brad_net
+
+  fastapi-queue:
+    build: ./fastapi-queue
+    container_name: brad-fastapi
+    ports:
+      - "${FASTAPI_PORT}:${FASTAPI_PORT}" 
+    depends_on:
+      - redis
+    env_file:
+      - .env
+    volumes:
+      - ./fastapi-queue:/app
+    networks:
+      - brad_net
 
   frontend:
     build: ./frontend
@@ -30,17 +52,43 @@ services:
       - "5173:5173"
     environment:
       - NODE_ENV=development
+    networks:
+      - brad_net
 
   mongo:
-    image: mongo
+    image: mongo:4.4
     container_name: brad-mongo
-    restart: always
+    restart: unless-stopped
     ports:
       - "27018:27017"
     volumes:
       - mongo-data:/data/db
       - ./database/mongo.conf:/etc/mongo.conf:ro
     command: mongod --quiet --logpath /var/log/mongodb/mongod.log
+    networks:
+      - brad_net
+
+  redis:
+    image: redis:7-alpine
+    container_name: brad-redis
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    command: redis-server --requirepass "${REDIS_PASSWORD}"
+    environment:
+      - REDIS_PASSWORD=${REDIS_PASSWORD}
+    volumes:
+      - redis-data:/data
+    networks:
+      - brad_net
 
 volumes:
   mongo-data:
+  redis-data:
+
+networks:
+  brad_net:
+    driver: bridge
+    name: brad_network

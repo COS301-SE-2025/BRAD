@@ -1,288 +1,287 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import ReporterNavbar from '../components/ReporterNavbar';
 import '../styles/ReporterDashboard.css';
-import Navbar from '../components/Navbar';
+import Notification from '../components/Notification';
 import API from '../api/axios';
 
+import { Pie } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+ChartJS.register(ArcElement, Tooltip, Legend);
+
 const ReporterDashboard = () => {
-  const [domain, setDomain] = useState('');
   const [reports, setReports] = useState([]);
   const [filter, setFilter] = useState('');
-  const [selectedReport, setSelectedReport] = useState(null);
-  const user = JSON.parse(localStorage.getItem('user'));
-  const [evidenceFiles, setEvidenceFiles] = useState([]);
+  const [notification, setNotification] = useState(null);
   const [activeImage, setActiveImage] = useState(null);
-const [showImageModal, setShowImageModal] = useState(false);
+  const [showImageModal, setShowImageModal] = useState(false);
+  const [selectedReport, setSelectedReport] = useState(null);
 
-  const MAX_FILES = 5;
+  const user = JSON.parse(localStorage.getItem('user')) || { username: 'Reporter' };
 
-  const handleFileChange = (e) => {
-    const newFiles = Array.from(e.target.files);
-    const combined = [...evidenceFiles, ...newFiles];
-    if (combined.length > MAX_FILES) {
-      alert('You can only attach up to 5 files.');
-      setEvidenceFiles(combined.slice(0, MAX_FILES));
-    } else {
-      setEvidenceFiles(combined);
-    }
-  };
-
-  const handleDrop = (e) => {
-    e.preventDefault();
-    const droppedFiles = Array.from(e.dataTransfer.files);
-    const combined = [...evidenceFiles, ...droppedFiles];
-    if (combined.length > MAX_FILES) {
-      alert('You can only attach up to 5 files.');
-      setEvidenceFiles(combined.slice(0, MAX_FILES));
-    } else {
-      setEvidenceFiles(combined);
-    }
-  };
-
-  const handleRemoveFile = (index) => {
-    setEvidenceFiles(prev => prev.filter((_, i) => i !== index));
-  };
-
-  const submitReport = async () => {
-    if (!domain) return alert('Please enter a domain/URL');
-
-    const formData = new FormData();
-    formData.append('domain', domain);
-    formData.append('submittedBy', user._id);
-
-    evidenceFiles.forEach((file) => {
-      formData.append('evidence', file);
-    });
-
-    try {
-      await API.post('/report', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-
-      setDomain('');
-      setEvidenceFiles([]);
-      alert('Report submitted successfully!');
-      setTimeout(() => fetchReports(), 1000);
-    } catch (err) {
-      alert(err.response?.data?.message || 'Failed to submit report');
-    }
+  const showNotification = (type, message) => {
+    setNotification({ type, message });
   };
 
   const fetchReports = async () => {
     try {
-      const response = await API.get('/reports');
-      setReports(response.data);
+      const res = await API.get('/reports', { params: { submittedBy: user._id } });
+      setReports(res.data);
     } catch (err) {
-      console.error('Error fetching reports:', err);
+      console.error('Error fetching report history:', err);
+      showNotification('error', 'Failed to fetch report history.');
     }
   };
 
   useEffect(() => {
     fetchReports();
-    const interval = setInterval(fetchReports, 5000);
-    return () => clearInterval(interval);
   }, []);
 
-  useEffect(() => {
-    document.title = 'B.R.A.D | Reporter';
-  }, []);
+  const filteredReports = reports.filter((r) =>
+    filter === ''
+      ? true
+      : filter === 'Resolved'
+      ? r.investigatorDecision
+      : !r.investigatorDecision
+  );
+
+  const pendingCount = reports.filter(r => !r.investigatorDecision).length;
+  const resolvedCount = reports.filter(r => r.investigatorDecision).length;
+
+  const pieOptions = {
+    plugins: {
+      legend: {
+        labels: {
+          color: 'white', 
+          font: {
+            size: 14,
+          },
+        },
+      },
+    },
+  };
+
+  const pieData = {
+    labels: ['Pending', 'Resolved'],
+    datasets: [
+      {
+        label: 'Report Status',
+        data: [pendingCount, resolvedCount],
+        backgroundColor: ['#f97316', '#22c55e'],
+        hoverOffset: 20,
+      },
+    ],
+  };
 
   return (
-    <div className="dashboard-container">
-      <Navbar />
-      <div className="dashboard-content">
-        <div className="submit-section">
-          <h2>Submit Suspicious URL</h2>
-          <div className="url-input-group">
-            <input
-              type="text"
-              placeholder="Enter URL"
-              className="url-input"
-              value={domain}
-              onChange={(e) => setDomain(e.target.value)}
-            />
-            <button className="submit-url-button" onClick={submitReport}>
-              Submit
+    <div className="reporter-dashboard">
+      <ReporterNavbar />
+
+      <div className="dashboard-main">
+        {/* Greeting & Settings */}
+        <div className="dashboard-header">
+          <h2 className="dashboard-greeting">Hello, {user.username} 👋</h2>
+          <button className="settings-btn" onClick={() => (window.location.href = '/settings')}>
+            ⚙️ User Settings
+          </button>
+        </div>
+
+        {/* History Section */}
+        {reports.length === 0 ? (
+          <div
+            style={{
+              background: 'rgba(255, 255, 255, 0.05)',
+              padding: '2rem',
+              borderRadius: '10px',
+              textAlign: 'center',
+              color: 'white',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.25)',
+            }}
+          >
+            <p>No report history.</p>
+            <button
+              onClick={() => (window.location.href = '/report')}
+              style={{
+                marginTop: '1rem',
+                padding: '0.75rem 1.5rem',
+                backgroundColor: '#2563eb',
+                border: 'none',
+                borderRadius: '8px',
+                color: 'white',
+                cursor: 'pointer',
+                fontSize: '1rem',
+              }}
+            >
+              Click here to submit your first report
             </button>
           </div>
-
+        ) : (
           <div
-            className="evidence-upload"
-            onDragOver={(e) => e.preventDefault()}
-            onDrop={handleDrop}
+            className="history-section"
+            style={{
+              display: 'grid',
+              gridTemplateColumns: '1fr 320px',
+              gap: '1.5rem',
+            }}
           >
-            <p>Attach Optional Evidence</p>
-            <div className="drop-area">
-              <p>Drag & Drop files here or </p>
-              <label htmlFor="file-upload" className="custom-file-button">
-                Choose Files
-              </label>
-              <input
-                id="file-upload"
-                type="file"
-                multiple
-                onChange={handleFileChange}
-                className="file-input"
-              />
+            {/* Header spanning both columns */}
+            <div
+              className="history-header"
+              style={{
+                gridColumn: '1 / -1',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '1rem',
+              }}
+            >
+              <h2 style={{ margin: 0 }}>Report History</h2>
+              <select
+                className="filter-select"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+              >
+                <option value="">Filter by status</option>
+                <option value="Pending">Pending</option>
+                <option value="Resolved">Resolved</option>
+              </select>
             </div>
 
-            {evidenceFiles.length > 0 && (
-              <ul className="file-list">
-                {evidenceFiles.map((file, index) => (
-                  <li key={index} className="file-list-item">
-                    {file.name}
-                    <button
-                      onClick={() => handleRemoveFile(index)}
-                      className="remove-file-button"
-                      style={{
-                        marginLeft: '10px',
-                        color: 'red',
-                        cursor: 'pointer',
-                        border: 'none',
-                        background: 'transparent',
-                        fontWeight: 'bold',
-                      }}
-                    >
-                      ✕
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-
-        <div className="history-section">
-          <div className="history-header">
-            <h2>Report History</h2>
-            <select
-              className="filter-select"
-              onChange={(e) => setFilter(e.target.value)}
+            {/* Left: Report Cards Grid */}
+            <div
+              className="report-list"
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+                gap: '1rem',
+              }}
             >
-              <option value="">Filter by status</option>
-              <option value="Pending">Pending</option>
-              <option value="Resolved">Resolved</option>
-            </select>
-          </div>
+              {filteredReports.map((report) => (
+                <div
+                  className={`report-card ${
+                    report.investigatorDecision ? 'resolved-card' : 'pending-card'
+                  }`}
+                  key={report._id}
+                >
+                  <p>
+                    <strong>{report.domain}</strong>
+                  </p>
+                  <p className="date-submitted">
+                    <span className="calendar-icon">📅</span>
+                    Date Submitted: {new Date(report.createdAt).toLocaleString()}
+                  </p>
+                  <p>
+                    Status:{' '}
+                    <span
+                      className={`status-tag ${
+                        report.investigatorDecision ? 'resolved' : 'pending'
+                      }`}
+                    >
+                      {report.investigatorDecision ? 'Resolved' : 'Pending'}
+                    </span>
+                  </p>
 
-          <div className="report-list">
-            {reports
-              .filter((r) =>
-                filter === ''
-                  ? true
-                  : filter === 'Resolved'
-                  ? r.investigatorDecision
-                  : !r.investigatorDecision
-              )
-              .map((report) => (
-             <div className="report-card" key={report._id}>
-  <p><strong>{report.domain}</strong></p>
-  <p>Date Submitted: {new Date(report.createdAt).toLocaleString()}</p>
-  <p>Status: {report.investigatorDecision ? 'Resolved' : 'Pending'}</p>
-
-  {report.evidence && report.evidence.length > 0 && (
-    <div className="evidence-names">
-      <p><strong>Evidence:</strong></p>
-      <ul>
-        {report.evidence.map((fileUrl, idx) => (
-       <li
-  key={idx}
-  onClick={() => {
-    const filename = fileUrl.split('/').pop();
-    setActiveImage(filename);
-    setShowImageModal(true);
-  }}
-  style={{
-    cursor: 'pointer',
-    color: 'blue',
-    textDecoration: 'underline',
-  }}
->
-  {fileUrl.split('/').pop()}
-</li>
-
-        ))}
-      </ul>
-    </div>
-  )}
-
-  {report.investigatorDecision && report.analysis && (
-    <button
-      className="view-button"
-      onClick={() => setSelectedReport(report)}
-    >
-      View Analysis
-    </button>
-  )}
-</div>
-
+                  {report.investigatorDecision && report.analysis && (
+                    <button className="view-button" onClick={() => setSelectedReport(report)}>
+                      View Analysis
+                    </button>
+                  )}
+                </div>
               ))}
+            </div>
+
+            {/* Right: Pie Chart */}
+            <div className="history-chart" style={{ alignSelf: 'start' }}>
+              <Pie data={pieData} options={pieOptions} />
+            </div>
           </div>
-        </div>
+        )}
 
-    {selectedReport && (
-  <div className="modal-overlay">
-    <div className="modal-content">
-      <h3>Report for {selectedReport.domain}</h3>
-      <p><strong>Submitted:</strong> {new Date(selectedReport.createdAt).toLocaleString()}</p>
-      <p><strong>Status:</strong> {selectedReport.investigatorDecision ? 'Resolved' : 'Pending'}</p>
-      <p><strong>Verdict:</strong> {selectedReport.investigatorDecision ?? 'Not decided'}</p>
-      <p><strong>Risk Score:</strong> {selectedReport.analysis?.riskScore ?? 'N/A'}</p>
+        {/* Notifications */}
+        {notification && (
+          <Notification
+            type={notification.type}
+            message={notification.message}
+            onClose={() => setNotification(null)}
+          />
+        )}
 
-      {selectedReport.evidence && selectedReport.evidence.length > 0 && (
-        <>
-          <p><strong>Attached Evidence:</strong></p>
-          <div className="evidence-preview">
-            {selectedReport.evidence.map((fileUrl, idx) => (
+        {/* Analysis Modal */}
+        {selectedReport && (
+          <div className="modal-overlay" onClick={() => setSelectedReport(null)}>
+            <div className="modal-content analysis-modal" onClick={(e) => e.stopPropagation()}>
+              <h3>Analysis for {selectedReport.domain}</h3>
+              <div className="analysis-field">
+                <span className="analysis-label">Status:</span>
+                <span
+                  className={`analysis-value ${
+                    selectedReport.investigatorDecision ? 'resolved' : 'pending'
+                  }`}
+                >
+                  {selectedReport.investigatorDecision ? 'Resolved' : 'Pending'}
+                </span>
+              </div>
+              <div className="analysis-field">
+                <span className="analysis-label">Verdict:</span>
+                <span className="analysis-value">
+                  {selectedReport.investigatorDecision || 'N/A'}
+                </span>
+              </div>
+              {selectedReport.analysis && (
+                <>
+                  <div className="analysis-field">
+                    <span className="analysis-label">Risk Score:</span>
+                    <span className="analysis-value">{selectedReport.analysis.riskScore}</span>
+                  </div>
+                  <div className="analysis-field">
+                    <span className="analysis-label">Summary:</span>
+                    <span className="analysis-value">{selectedReport.analysis.summary}</span>
+                  </div>
+                </>
+              )}
+
+              {/* Evidence displayed here */}
+              {selectedReport.evidence && selectedReport.evidence.length > 0 && (
+                <div className="evidence-names" style={{ marginTop: '1rem' }}>
+                  <p>
+                    <strong>Evidence:</strong>
+                  </p>
+                  <ul>
+                    {selectedReport.evidence.map((fileUrl, idx) => (
+                      <li
+                        key={idx}
+                        onClick={() => {
+                          const filename = fileUrl.split('/').pop();
+                          setActiveImage(filename);
+                          setShowImageModal(true);
+                        }}
+                        style={{ cursor: 'pointer', color: '#90e0ef', textDecoration: 'underline' }}
+                      >
+                        {fileUrl.split('/').pop()}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <button onClick={() => setSelectedReport(null)}>Close</button>
+            </div>
+          </div>
+        )}
+
+        {/* Evidence Image Modal */}
+        {showImageModal && activeImage && (
+          <div className="modal-overlay" onClick={() => setShowImageModal(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <h3>Evidence Preview: {activeImage}</h3>
               <img
-                key={idx}
-                src={fileUrl}
-                alt={`evidence-${idx}`}
-                className="evidence-thumbnail"
-                style={{
-                  maxWidth: '150px',
-                  maxHeight: '150px',
-                  marginRight: '10px',
-                  marginBottom: '10px',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                  objectFit: 'cover',
-                }}
+                src={`http://localhost:3000/static/uploads/evidence/${activeImage}`}
+                alt="Evidence"
+                style={{ maxWidth: '80%', maxHeight: '80vh', borderRadius: '5px' }}
               />
-            ))}
+              <button onClick={() => setShowImageModal(false)}>Close</button>
+            </div>
           </div>
-        </>
-      )}
-
-      <button
-        onClick={() => setSelectedReport(null)}
-        style={{ marginTop: '20px' }}
-      >
-        Close
-      </button>
-    </div>
-  </div>
-)}
-
-{showImageModal && activeImage && (
-  <div className="modal-overlay">
-    <div className="modal-content">
-      <h3>Image Preview</h3>
-      <img
-        src={`http://localhost:3000/static/uploads/evidence/${activeImage}`}
-        alt="Evidence"
-        style={{
-          maxWidth: '100%',
-          maxHeight: '80vh',
-          borderRadius: '10px',
-          marginBottom: '10px',
-        }}
-      />
-      <button onClick={() => setShowImageModal(false)}>Close</button>
-    </div>
-  </div>
-)}
-
-
+        )}
       </div>
     </div>
   );
