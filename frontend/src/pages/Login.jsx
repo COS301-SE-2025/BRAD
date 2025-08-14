@@ -70,6 +70,11 @@ useEffect(() => {
     <div className="login-page">
       <div className="robot-section">
         <img src={BRAD_robot} alt="BRAD Robot" className="brad-robot" />
+        <h2 className="welcome-message">
+            Welcome back! Ready to continue your journey <br />
+            with B.R.A.D? Log in to get started.
+              <span className="cursor"></span>
+          </h2>
       </div>
 
       <div className="form-section">

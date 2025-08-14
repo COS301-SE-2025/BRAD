@@ -163,4 +163,31 @@ async getDomainsReportedMoreThanOnce(@Req() req: Request) {
         const role=user?.role;
         return this.statisticsService.getNoOfGeneralUsers(role);
     }
+
+
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin', 'investigator','general')
+    @Get('in-progress-reports')
+    @ApiBearerAuth("JWT-auth")
+    @ApiOperation({ summary: 'Get in-progress reports count' })
+    @ApiResponse({ status: 200, description: 'In-progress reports count' })
+    async getInProgressReportsCount(@Req() req: Request) {
+        const user=req['user'] as JwtPayload;
+
+        const role=user?.role;
+        return this.statisticsService.getInProgressReportsCount(user.id, role);
     }
+
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin', 'investigator','general')
+    @Get('resolved-reports')
+    @ApiBearerAuth("JWT-auth")
+    @ApiOperation({ summary: 'Get resolved reports count' })
+    @ApiResponse({ status: 200, description: 'Resolved reports count' })
+    async getResolvedReportsCount(@Req() req: Request) {
+        const user=req['user'] as JwtPayload;
+
+        const role=user?.role;
+        return this.statisticsService.getResolvedReportsCount(user.id, role);
+    }
+}

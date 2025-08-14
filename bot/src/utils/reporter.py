@@ -1,6 +1,9 @@
 import requests
 import os
 import json
+from .logger import get_logger
+
+logger = get_logger(__name__)
 
 API_URL = os.getenv("API_URL")
 AUTH_KEY = os.getenv("BOT_ACCESS_KEY")
@@ -14,6 +17,8 @@ def serialize(obj):
     return obj
 
 def report_analysis(report_id, analysis_data, scraping_info, abuse_flags):
+    logger.info(f"[API] Preparing to update analysis for report {report_id}")
+
     url = f"{API_URL}/reports/{report_id}/analysis"
     data = {
         "analysis": serialize(analysis_data),
@@ -21,11 +26,13 @@ def report_analysis(report_id, analysis_data, scraping_info, abuse_flags):
         "abuseFlags": serialize(abuse_flags),
         "analysisStatus": "done"
     }
+
     try:
-        response = requests.patch(url, json=data, headers=headers)
+        logger.debug(f"[API] PATCH {url} — Payload: {json.dumps(data)[:500]}...")
+        response = requests.patch(url, json=data, headers=headers, timeout=10)
         response.raise_for_status()
-        print(f"[BOT] Analysis for {report_id} updated.")
+        logger.info(f"[API] Analysis for report {report_id} updated successfully.")
         return True
     except Exception as e:
-        print(f"[BOT] Failed to update analysis: {e}")
+        logger.error(f"[API] Failed to update analysis for report {report_id}: {e}", exc_info=True)
         return False

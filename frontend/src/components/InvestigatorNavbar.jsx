@@ -10,6 +10,7 @@ const InvestigatorNavbar = () => {
   const navItems = [
     { label: 'Dashboard', icon: <FaChartPie />, path: '/investigator/stats' },
     { label: 'Pending Reports', icon: <FaClock />, path: '/investigator/pending' },
+    { label: 'In-Progress Reports', icon: <FaClock />, path: '/investigator/in_progress' },
     { label: 'Reviewed Reports', icon: <FaCheckCircle />, path: '/investigator/reviewed' },
     { label: 'Help Menu', icon: <FaQuestionCircle />, path: '/help/investigator' },
     { label: 'Settings', icon: <FaUserCog />, path: '/investigator/settings' },

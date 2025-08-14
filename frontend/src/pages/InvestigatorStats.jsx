@@ -8,7 +8,8 @@ import {
 } from 'recharts';
 
 import { getTotalReports,getMaliciousReports
-  ,getSafeReports,getRepeatedDomains
+  ,getSafeReports,getRepeatedDomains,getPendingReportsCount,
+  getInProgressReportsCount,getResolvedReportsCount 
  } from '../api/stats';
 
 const InvestigatorStats = () => {
@@ -29,11 +30,14 @@ const InvestigatorStats = () => {
     useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [total, malicious, safe, domains] = await Promise.all([
+        const [total, malicious, safe, domains,open,closed,pending] = await Promise.all([
           getTotalReports(),
           getMaliciousReports(),
           getSafeReports(),
           getRepeatedDomains(),
+          getPendingReportsCount(),
+          getInProgressReportsCount(),
+          getResolvedReportsCount(),
         ]);
 
 
@@ -42,9 +46,9 @@ const InvestigatorStats = () => {
           malicious: malicious || 0,
           safe: safe || 0,
           topDomains: domains || [],
-          open: 26,
-          closed: 72,
-          pendingEvidence: 14,
+          open: open||0,
+          closed: closed||0,
+          pendingEvidence: pending||0,
         });
       } catch (error) {
         console.error('Error fetching statistics:', error);

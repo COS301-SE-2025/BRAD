@@ -18,15 +18,36 @@ export class StatisticsService {
 throw new ForbiddenException('Role not permitted to view statistics');
 }
 
-async getPendingReportsCount(userid:string, role:string): Promise<number> {
-    if(role==='admin' || role==='investigator') {
-        return this.reportModel.countDocuments({ analyzed: false });
-    }
-    if(role==='general') {
-        return this.reportModel.countDocuments({ userId: userid, analyzed: false });
-    }
-    throw new ForbiddenException('Role not permitted to view statistics');
+async getPendingReportsCount(userid: string, role: string): Promise<number> {
+  if (role === 'admin' || role === 'investigator') {
+    return this.reportModel.countDocuments({ investigatorDecision: null, reviewedBy: null, analysisStatus: 'pending'  });
   }
+  if (role === 'general') {
+    return this.reportModel.countDocuments({ userId: userid, investigatorDecision: null, reviewedBy: null, analysisStatus: 'pending' });
+  }
+  throw new ForbiddenException('Role not permitted to view statistics');
+}
+
+async getInProgressReportsCount(userid: string, role: string): Promise<number> {
+  if (role === 'admin' || role === 'investigator') {
+    return this.reportModel.countDocuments({ investigatorDecision: null, reviewedBy: { $ne: null }, analysisStatus: 'in-progress' });
+  }
+  if (role === 'general') {
+    return this.reportModel.countDocuments({ userId: userid, investigatorDecision: null, reviewedBy: { $ne: null }, analysisStatus: 'in-progress' });
+  }
+  throw new ForbiddenException('Role not permitted to view statistics');
+}
+
+async getResolvedReportsCount(userid: string, role: string): Promise<number> {
+  if (role === 'admin' || role === 'investigator') {
+    return this.reportModel.countDocuments({ investigatorDecision: { $ne: null }, reviewedBy: { $ne: null }, analysisStatus: 'done' });
+  }
+  if (role === 'general') {
+    return this.reportModel.countDocuments({ userId: userid, investigatorDecision: { $ne: null }, reviewedBy: { $ne: null }, analysisStatus: 'done' });
+  }
+  throw new ForbiddenException('Role not permitted to view statistics');
+}
+
 
   async getAnalyzedReportsCount(userid:string, role:string): Promise<number> {
     if(role==='admin' || role==='investigator') {
@@ -41,13 +62,13 @@ async getDomainsReportedMoreThanOnce(): Promise<{ domain: string; count: number 
   const results = await this.reportModel.aggregate([
     {
       $group: {
-        _id: '$domain',        // group by domain
-        count: { $sum: 1 }      // count how many times it appears
+        _id: '$domain',        
+        count: { $sum: 1 }     
       }
     },
     {
       $match: {
-        count: { $gt: 1 }       // keep only those with more than 1 occurrence
+        count: { $gt: 1 }       
       }
     },
     {
@@ -58,7 +79,7 @@ async getDomainsReportedMoreThanOnce(): Promise<{ domain: string; count: number 
       }
     },
     {
-      $sort: { count: -1 }      // optional: sort by count descending
+      $sort: { count: -1 }     
     }
   ]);
 
@@ -76,7 +97,7 @@ async getDomainsReportedMoreThanOnce(): Promise<{ domain: string; count: number 
     if(role !== 'admin' && role !== 'investigator') {
       throw new ForbiddenException('Role not permitted to view statistics');
     }
-    return this.reportModel.countDocuments({ investigatorDecision: 'safe' });
+    return this.reportModel.countDocuments({ investigatorDecision: 'benign' });
   }
 async getReportCountByMonth(role: string, month: number): Promise<{ month: number; count: number }> {
   if (role !== 'admin' && role !== 'investigator') {

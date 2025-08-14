@@ -7,8 +7,12 @@ import ScrapingInfoViewer from '../components/ScrapingInfoViewer';
 import Notification from "../components/Notification";
 import ForensicReportBlock from '../components/ForensicReportBlock'; // ✅ imported here
 import '../styles/InvestigatorDashboard.css';
+import InProgressReports from '../components/InProgressReports';
 
 const InvestigatorDashboard = ({ view }) => {
+
+  const loggedInUser = JSON.parse(localStorage.getItem('user'));
+
   const [reports, setReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
   const [showScraping, setShowScraping] = useState(false);
@@ -27,15 +31,40 @@ const InvestigatorDashboard = ({ view }) => {
   };
 
   const handleCloseReport = async () => {
-  if (selectedReport && !selectedReport.investigatorDecision) {
-    try {
-      await API.post(`/reports/${selectedReport._id}/release`);
-    } catch (error) {
-      console.error("Failed to release report:", error);
-    }
-  }
+  
   setSelectedReport(null);
 };
+
+const handleClaimReport = async () => {
+  if (!selectedReport) return;
+
+  try {
+  
+
+    const res = await API.post(`/reports/${selectedReport._id}/claim`, {
+     
+    });
+
+    const updatedReport = res.data;
+
+    // ✅ Update reports so it moves from pending → in-progress immediately
+    setReports(prevReports =>
+      prevReports.map(r =>
+        r._id === updatedReport._id ? updatedReport : r
+      )
+    );
+
+    setSelectedReport(updatedReport);
+    showNotification("success", "Report successfully claimed.");
+  } catch (error) {
+    console.error("Claim error:", error);
+    showNotification(
+      "error",
+      error.response?.data?.message || "Failed to claim report."
+    );
+  }
+};
+
 
 
   const fetchReports = async () => {
@@ -76,6 +105,7 @@ const InvestigatorDashboard = ({ view }) => {
       <div className="dashboard-main">
         {view === 'pending' && <PendingReports reports={reports} setReports={setReports} onSelect={setSelectedReport} />}
         {view === 'reviewed' && <ReviewedReports reports={reports} onSelect={setSelectedReport} />}
+        {view === 'in_progress' && <InProgressReports reports={reports} onSelect={setSelectedReport} setReports={setReports} />}
 
         {notification && (
           <Notification
@@ -87,9 +117,26 @@ const InvestigatorDashboard = ({ view }) => {
 
         {/* Report Modal */}
         {selectedReport && (
-          <div className="modal-overlay">
-            <div className="modal-content">
-              <h3>Analysis for {selectedReport.domain}</h3>
+  <div className="modal-overlay">
+    <div className="modal-content">
+      <h3>Analysis for {selectedReport.domain}</h3>
+
+                    { view === 'in_progress'
+  && selectedReport.reviewedBy?._id !== loggedInUser?._id && (
+    <p style={{ color: 'gray', fontStyle: 'italic' }}>
+      This report is assigned to {selectedReport.reviewedBy?.username}. You can view but not make a decision.
+    </p>
+)}
+
+     {/* ✅ Show Claim button only in pending view */}
+{view === 'pending' && !selectedReport.investigator && (
+  <button
+    className="claim-button"
+    onClick={handleClaimReport}
+  >
+    Claim Report
+  </button>
+)}
 
               {/* Evidence Preview */}
               {selectedReport?.evidence?.length > 0 && (
@@ -132,34 +179,52 @@ const InvestigatorDashboard = ({ view }) => {
                 <p>No analysis available.</p>
               )}
 
-              {!selectedReport.investigatorDecision && (
-                <div className="modal-buttons">
-                  <button
-                    className="malicious"
-                    onClick={() =>
-                      setConfirmModal({
-                        visible: true,
-                        message: `Are you sure you want to mark this report as MALICIOUS?`,
-                        action: () => handleDecision(selectedReport._id, 'malicious')
-                      })
-                    }
-                  >
-                    Mark as Malicious
-                  </button>
-                  <button
-                    className="benign"
-                    onClick={() =>
-                      setConfirmModal({
-                        visible: true,
-                        message: `Are you sure you want to mark this report as SAFE?`,
-                        action: () => handleDecision(selectedReport._id, 'benign')
-                      })
-                    }
-                  >
-                    Mark as Safe
-                  </button>
-                </div>
-              )}
+
+
+
+            {view === 'in_progress' && !selectedReport.investigatorDecision && (
+  <div className="modal-buttons">
+    <button
+      className="malicious"
+      disabled={selectedReport.reviewedBy?._id !== loggedInUser?._id}
+      style={{
+        backgroundColor:
+          selectedReport.reviewedBy?._id !== loggedInUser?._id ? '#ccc' : '#e74c3c',
+        cursor:
+          selectedReport.reviewedBy?._id !== loggedInUser?._id ? 'not-allowed' : 'pointer'
+      }}
+      onClick={() =>
+        setConfirmModal({
+          visible: true,
+          message: `Are you sure you want to mark this report as MALICIOUS?`,
+          action: () => handleDecision(selectedReport._id, 'malicious')
+        })
+      }
+    >
+      Mark as Malicious
+    </button>
+    <button
+      className="benign"
+      disabled={selectedReport.reviewedBy?._id !== loggedInUser?._id}
+      style={{
+        backgroundColor:
+          selectedReport.reviewedBy?._id !== loggedInUser?._id ? '#ccc' : '#2ecc71',
+        cursor:
+          selectedReport.reviewedBy?._id !== loggedInUser?._id ? 'not-allowed' : 'pointer'
+      }}
+      onClick={() =>
+        setConfirmModal({
+          visible: true,
+          message: `Are you sure you want to mark this report as SAFE?`,
+          action: () => handleDecision(selectedReport._id, 'benign')
+        })
+      }
+    >
+      Mark as Safe
+    </button>
+  </div>
+)}
+
 
               <button className="close-button" onClick={handleCloseReport}>Close</button>
             </div>

@@ -106,8 +106,8 @@ async updateDecisionAndReviewer(id: string, verdict: string, reviewedById: strin
   }
 
   const updated = await this.reportModel.findByIdAndUpdate(
-    id,
-    { investigatorDecision: verdict, reviewedBy: reviewedById },
+    {_id:id,reviewedBy: reviewedById, analysisStatus: 'in-progress'},
+    { investigatorDecision: verdict, reviewedBy: reviewedById, analysisStatus: 'done' },
     { new: true }
   );
 
@@ -117,15 +117,28 @@ async updateDecisionAndReviewer(id: string, verdict: string, reviewedById: strin
 
   return updated;
 }
-async claimReport(id: string, reviewedById: string) {
-  const report = await this.reportModel.findById(id);
-  if (!report) throw new NotFoundException('Report not found');
 
-  const updated = await this.reportModel.findByIdAndUpdate(
-    id,
-    { analysisStatus: 'in-progress', reviewedBy: reviewedById },
+async claimReport(id: string, reviewedById: string) {
+  const updated = await this.reportModel.findOneAndUpdate(
+    { 
+      _id: id,
+      investigatorDecision: null,
+      reviewedBy: null,
+      analysisStatus: 'pending'
+
+    },
+    { 
+      reviewedBy: reviewedById,
+      analysisStatus: 'in-progress'
+    },
     { new: true }
   );
+
+  if (!updated) {
+    throw new NotFoundException(
+      'Report not found or cannot be claimed (status not pending or already decided)'
+    );
+  }
 
   return updated;
 }
@@ -133,8 +146,8 @@ async claimReport(id: string, reviewedById: string) {
 
 async releaseReport(reportId: string, investigatorId: string) {
   const report = await this.reportModel.findOneAndUpdate(
-    { _id: reportId, analysisStatus: 'in-progress', reviewedBy: investigatorId },
-    { analysisStatus: 'pending', reviewedBy: null },
+    { _id: reportId, reviewedBy: investigatorId, investigatorDecision: null, analysisStatus: 'in-progress' },
+    { reviewedBy: null, investigatorDecision: null, analysisStatus: 'pending' },
     { new: true }
   );
   
