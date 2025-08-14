@@ -1,12 +1,20 @@
 import os
 import requests
+import time
 from datetime import datetime, timezone
 from dotenv import load_dotenv
+
 import dramatiq
 from dramatiq.brokers.redis import RedisBroker
 
 from .forensics.report import ForensicReport
-from .utils.analysis import perform_scraping  # still used for scrapingInfo and abuseFlags
+from .utils.analysis import perform_scraping
+from src.utils.logger import get_logger, report_id_ctx
+from src.utils.job_logging_middleware import JobLoggingMiddleware
+
+
+# ─── Logger ───
+logger = get_logger(__name__)
 
 # ─── Load Environment ───
 load_dotenv()
@@ -20,17 +28,21 @@ MAX_RETRIES = 3
 
 # ─── Setup Headers ───
 if not AUTH_KEY:
+    logger.critical("BOT_ACCESS_KEY missing from .env — bot cannot start.")
     raise RuntimeError("BOT_ACCESS_KEY missing from .env")
 
 headers = {"Authorization": f"Bot {AUTH_KEY}"}
 
 # ─── Redis Broker Setup ───
+logger.info(f"Connecting to Redis broker at {REDIS_HOST}:{REDIS_PORT}...")
 redis_broker = RedisBroker(
     host=REDIS_HOST,
     port=REDIS_PORT,
     password=os.getenv("REDIS_PASSWORD") or None
 )
+redis_broker.add_middleware(JobLoggingMiddleware())
 dramatiq.set_broker(redis_broker)
+logger.info("Redis broker set successfully.")
 
 # ─── Utility Functions ───
 def sanitize_domain(domain: str) -> str:
@@ -51,16 +63,17 @@ def report_analysis(report_id, report_obj: ForensicReport, scraping_info, abuse_
         "analysis": serialize(report_obj.to_dict()),
         "scrapingInfo": serialize(scraping_info),
         "abuseFlags": serialize(abuse_flags),
-        "analysisStatus": "done"
+        "analysisStatus": "pending"
     }
 
     try:
+        logger.debug(f"PATCH {url} — sending analysis results...")
         response = requests.patch(url, json=data, headers=headers, timeout=10)
         response.raise_for_status()
-        print(f"[BOT] Report {report_id} updated successfully")
+        logger.info(f"Report {report_id} updated successfully in API.")
         return True
     except Exception as e:
-        print(f"[BOT] Failed to PATCH analysis for {report_id}: {e}")
+        logger.error(f"Failed to PATCH analysis for {report_id}: {e}", exc_info=True)
         return False
 
 # ─── Dramatiq Actor: Main Job Consumer ───
@@ -70,24 +83,36 @@ def process_report(data):
     domain = data.get("domain")
 
     if not report_id or not domain:
-        print(f"[BOT] Skipping invalid job: {data}")
+        logger.warning(f"Skipping invalid job payload: {data}")
         return
 
-    print(f"\n[BOT] Analyzing {domain} (Report ID: {report_id})")
+    t0 = time.perf_counter()
+    logger.debug(f"Received job payload: {data}")
+    logger.info(f"[BOT] Starting analysis for {domain} (Report ID: {report_id})")
 
     try:
         domain = sanitize_domain(domain)
 
-        # 1. Gather forensic & risk data
-        forensic_Data = ForensicReport(domain)
-        forensic_Data.run()
+        # 1) Forensics
+        logger.debug("Running forensic data collection...")
+        forensic_data = ForensicReport(domain)
+        forensic_data.run()
+        logger.debug("Forensic data collection complete.")
 
-        # 2. Perform scraping & abuse flag extraction
+        # 2) Scraping
+        logger.debug("Performing scraping and abuse flag extraction...")
         scraping_info, abuse_flags = perform_scraping(domain, report_id)
+        logger.debug("Scraping and abuse flag extraction complete.")
 
-        # 3. Send to API
-        if report_analysis(report_id, forensic_Data, scraping_info, abuse_flags):
-            print(f"[BOT] Report {report_id} successfully analyzed.")
+        # 3) Send to API
+        if report_analysis(report_id, forensic_data, scraping_info, abuse_flags):
+            elapsed_ms = int((time.perf_counter() - t0) * 1000)
+            logger.info(f"[BOT] Report {report_id} successfully analyzed "
+                        f"(risk={forensic_data.risk_level}, score={forensic_data.risk_score}, {elapsed_ms}ms)")
+        else:
+            logger.warning(f"[BOT] Report {report_id} analysis completed but failed to update API.")
     except Exception as e:
-        print(f"[BOT] Analysis failed for {domain}: {e}")
-        raise e
+        logger.error(f"[BOT] Analysis failed for {domain}: {e}", exc_info=True)
+        raise
+
+
