@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+
 import LandingPage from './pages/Landing';
 import LoginPage from './pages/Login';
 import RegisterPage from './pages/Register';
@@ -13,35 +14,111 @@ import ChangePassword from './pages/ChangePassword';
 import ResetPasswordPage from './pages/ResetPasswordPage';
 import InvestigatorStats from './pages/InvestigatorStats';
 import Help from './pages/Help';
+import NotAuthorized from './pages/NotAuthorized';
+
+import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
 function App() {
   return (
     <Router>
       <Routes>
+        {/* Public routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/about" element={<AboutPage />} />
-
-        {/* Reporter routes */}
-        <Route path="/dashboard" element={<ReporterDashboard />} />
-        <Route path="/report" element={<ReportPage />} />
-
-        {/* Investigator */}
-        <Route path="/investigator" element={<InvestigatorDashboard />} />
-        <Route path="/investigator/pending" element={<InvestigatorDashboard view="pending" />} />
-        <Route path="/investigator/reviewed" element={<InvestigatorDashboard view="reviewed" />} />
-        <Route path="/investigator/settings" element={<UserSettings />} />
-        <Route path="/investigator/stats" element={<InvestigatorStats />} />
-
-        {/* General  */}
-        <Route path="/settings" element={<UserSettings />} />
-        <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/reset-password" element={<ResetPasswordPage />} />
-        <Route path="/change-password" element={<ChangePassword />} />
+        <Route path="/not-authorized" element={<NotAuthorized />} />
         <Route path="/help/:role" element={<Help />} />
 
+        {/* Reporter-only */}
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute allowedRoles={['general']}>
+              <ReporterDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/report"
+          element={
+            <ProtectedRoute allowedRoles={['general']}>
+              <ReportPage />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Investigator-only */}
+        <Route
+          path="/investigator"
+          element={
+            <ProtectedRoute allowedRoles={['investigator']}>
+              <InvestigatorDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/investigator/pending"
+          element={
+            <ProtectedRoute allowedRoles={['investigator']}>
+              <InvestigatorDashboard view="pending" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/investigator/reviewed"
+          element={
+            <ProtectedRoute allowedRoles={['investigator']}>
+              <InvestigatorDashboard view="reviewed" />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/investigator/settings"
+          element={
+            <ProtectedRoute allowedRoles={['investigator']}>
+              <UserSettings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/investigator/stats"
+          element={
+            <ProtectedRoute allowedRoles={['investigator']}>
+              <InvestigatorStats />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Admin-only */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* General logged-in users */}
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'investigator', 'general']}>
+              <UserSettings />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/change-password"
+          element={
+            <ProtectedRoute allowedRoles={['admin', 'investigator', 'general']}>
+              <ChangePassword />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </Router>
   );
