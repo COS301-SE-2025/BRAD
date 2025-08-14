@@ -58,14 +58,11 @@ evidence: string[];
     captchaDetected?: boolean;
   };
   
-  
-  
-  
   @Prop()
   riskScore?: number;
 
-  @ApiProperty({ enum: ['pending', 'in-progress', 'done', 'error'], default: 'pending' })
-  @Prop({ enum: ['pending', 'in-progress', 'done', 'error'], default: 'pending' })
+  @ApiProperty({ enum: ['bot', 'pending', 'in-progress', 'done', 'error'], default: 'bot' })
+  @Prop({ enum: ['bot', 'pending', 'in-progress', 'done', 'error'], default: 'bot' })
   analysisStatus: string;
 
   @ApiProperty({ enum: ['malicious', 'benign', null], nullable: true })

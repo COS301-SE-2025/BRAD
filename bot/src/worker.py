@@ -63,7 +63,7 @@ def report_analysis(report_id, report_obj: ForensicReport, scraping_info, abuse_
         "analysis": serialize(report_obj.to_dict()),
         "scrapingInfo": serialize(scraping_info),
         "abuseFlags": serialize(abuse_flags),
-        "analysisStatus": "done"
+        "analysisStatus": "pending"
     }
 
     try:
