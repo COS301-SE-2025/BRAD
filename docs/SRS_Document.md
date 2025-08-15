@@ -8,21 +8,18 @@
 
 # Table of Contents
 
-- [Software Requirement Specifications](#software-requirement-specifications)
-- [Table of Contents](#table-of-contents)
-  - [Table of Contents](#table-of-contents-1)
 - [Introduction](#introduction)
-    - [Business Need](#business-need)
-    - [Project Scope](#project-scope)
+  - [Business Need](#business-need)
+  - [Project Scope](#project-scope)
 - [User Stories](#user-stories)
   - [1.Role: General user(Reporter)](#1role-general-userreporter)
   - [2.Role:Investigator](#2roleinvestigator)
   - [3.Role:Admin](#3roleadmin)
 - [Use cases](#use-cases)
-    - [Use Case 1: Submit Domain Report](#use-case-1-submit-domain-report)
-    - [Use Case 2: View Submitted Reports](#use-case-2-view-submitted-reports)
-    - [Use Case 3: Analyse Forensic](#use-case-3-analyse-forensic)
-    - [Complete use cases daigrams:](#complete-use-cases-daigrams)
+  - [Use Case 1: Submit Domain Report](#use-case-1-submit-domain-report)
+  - [Use Case 2: View Submitted Reports](#use-case-2-view-submitted-reports)
+  - [Use Case 3: Analyse Forensic](#use-case-3-analyse-forensic)
+  - [Complete use cases daigrams:](#complete-use-cases-daigrams)
 - [Use Cases for Demo 2](#use-cases-for-demo-2)
   - [Use Case 1: Admin Adds a New User](#use-case-1-admin-adds-a-new-user)
   - [Use Case 2: Admin Manages Users](#use-case-2-admin-manages-users)
@@ -33,7 +30,7 @@
 - [Functional Requirements](#functional-requirements)
   - [Core Requirements](#core-requirements)
     - [1.1. User Submission Portal](#11-user-submission-portal)
-    - [1.2. Scraping \& Malware Detection](#12-scraping--malware-detection)
+    - [1.2. Scraping & Malware Detection](#12-scraping--malware-detection)
     - [1.3. Forensic Data Collection](#13-forensic-data-collection)
     - [1.4. AI Risk Analysis](#14-ai-risk-analysis)
     - [1.5. Evidence Submission](#15-evidence-submission)
@@ -41,7 +38,7 @@
     - [1.7. Secure Storage](#17-secure-storage)
   - [Optional Features](#optional-features)
     - [2.1. Threat Intelligence Lookup](#21-threat-intelligence-lookup)
-    - [2.2. Automated WHOIS \& DNS](#22-automated-whois--dns)
+    - [2.2. Automated WHOIS & DNS](#22-automated-whois--dns)
     - [2.3. Domain Similarity Detection](#23-domain-similarity-detection)
     - [2.4. Real-Time Alerts](#24-real-time-alerts)
     - [2.5. Historical Tracking](#25-historical-tracking)
@@ -53,10 +50,17 @@
     - [3.4. Blockchain Evidence](#34-blockchain-evidence)
     - [3.5. Auto Takedown Requests](#35-auto-takedown-requests)
     - [3.6. Dark Web Checks](#36-dark-web-checks)
-  - [Service Contracts](#service-contracts)
+- [Architectural Requirements](#architectural-requirements)
+  - [Architectural Design](#architectural-design)
+  - [Strategy: Design based on Quality Requirements](#strategy-design-based-on-quality-requirements)
+  - [Architectural Styles](#architectural-styles)
+  - [Architectural Design and Pattern](#architectural-design-and-pattern)
+  - [Design Patterns](#design-patterns)
+  - [Architectural Constraints](#architectural-constraints)
+- [Service Contracts](#service-contracts)
   - [API Contract](#api-contract)
     - [Communication](#communication)
-    - [Report Report Management](#report-report-management)
+    - [Report Management](#report-management)
       - [Submit Report](#submit-report)
       - [Get All Reports](#get-all-reports)
       - [Update Analysis (Bot)](#update-analysis-bot)
@@ -70,13 +74,13 @@
       - [Get All Users](#get-all-users)
       - [Delete User](#delete-user)
       - [Create New User with One-Time Password](#create-new-user-with-one-time-password)
-    - [Authtication Management](#authtication-management)
+    - [Authentication Management](#authentication-management)
       - [Register](#register)
       - [Login](#login)
       - [Forgot Password](#forgot-password)
       - [Reset Password (via Token)](#reset-password-via-token)
       - [Change Password (First-Time OTP)](#change-password-first-time-otp)
-    - [Queue \& Redis Service Contracts](#queue--redis-service-contracts)
+    - [Queue & Redis Service Contracts](#queue--redis-service-contracts)
       - [Queue Service: `queueToFastAPI(domain, reportId)`](#queue-service-queuetofastapidomain-reportid)
     - [Bot Service Contracts](#bot-service-contracts)
       - [FastAPI Bot Job Endpoint](#fastapi-bot-job-endpoint)
@@ -88,97 +92,10 @@
   - [Frontend](#frontend)
   - [Backend](#backend)
   - [Scraping Tools](#scraping-tools)
-  - [DevOps \& Collaboration Tools](#devops--collaboration-tools)
+  - [DevOps & Collaboration Tools](#devops--collaboration-tools)
   - [Programming Languages Used](#programming-languages-used)
 - [Appendices](#appendices)
 
-## Table of Contents
-
-- [Software Requirement Specifications](#software-requirement-specifications)
-- [Table of Contents](#table-of-contents)
-  - [Table of Contents](#table-of-contents-1)
-- [Introduction](#introduction)
-    - [Business Need](#business-need)
-    - [Project Scope](#project-scope)
-- [User Stories](#user-stories)
-  - [1.Role: General user(Reporter)](#1role-general-userreporter)
-  - [2.Role:Investigator](#2roleinvestigator)
-  - [3.Role:Admin](#3roleadmin)
-- [Use cases](#use-cases)
-    - [Use Case 1: Submit Domain Report](#use-case-1-submit-domain-report)
-    - [Use Case 2: View Submitted Reports](#use-case-2-view-submitted-reports)
-    - [Use Case 3: Analyse Forensic](#use-case-3-analyse-forensic)
-    - [Complete use cases daigrams:](#complete-use-cases-daigrams)
-- [Use Cases for Demo 2](#use-cases-for-demo-2)
-  - [Use Case 1: Admin Adds a New User](#use-case-1-admin-adds-a-new-user)
-  - [Use Case 2: Admin Manages Users](#use-case-2-admin-manages-users)
-  - [Use Case 3: Investigator Analyzes Report Using Bot Response](#use-case-3-investigator-analyzes-report-using-bot-response)
-  - [Use Case 4: Reset or Change Password](#use-case-4-reset-or-change-password)
-    - [Steps to Reset Password:](#steps-to-reset-password)
-    - [Steps to Register (if not a user):](#steps-to-register-if-not-a-user)
-- [Functional Requirements](#functional-requirements)
-  - [Core Requirements](#core-requirements)
-    - [1.1. User Submission Portal](#11-user-submission-portal)
-    - [1.2. Scraping \& Malware Detection](#12-scraping--malware-detection)
-    - [1.3. Forensic Data Collection](#13-forensic-data-collection)
-    - [1.4. AI Risk Analysis](#14-ai-risk-analysis)
-    - [1.5. Evidence Submission](#15-evidence-submission)
-    - [1.6. Investigator Dashboard](#16-investigator-dashboard)
-    - [1.7. Secure Storage](#17-secure-storage)
-  - [Optional Features](#optional-features)
-    - [2.1. Threat Intelligence Lookup](#21-threat-intelligence-lookup)
-    - [2.2. Automated WHOIS \& DNS](#22-automated-whois--dns)
-    - [2.3. Domain Similarity Detection](#23-domain-similarity-detection)
-    - [2.4. Real-Time Alerts](#24-real-time-alerts)
-    - [2.5. Historical Tracking](#25-historical-tracking)
-    - [2.6. Multi-Language Support](#26-multi-language-support)
-  - [3. Wow Factors](#3-wow-factors)
-    - [3.1. Live Sandbox Testing](#31-live-sandbox-testing)
-    - [3.2. Machine Learning Risk Scores](#32-machine-learning-risk-scores)
-    - [3.3. Automated Threat Hunting](#33-automated-threat-hunting)
-    - [3.4. Blockchain Evidence](#34-blockchain-evidence)
-    - [3.5. Auto Takedown Requests](#35-auto-takedown-requests)
-    - [3.6. Dark Web Checks](#36-dark-web-checks)
-  - [Service Contracts](#service-contracts)
-  - [API Contract](#api-contract)
-    - [Communication](#communication)
-    - [Report Report Management](#report-report-management)
-      - [Submit Report](#submit-report)
-      - [Get All Reports](#get-all-reports)
-      - [Update Analysis (Bot)](#update-analysis-bot)
-      - [Submit Investigator Verdict](#submit-investigator-verdict)
-      - [Manual Forensic Analysis](#manual-forensic-analysis)
-    - [Admin Management](#admin-management)
-      - [Add Admin](#add-admin)
-      - [Promote User to Investigator](#promote-user-to-investigator)
-      - [Demote User to General](#demote-user-to-general)
-      - [Promote User to Admin](#promote-user-to-admin)
-      - [Get All Users](#get-all-users)
-      - [Delete User](#delete-user)
-      - [Create New User with One-Time Password](#create-new-user-with-one-time-password)
-    - [Authtication Management](#authtication-management)
-      - [Register](#register)
-      - [Login](#login)
-      - [Forgot Password](#forgot-password)
-      - [Reset Password (via Token)](#reset-password-via-token)
-      - [Change Password (First-Time OTP)](#change-password-first-time-otp)
-    - [Queue \& Redis Service Contracts](#queue--redis-service-contracts)
-      - [Queue Service: `queueToFastAPI(domain, reportId)`](#queue-service-queuetofastapidomain-reportid)
-    - [Bot Service Contracts](#bot-service-contracts)
-      - [FastAPI Bot Job Endpoint](#fastapi-bot-job-endpoint)
-      - [Submit Results to API](#submit-results-to-api)
-  - [Data Schema](#data-schema)
-  - [DTO Reference](#dto-reference)
-- [Domain Model](#domain-model)
-- [Technology Choices](#technology-choices)
-  - [Frontend](#frontend)
-  - [Backend](#backend)
-  - [Scraping Tools](#scraping-tools)
-  - [DevOps \& Collaboration Tools](#devops--collaboration-tools)
-  - [Programming Languages Used](#programming-languages-used)
-- [Appendices](#appendices)
-
-<br />
 <br />
 
 # Introduction
@@ -703,19 +620,20 @@ Any **user** who has forgotten or needs to reset their password can initiate rec
 
 ### Communication
 
-* **Protocol**: HTTP/HTTPS (RESTful)
-* **Format**: `application/json` (except multipart for file uploads)
-* **Auth**:
+- **Protocol**: HTTP/HTTPS (RESTful)
+- **Format**: `application/json` (except multipart for file uploads)
+- **Auth**:
 
-  * `Authorization: Bearer <JWT>` (for user endpoints)
-  * `X-Bot-Key: <KEY>` (for bot endpoints)
-* **Error Handling**:
+  - `Authorization: Bearer <JWT>` (for user endpoints)
+  - `X-Bot-Key: <KEY>` (for bot endpoints)
 
-  * `400` Bad Request (missing fields, invalid values)
-  * `401` Unauthorized (invalid/missing auth)
-  * `403` Forbidden (role-based access denial)
-  * `404` Not Found (invalid report ID)
-  * `500` Internal Server Error
+- **Error Handling**:
+
+  - `400` Bad Request (missing fields, invalid values)
+  - `401` Unauthorized (invalid/missing auth)
+  - `403` Forbidden (role-based access denial)
+  - `404` Not Found (invalid report ID)
+  - `500` Internal Server Error
 
 <br />
 
@@ -723,31 +641,31 @@ Any **user** who has forgotten or needs to reset their password can initiate rec
 
 This service handles submission, retrieval, analysis, and status updates of suspicious domain reports. It communicates with a bot (via FastAPI) for domain analysis and stores results with structured forensic data.
 
-
 #### Submit Report
+
 ---
 
 **Endpoint**: `POST /report`
 
-* **Description**: Submit a suspicious domain with optional screenshot/file evidence.
+- **Description**: Submit a suspicious domain with optional screenshot/file evidence.
 
-* **Guards**: `AuthGuard`, `RolesGuard`
+- **Guards**: `AuthGuard`, `RolesGuard`
 
-* **Roles**: `general`, `admin`
+- **Roles**: `general`, `admin`
 
-* **Content-Type**: `multipart/form-data`
+- **Content-Type**: `multipart/form-data`
 
-* **Request Body**
+- **Request Body**
 
-    | Field    | Type    | Required | Description                  |
-    | -------- | ------- | -------- | ---------------------------- |
-    | domain   | string  | YES      | Domain being reported        |
-    | evidence | file\[] | NO       | Up to 5 files (max 5MB each) |
+  | Field    | Type    | Required | Description                  |
+  | -------- | ------- | -------- | ---------------------------- |
+  | domain   | string  | YES      | Domain being reported        |
+  | evidence | file\[] | NO       | Up to 5 files (max 5MB each) |
 
-* **Response**
+- **Response**
 
-    ```json
-    {
+  ```json
+  {
     "_id": "665c861c8b23919a3f823fa1",
     "domain": "suspicious-domain.com",
     "submittedBy": "665c84cf7b7f5b2b04117f3d",
@@ -758,110 +676,112 @@ This service handles submission, retrieval, analysis, and status updates of susp
     "abuseFlags": null,
     "analysisStatus": "pending",
     "investigatorDecision": null
-    }
-    ```
+  }
+  ```
 
 #### Get All Reports
+
 ---
 
 **Endpoint**: `GET /reports`
 
-* **Description**: Retrieve all reports (admin/investigator) or own reports (general).
-* **Guards**: `AuthGuard`, `RolesGuard`
-* **Roles**: `general`, `admin`, `investigator`
+- **Description**: Retrieve all reports (admin/investigator) or own reports (general).
+- **Guards**: `AuthGuard`, `RolesGuard`
+- **Roles**: `general`, `admin`, `investigator`
 
-* **Response**
+- **Response**
 
-    ```json
-    [
-    {
-        "_id": "...",
-        "domain": "...",
-        "submittedBy": { "username": "user123" },
-        ...
-    }
-    ]
-    ```
+  ```json
+  [
+  {
+      "_id": "...",
+      "domain": "...",
+      "submittedBy": { "username": "user123" },
+      ...
+  }
+  ]
+  ```
 
 #### Update Analysis (Bot)
+
 ---
 
 **Endpoint**: `PATCH /reports/:id/analysis`
 
-* **Description**: Update a report with analysis results.
-* **Guard**: `BotGuard`
+- **Description**: Update a report with analysis results.
+- **Guard**: `BotGuard`
 
-* **Request Body** (DTO: `UpdateAnalysisDto`)
+- **Request Body** (DTO: `UpdateAnalysisDto`)
 
-    ```json
-    {
-    "analysis": {
-        "domain": "site.com",
-        "scannedAt": "2025-08-08T10:00:00Z",
-        "ip": "123.45.67.89",
-        "registrar": "Example Inc.",
-        "whoisOwner": "John Doe",
-        "sslValid": true,
-        "sslExpires": "2025-12-01",
-        "riskScore": 8.5,
-        "summary": "Possible phishing site",
-        ...
-    },
-    "scrapingInfo": {
-        "htmlRaw": "<html>...</html>",
-        "structuredInfo": {
-        "headings": ["Welcome"],
-        "links": ["http://..."]
-        }
-    },
-    "abuseFlags": {
-        "obfuscatedScripts": true,
-        "suspiciousJS": ["eval", "atob"],
-        ...
-    },
-    "analysisStatus": "done"
-    }
-    ```
+  ```json
+  {
+  "analysis": {
+      "domain": "site.com",
+      "scannedAt": "2025-08-08T10:00:00Z",
+      "ip": "123.45.67.89",
+      "registrar": "Example Inc.",
+      "whoisOwner": "John Doe",
+      "sslValid": true,
+      "sslExpires": "2025-12-01",
+      "riskScore": 8.5,
+      "summary": "Possible phishing site",
+      ...
+  },
+  "scrapingInfo": {
+      "htmlRaw": "<html>...</html>",
+      "structuredInfo": {
+      "headings": ["Welcome"],
+      "links": ["http://..."]
+      }
+  },
+  "abuseFlags": {
+      "obfuscatedScripts": true,
+      "suspiciousJS": ["eval", "atob"],
+      ...
+  },
+  "analysisStatus": "done"
+  }
+  ```
 
-* **Response**
+- **Response**
 
-    Returns the updated report document.
-
+  Returns the updated report document.
 
 #### Submit Investigator Verdict
+
 ---
 
 **Endpoint**: `PATCH /report/:id/decision`
 
-* **Description**: Investigator marks the report as either `malicious` or `benign`.
-* **Guards**: `AuthGuard`, `RolesGuard`
-* **Roles**: `investigator`
+- **Description**: Investigator marks the report as either `malicious` or `benign`.
+- **Guards**: `AuthGuard`, `RolesGuard`
+- **Roles**: `investigator`
 
-* **Request Body**
+- **Request Body**
 
-    ```json
-    {
+  ```json
+  {
     "verdict": "malicious"
-    }
-    ```
+  }
+  ```
 
-* **Response**
+- **Response**
 
-    ```json
-    {
+  ```json
+  {
     "investigatorDecision": "malicious"
-    }
-    ```
+  }
+  ```
 
 #### Manual Forensic Analysis
 
 **Endpoint**: `GET /forensics/:id`
 
-* **Description**: Manually trigger forensic analysis using the `ForensicService`.
+- **Description**: Manually trigger forensic analysis using the `ForensicService`.
 
-* **Guards**: `AuthGuard`, `RolesGuard`
+- **Guards**: `AuthGuard`, `RolesGuard`
 
-* **Roles**: `admin`, `investigator`
+- **Roles**: `admin`, `investigator`
 
 <br />
 
@@ -869,162 +789,165 @@ This service handles submission, retrieval, analysis, and status updates of susp
 
 This service provides privileged operations to manage users in the system, such as promoting/demoting roles, creating users with one-time passwords, and deleting users. Access is restricted to users with the `admin` role.
 
-
 #### Add Admin
+
 ---
 
 **Endpoint**: `POST /admin/add`
 
-* **Description**: Create a new admin user.
-* **Request Body**: `AddAdminDto`
+- **Description**: Create a new admin user.
+- **Request Body**: `AddAdminDto`
 
-    ```json
-    {
+  ```json
+  {
     "userId": "665d5f9b3f5c2e2a88e98b91",
     "firstname": "Natasha",
     "lastname": "Romanoff",
     "email": "natasha@example.com",
     "username": "nat_romanoff",
     "password": "supersecurepassword"
-    }
-    ```
+  }
+  ```
 
-* **Response**:
+- **Response**:
 
-    ```json
-    {
+  ```json
+  {
     "_id": "665d5f9b3f5c2e2a88e98b91",
     "firstname": "Natasha",
     "lastname": "Romanoff",
     "email": "natasha@example.com",
     "username": "nat_romanoff",
     "role": "admin"
-    }
-    ```
+  }
+  ```
 
 #### Promote User to Investigator
+
 ---
 
 **Endpoint**: `PATCH /admin/promote/:userId`
 
-* **Description**: Promote a general user to `investigator`.
-* **Params**:
+- **Description**: Promote a general user to `investigator`.
+- **Params**:
 
-  * `userId` — MongoDB ObjectId of the user
+  - `userId` — MongoDB ObjectId of the user
 
-* **Response**:
+- **Response**:
 
-    ```json
-    {
+  ```json
+  {
     "_id": "...",
     "role": "investigator"
-    }
-    ```
-
+  }
+  ```
 
 #### Demote User to General
+
 ---
 
 **Endpoint**: `PATCH /admin/demote/:userId`
 
-* **Description**: Demote an `investigator` or `admin` user to `general`.
-* **Params**:
+- **Description**: Demote an `investigator` or `admin` user to `general`.
+- **Params**:
 
-  * `userId` — MongoDB ObjectId of the user
+  - `userId` — MongoDB ObjectId of the user
 
-* **Response**:
+- **Response**:
 
-    ```json
-    {
+  ```json
+  {
     "_id": "...",
     "role": "general"
-    }
-    ```
-
+  }
+  ```
 
 #### Promote User to Admin
+
 ---
 
 **Endpoint**: `PATCH /admin/promote-to-admin/:userId`
 
-* **Description**: Promote any user to `admin`.
-* **Params**:
+- **Description**: Promote any user to `admin`.
+- **Params**:
 
-  * `userId` — MongoDB ObjectId of the user
+  - `userId` — MongoDB ObjectId of the user
 
-* **Response**:
+- **Response**:
 
-    ```json
-    {
+  ```json
+  {
     "_id": "...",
     "role": "admin"
-    }
-    ```
+  }
+  ```
 
 #### Get All Users
+
 ---
+
 **Endpoint**: `GET /admin/users`
 
-* **Description**: Returns all registered users (passwords excluded).
-* **Response**:
+- **Description**: Returns all registered users (passwords excluded).
+- **Response**:
 
-    ```json
-    [
-    {
-        "_id": "665d...",
-        "firstname": "Tony",
-        "lastname": "Stark",
-        "email": "tony@example.com",
-        "username": "tony_stark",
-        "role": "admin"
-    },
-    ...
-    ]
-    ```
-
+  ```json
+  [
+  {
+      "_id": "665d...",
+      "firstname": "Tony",
+      "lastname": "Stark",
+      "email": "tony@example.com",
+      "username": "tony_stark",
+      "role": "admin"
+  },
+  ...
+  ]
+  ```
 
 #### Delete User
+
 ---
 
 **Endpoint**: `DELETE /admin/delete/:userId`
 
-* **Description**: Permanently delete a user by ID.
-* **Params**:
+- **Description**: Permanently delete a user by ID.
+- **Params**:
 
-  * `userId` — MongoDB ObjectId of the user
+  - `userId` — MongoDB ObjectId of the user
 
-* **Response**:
+- **Response**:
 
-    ```json
-    {
+  ```json
+  {
     "message": "User deleted successfully"
-    }
-    ```
-
+  }
+  ```
 
 #### Create New User with One-Time Password
+
 ---
 
 **Endpoint**: `POST /admin/user`
 
-* **Description**: Create a new user with a randomly generated 5-digit one-time password. The user is emailed a password reset link valid for 30 minutes.
-* 
-* **Request Body**: `CreateUserDto`
+- **Description**: Create a new user with a randomly generated 5-digit one-time password. The user is emailed a password reset link valid for 30 minutes.
+-
+- **Request Body**: `CreateUserDto`
 
-    ```json
-    {
+  ```json
+  {
     "firstname": "Steve",
     "lastname": "Rogers",
     "email": "steve@example.com",
     "username": "captain_america",
     "role": "investigator"
-    }
-    ```
+  }
+  ```
 
-* **Response**:
+- **Response**:
 
-    ```json
-    {
+  ```json
+  {
     "_id": "665d...",
     "firstname": "Steve",
     "lastname": "Rogers",
@@ -1032,10 +955,10 @@ This service provides privileged operations to manage users in the system, such 
     "username": "captain_america",
     "role": "investigator",
     "mustChangePassword": true
-    }
-    ```
+  }
+  ```
 
-* An email will be sent to the user with the one-time password and reset link.
+- An email will be sent to the user with the one-time password and reset link.
 
 <br />
 
@@ -1043,141 +966,137 @@ This service provides privileged operations to manage users in the system, such 
 
 This module handles user registration, authentication, and password lifecycle management (reset, change). It supports login via username or email, sends secure password reset links via email, and enforces first-time password change using OTPs for users created by admins.
 
-
-
 #### Register
+
 ---
 
 **Endpoint**: `POST /auth/register`
 
-* **Description**: Register a new user (default role: investigator).
-* **Public**
-* **Request Body**: `RegisterDto`
+- **Description**: Register a new user (default role: investigator).
+- **Public**
+- **Request Body**: `RegisterDto`
 
-    ```json
-    {
+  ```json
+  {
     "firstname": "Tony",
     "lastname": "Stark",
     "email": "tony@example.com",
     "username": "tony_stark",
     "password": "strongPassword1!"
-    }
-    ```
+  }
+  ```
 
-* **Response**
+- **Response**
 
-    ```json
-    { "userId": "665d..." }
-    ```
-
+  ```json
+  { "userId": "665d..." }
+  ```
 
 #### Login
+
 ---
 
 **Endpoint**: `POST /auth/login`
 
-* **Description**: Authenticate with username or email and return JWT token.
-* **Public**
-* **Request Body**: `LoginDto`
+- **Description**: Authenticate with username or email and return JWT token.
+- **Public**
+- **Request Body**: `LoginDto`
 
-    ```json
-    {
+  ```json
+  {
     "identifier": "tony_stark",
     "password": "strongPassword1!"
+  }
+  ```
+
+- **Response**
+
+  ```json
+  {
+    "token": "<JWT_TOKEN>",
+    "user": {
+      "_id": "665d...",
+      "firstname": "Tony",
+      "lastname": "Stark",
+      "email": "tony@example.com",
+      "username": "tony_stark",
+      "role": "investigator",
+      "mustChangePassword": false,
+      "createdAt": "2025-08-08T14:26:34.687Z",
+      "updatedAt": "2025-08-08T14:26:34.687Z",
+      "__v": 0
     }
-    ```
+  }
+  ```
 
-* **Response**
-
-    ```json
-    {
-        "token": "<JWT_TOKEN>",
-        "user": {
-            "_id": "665d...",
-            "firstname": "Tony",
-            "lastname": "Stark",
-            "email": "tony@example.com",
-            "username": "tony_stark",
-            "role": "investigator",
-            "mustChangePassword": false,
-            "createdAt": "2025-08-08T14:26:34.687Z",
-            "updatedAt": "2025-08-08T14:26:34.687Z",
-            "__v": 0
-        }
-    }
-    ```
-
-* If `mustChangePassword = true`, user must change password before login.
-
-
+- If `mustChangePassword = true`, user must change password before login.
 
 #### Forgot Password
+
 ---
 
 **Endpoint**: `POST /auth/forgot-password`
 
-* **Description**: Sends a password reset link to the user's email.
-* **Public**
-* **Request Body**
+- **Description**: Sends a password reset link to the user's email.
+- **Public**
+- **Request Body**
 
-    ```json
-    { "email": "tony@example.com" }
-    ```
+  ```json
+  { "email": "tony@example.com" }
+  ```
 
-* **Response**
+- **Response**
 
-    ```json
-    { "message": "Password reset email sent" }
-    ```
-
-
+  ```json
+  { "message": "Password reset email sent" }
+  ```
 
 #### Reset Password (via Token)
+
 ---
 
 **Endpoint**: `POST /auth/reset-password`
 
-* **Description**: Resets password using token from email.
-* **Public**
-* **Request Body**: `ResetPasswordDto`
+- **Description**: Resets password using token from email.
+- **Public**
+- **Request Body**: `ResetPasswordDto`
 
-    ```json
-    {
+  ```json
+  {
     "token": "reset_token_from_email",
     "newPassword": "newSecurePassword123"
-    }
-    ```
+  }
+  ```
 
-* **Response**
+- **Response**
 
-    ```json
-    { "message": "Password has been reset successfully" }
-    ```
-
-
+  ```json
+  { "message": "Password has been reset successfully" }
+  ```
 
 #### Change Password (First-Time OTP)
+
 ---
 
 **Endpoint**: `PATCH /auth/change-password/:username`
 
-* **Description**: Changes password using a one-time password (for first login).
-* **Public**
-* **Path Param**: `username` — the username of the user
-* **Request Body**: `ChangePasswordDto`
+- **Description**: Changes password using a one-time password (for first login).
+- **Public**
+- **Path Param**: `username` — the username of the user
+- **Request Body**: `ChangePasswordDto`
 
-    ```json
-    {
+  ```json
+  {
     "OTP": "12345",
     "newPassword": "newSecurePassword123!"
-    }
-    ```
+  }
+  ```
 
-* **Response**
+- **Response**
 
-    ```json
-    { "message": "Password changed successfully. You can now log in." }
-    ```
+  ```json
+  { "message": "Password changed successfully. You can now log in." }
+  ```
 
 <br />
 
@@ -1185,42 +1104,41 @@ This module handles user registration, authentication, and password lifecycle ma
 
 These services handle asynchronous integration between the NestJS API and the FastAPI bot, and queue-based processing via Redis. They support pushing reports into the FastAPI analysis queue and Redis-based message passing.
 
-
-
 #### Queue Service: `queueToFastAPI(domain, reportId)`
+
 ---
 
 Used by: `ReportService.submitReport(...)`
 
-* **Purpose**: Sends a report to FastAPI via HTTP POST for domain analysis.
+- **Purpose**: Sends a report to FastAPI via HTTP POST for domain analysis.
 
-* **Protocol**: HTTP (JSON)
+- **Protocol**: HTTP (JSON)
 
-* **URL**: `${FASTAPI_URL}/queue`
+- **URL**: `${FASTAPI_URL}/queue`
 
-* **Payload**
+- **Payload**
 
-    ```json
-    {
+  ```json
+  {
     "domain": "example.com",
     "report_id": "665d5f9b3f5c2e2a88e98b91"
-    }
-    ```
+  }
+  ```
 
-* **Response**
+- **Response**
 
-    ```json
-    {
+  ```json
+  {
     "status": "queued",
     "message": "Job successfully received"
-    }
-    ```
+  }
+  ```
 
 **Errors**:
 
-* Connection failures or timeouts are caught and logged.
-* Error message is printed: `[QueueService] Failed to queue: <message>`
-* The exception is rethrown.
+- Connection failures or timeouts are caught and logged.
+- Error message is printed: `[QueueService] Failed to queue: <message>`
+- The exception is rethrown.
 
 <br />
 
@@ -1228,75 +1146,76 @@ Used by: `ReportService.submitReport(...)`
 
 This component is a Python-based bot system built with FastAPI + Dramatiq + Redis. It acts as an asynchronous consumer of analysis jobs pushed from the NestJS backend. The bot performs forensic and scraping analysis on domains and reports results back to the API.
 
-
-
 #### FastAPI Bot Job Endpoint
+
 ---
 
 **Endpoint**: `POST /queue`
-* **Description**: Accepts analysis jobs from the NestJS backend and enqueues them to Redis using   Dramatiq.
 
-* **Request Body**
+- **Description**: Accepts analysis jobs from the NestJS backend and enqueues them to Redis using Dramatiq.
 
-    ```json
-    {
+- **Request Body**
+
+  ```json
+  {
     "domain": "phishing-site.com",
     "report_id": "665d5f9b3f5c2e2a88e98b91"
-    }
-    ```
+  }
+  ```
 
-* **Response**
+- **Response**
 
-    ```json
-    {
+  ```json
+  {
     "status": "queued"
-    }
-    ```
-
+  }
+  ```
 
 #### Submit Results to API
+
 ---
 
-   **Endpoint**: `PATCH /reports/{report_id}/analysis`
-* **Description**: Submits the analysis results back to the NestJS API for storage and further processing.
+**Endpoint**: `PATCH /reports/{report_id}/analysis`
 
-* **Payload Example**
+- **Description**: Submits the analysis results back to the NestJS API for storage and further processing.
 
-   ```json
-   {
-     "analysis": {
-       "domain": "phishing-site.com",
-       "ip": "123.45.67.89",
-       "registrar": "ExampleRegistrar",
-       "riskScore": 8.5,
-       "riskLevel": "High",
-       ...
-     },
-     "scrapingInfo": {
-       "htmlRaw": "...",
-       "screenshotPath": "static/screenshots/phishing-site.com.png",
-       "structuredInfo": {
-         "headings": ["Login", "Submit"],
-         "links": ["http://malicious-link.com"]
-       },
-       "crawledLinks": ["http://phishing-site.com/login"]
-     },
-     "abuseFlags": {
-       "suspiciousJS": ["eval", "atob"],
-       "redirectChain": ["start.com → middle.com → end.com"],
-       "obfuscatedScripts": true,
-       ...
-     },
-     "analysisStatus": "done"
-   }
-   ```
+- **Payload Example**
 
-* **Error Handling**
+  ```json
+  {
+    "analysis": {
+      "domain": "phishing-site.com",
+      "ip": "123.45.67.89",
+      "registrar": "ExampleRegistrar",
+      "riskScore": 8.5,
+      "riskLevel": "High",
+      ...
+    },
+    "scrapingInfo": {
+      "htmlRaw": "...",
+      "screenshotPath": "static/screenshots/phishing-site.com.png",
+      "structuredInfo": {
+        "headings": ["Login", "Submit"],
+        "links": ["http://malicious-link.com"]
+      },
+      "crawledLinks": ["http://phishing-site.com/login"]
+    },
+    "abuseFlags": {
+      "suspiciousJS": ["eval", "atob"],
+      "redirectChain": ["start.com → middle.com → end.com"],
+      "obfuscatedScripts": true,
+      ...
+    },
+    "analysisStatus": "done"
+  }
+  ```
 
-   * On failure: logs the error and raises to retry via Dramatiq
-   * Retries: Up to `MAX_RETRIES = 3`
-   * Timeout: 60 seconds max per job
-  
+- **Error Handling**
+
+  - On failure: logs the error and raises to retry via Dramatiq
+  - Retries: Up to `MAX_RETRIES = 3`
+  - Timeout: 60 seconds max per job
+
 <br />
 
 ## Data Schema
@@ -1400,9 +1319,6 @@ This component is a Python-based bot system built with FastAPI + Dramatiq + Redi
 
 <p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 
-
-
-
 <br />
 <br />
 <br />
@@ -1421,10 +1337,11 @@ This component is a Python-based bot system built with FastAPI + Dramatiq + Redi
 <br />
 <br />
 
-**Architectural** **Requirements**
+# **Architectural** **Requirements**
 
-**Architectural** **Design**
-**Strategy:** **Design** **based** **on** **Quality** **Requirements**
+## **Architectural** **Design**
+
+### **Strategy:** **Design** **based** **on** **Quality** **Requirements**
 
 **Making** **It** **Easy** **to** **Use**
 
@@ -1480,7 +1397,7 @@ which is a key part of Agile.
 
 <p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 
-**Architectural** **Styles**
+## **Architectural** **Styles**
 
 In developing the Bot to Report Abusive Domains (BRAD) system, we have
 selected several architectural styles to meet key quality requirements,
@@ -1515,14 +1432,14 @@ usability by allowing a focused and responsive interface. It also
 supports security and compliance by ensuring that sensitive operations
 are handled server-side under controlled conditions.
 
-The Layered Architecture organizes the BRAD bot into distinct backend layers: 
-the Scrape Service Layer (responsible for fetching and parsing submitted domains), 
-Malware Detection Layer (examines domains for malicious content), AI Analysis Layer 
-(classifies and scores domain risk based on trained models), and Report Generation 
-Layer (produces and logs investigation reports). This structure improves maintainability, 
-as each layer handles a specific subtask and can be updated or debugged independently. 
-It also enhances reliability, as issues in one layer such as scraping do not directly 
-affect the functioning of others. Security is reinforced by isolating sensitive processes 
+The Layered Architecture organizes the BRAD bot into distinct backend layers:
+the Scrape Service Layer (responsible for fetching and parsing submitted domains),
+Malware Detection Layer (examines domains for malicious content), AI Analysis Layer
+(classifies and scores domain risk based on trained models), and Report Generation
+Layer (produces and logs investigation reports). This structure improves maintainability,
+as each layer handles a specific subtask and can be updated or debugged independently.
+It also enhances reliability, as issues in one layer such as scraping do not directly
+affect the functioning of others. Security is reinforced by isolating sensitive processes
 within these internal layers, reducing exposure to external threats.
 
 The Pipe and Filter Pattern structures the backend analysis workflow as
@@ -1591,7 +1508,7 @@ performance by enabling potential parallel execution of steps.
 
 <p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 
-**Architectural** **Quality** **Requirements**
+## **Architectural** **Quality** **Requirements**
 
 > **1.** **Security** **(Most** **Important)**
 
@@ -1661,7 +1578,7 @@ developers can make targeted changes without affecting the whole system.
 
 <p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 
-**Architectural** **Design** **and** **Pattern**
+## **Architectural** **Design** **and** **Pattern**
 
 In developing the BRAD (Bot to Report Abusive Domains) system, several
 architectural patterns have been chosen to support the project’s
@@ -1768,17 +1685,17 @@ without compromising backend integrity.
 
 > **Layered** **Architecture**
 
-The BRAD system applies a Layered Architecture within its backend, which includes both the API and the bot, to organize tasks 
-into sequential, logical layers. This layered structure supports the execution of grouped subtasks in a defined order, 
+The BRAD system applies a Layered Architecture within its backend, which includes both the API and the bot, to organize tasks
+into sequential, logical layers. This layered structure supports the execution of grouped subtasks in a defined order,
 improving modularity and control throughout the domain investigation process.
 
 In the bot, the layered execution pipeline consists of:
 
 - **Scrape Service**: Retrieves and collects data from the submitted domain.
 - **Malware Detection Service**: Scans the scraped domain content for known malware signatures or suspicious behavior.
-- **AI Analysis Service** *(executed within the API)*: Uses artificial intelligence to classify and assess the **risk level** 
-of the domain based on patterns in threat data and previously seen indicators. This logic is kept secure by running it inside 
-the API, which has direct access to the database and enforces access protection.
+- **AI Analysis Service** _(executed within the API)_: Uses artificial intelligence to classify and assess the **risk level**
+  of the domain based on patterns in threat data and previously seen indicators. This logic is kept secure by running it inside
+  the API, which has direct access to the database and enforces access protection.
 - **Report Service**: Compiles the output from previous layers into a structured report, ready for review by investigators.
 
 By structuring backend services in layers, BRAD achieves a clear separation of concerns. Each service can be developed, tested, and modified independently. Sensitive operations such as AI-based threat assessment and data handling are encapsulated deeper in the backend (in the API), away from the public interface. This design choice improves system integrity, eases long-term maintenance, and strengthens protection from external threats.
@@ -1844,12 +1761,12 @@ critical quality requirements. This ensures that BRAD is not only
 functional but secure, adaptable, and resilient in the face of
 ever-evolving cyber-security threats.
 
-<img src="./images/architectureDiagram.png"
+<img src="./images/architectureDiagram.jpg"
 style="width:7.59514in;height:11.24167in" />
 
 <p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 
-**Design** **Patterns**
+## **Design** **Patterns**
 
 > **Chain** **of** **Responsibility**
 
@@ -1881,7 +1798,7 @@ natural and effective fit for the architecture.
 
 <p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
 
-**Architectural** **Constraints**
+## **Architectural** **Constraints**
 
 **Adherence** **to** **Legal** **Standards** **and** **Regulations:**
 
