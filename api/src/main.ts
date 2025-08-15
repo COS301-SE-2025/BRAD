@@ -38,12 +38,12 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document);
 
   app.enableCors({
-    origin: 'http://localhost:5173',
+    origin: ['http://capstone-brad.dns.net.za', 'http://localhost:5173'],
     credentials: true,
   });
 
   // Serve /screenshots
-  const screenshotsPath = join(__dirname, '..','..', 'screenshots');
+  const screenshotsPath = join(__dirname, '..', '..', 'screenshots');
   console.log('Serving screenshots from:', screenshotsPath);
 
   app.use(
@@ -56,17 +56,18 @@ async function bootstrap() {
     }),
   );
 
-
-
   // Serve /uploads
   app.use(
     '/static/uploads',
-    express.static(join(__dirname, '..', '..','..', '..', '..','..','uploads'), {
-      setHeaders: (res) => {
-        res.setHeader('Access-Control-Allow-Origin', '*');
-        res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+    express.static(
+      join(__dirname, '..', '..', '..', '..', '..', '..', 'uploads'),
+      {
+        setHeaders: (res) => {
+          res.setHeader('Access-Control-Allow-Origin', '*');
+          res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+        },
       },
-    }),
+    ),
   );
 
   await app.listen(3000);
