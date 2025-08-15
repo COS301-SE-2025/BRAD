@@ -16,6 +16,7 @@ import InvestigatorStats from './pages/InvestigatorStats';
 import Help from './pages/Help';
 import NotAuthorized from './pages/NotAuthorized';
 
+
 import ProtectedRoute from './components/ProtectedRoute';
 import './App.css';
 
@@ -64,6 +65,15 @@ function App() {
           element={
             <ProtectedRoute allowedRoles={['investigator']}>
               <InvestigatorDashboard view="pending" />
+            </ProtectedRoute>
+          }
+        />
+
+         <Route
+          path="/investigator/in_progress"
+          element={
+            <ProtectedRoute allowedRoles={['investigator']}>
+              <InvestigatorDashboard view="in_progress" />
             </ProtectedRoute>
           }
         />

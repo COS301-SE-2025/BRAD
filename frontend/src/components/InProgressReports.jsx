@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { FaCalendarAlt, FaExclamationTriangle } from 'react-icons/fa';
 import API from '../api/axios';
 
-const PendingReports = ({ reports, onSelect, setReports }) => {
+const InProgressReports = ({ reports, onSelect, setReports }) => {
   const [loadingClaimId, setLoadingClaimId] = useState(null);
 
-  const pending = reports.filter(r => !r.investigator && !r.investigatorDecision && r.analysisStatus === 'pending');
+  const inProgress = reports.filter(r => r.reviewedBy && !r.investigatorDecision && r.analysisStatus === 'in-progress');
 
  const handleViewReport = (report) => {
   onSelect(report); // ✅ just open the report modal
@@ -14,10 +14,10 @@ const PendingReports = ({ reports, onSelect, setReports }) => {
 
   return (
     <div>
-      <h3 style={{ marginBottom: '1rem', color: '#fff' }}>Pending Reports</h3>
+      <h3 style={{ marginBottom: '1rem', color: '#fff' }}>In Progress Reports</h3>
       <div className="report-grid">
-        {pending.length === 0 && <p>No pending reports.</p>}
-        {pending.map(report => (
+        {inProgress.length === 0 && <p>No in-progress reports.</p>}
+        {inProgress.map(report => (
           <div
             className={`report-card-grid ${report.analysis?.riskScore > 80 ? 'high-risk' : ''}`}
             key={report._id}
@@ -25,6 +25,9 @@ const PendingReports = ({ reports, onSelect, setReports }) => {
             <p className="report-domain">{report.domain}</p>
             <p className="report-submitter">
               Submitted by: {report.submittedBy?.username || 'Unknown'}
+            </p>
+            <p className="report-reviewer">
+              Claimed by: {report.reviewedBy?.username || 'Unknown'}
             </p>
             <p className="report-date">
               <FaCalendarAlt style={{ marginRight: '6px', color: '#fff' }} />
@@ -47,4 +50,4 @@ const PendingReports = ({ reports, onSelect, setReports }) => {
   );
 };
 
-export default PendingReports;
+export default InProgressReports;

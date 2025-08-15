@@ -24,6 +24,11 @@ evidence: string[];
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   submittedBy: Types.ObjectId;
 
+
+   @ApiProperty({ example: '665c861c8b23919a3f823fa1', type: String })
+  @Prop({ type: Types.ObjectId, ref: 'User', required: false })
+  reviewedBy?: Types.ObjectId;
+
   @ApiProperty({ example: false, default: false })
   @Prop({ default: false })
   analyzed: boolean;

@@ -39,7 +39,7 @@ export class ReportService {
   async getReports(userId: string, role: string) {
     if (role === 'admin' || role === 'investigator') {
       // Admins and investigators can view all reports
-      return this.reportModel.find().populate('submittedBy', 'username');
+      return this.reportModel.find().populate('submittedBy', 'username').populate('reviewedBy', 'username');
     }
   
     if (role === 'general') {
@@ -90,6 +90,8 @@ export class ReportService {
     { new: true },
   );
 
+  
+
   if (!updated) {
     throw new NotFoundException(`Report with id ${id} not found`);
   }
@@ -98,13 +100,61 @@ export class ReportService {
   }
 
   
-  async updateInvestigatorDecision(id: string, verdict: string) {
-    if (!['malicious', 'benign'].includes(verdict))
-      throw new Error('Invalid verdict');
-    return this.reportModel.findByIdAndUpdate(
-      id,
-      { investigatorDecision: verdict },
-      { new: true }
+async updateDecisionAndReviewer(id: string, verdict: string, reviewedById: string) {
+  if (!['malicious', 'benign'].includes(verdict)) {
+    throw new Error('Invalid verdict');
+  }
+
+  const updated = await this.reportModel.findByIdAndUpdate(
+    {_id:id,reviewedBy: reviewedById, analysisStatus: 'in-progress'},
+    { investigatorDecision: verdict, reviewedBy: reviewedById, analysisStatus: 'done' },
+    { new: true }
+  );
+
+  if (!updated) {
+    throw new NotFoundException(`Report with id ${id} not found`);
+  }
+
+  return updated;
+}
+
+async claimReport(id: string, reviewedById: string) {
+  const updated = await this.reportModel.findOneAndUpdate(
+    { 
+      _id: id,
+      investigatorDecision: null,
+      reviewedBy: null,
+      analysisStatus: 'pending'
+
+    },
+    { 
+      reviewedBy: reviewedById,
+      analysisStatus: 'in-progress'
+    },
+    { new: true }
+  );
+
+  if (!updated) {
+    throw new NotFoundException(
+      'Report not found or cannot be claimed (status not pending or already decided)'
     );
   }
+
+  return updated;
+}
+
+
+async releaseReport(reportId: string, investigatorId: string) {
+  const report = await this.reportModel.findOneAndUpdate(
+    { _id: reportId, reviewedBy: investigatorId, investigatorDecision: null, analysisStatus: 'in-progress' },
+    { reviewedBy: null, investigatorDecision: null, analysisStatus: 'pending' },
+    { new: true }
+  );
+  
+  if (!report) {
+    throw new Error('Cannot release report: either not claimed by you or not in-progress');
+  }
+
+  return report;
+}
 }
