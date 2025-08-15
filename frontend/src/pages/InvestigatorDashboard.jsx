@@ -237,7 +237,8 @@ const handleClaimReport = async () => {
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <h4>Evidence Preview: {activeImage}</h4>
               <img
-                src={`http://localhost:3000/static/uploads/evidence/${activeImage}`}
+                // src={`http://localhost:3000/static/uploads/evidence/${activeImage}`}
+                src={`/api/static/uploads/evidence/${activeImage}`}
                 alt="Evidence Full"
                 style={{ maxWidth: '80%', maxHeight: '80vh', borderRadius: '5px' }}
               />

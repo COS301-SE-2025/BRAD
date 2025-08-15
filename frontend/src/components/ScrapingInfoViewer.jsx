@@ -106,7 +106,8 @@ const ScrapingInfoViewer = ({ scrapingInfo }) => {
   );
 
   const renderScreenshot = () => {
-    const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+    // const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
+    const baseUrl = import.meta.env.VITE_BACKEND_URL || "/api";
     const path = `/static/${scrapingInfo.screenshotPath}`;
     const imageUrl = `${baseUrl}${path}`;
 

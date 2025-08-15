@@ -217,7 +217,8 @@ const ReporterDashboard = () => {
             <div className="modal-content">
             <h3>Image Preview</h3>
             <img
-                src={`http://localhost:3000/static/uploads/evidence/${activeImage}`}
+                // src={`http://localhost:3000/static/uploads/evidence/${activeImage}`}
+                src={`/api/static/uploads/evidence/${activeImage}`}
                 alt="Evidence"
                 style={{
                 maxWidth: '100%',
