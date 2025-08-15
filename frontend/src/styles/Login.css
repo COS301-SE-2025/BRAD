@@ -2,24 +2,58 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 2rem;
   padding: 2rem;
   color: #ffffff;
 }
 
 .robot-section {
-  flex: 1;
+  flex: 0 0 50%;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 
 .brad-robot {
-  max-height: 60vh;
-  max-width: 100%;
+  width: clamp(300px, 40vw, 650px); /* min 300px, max 650px, responsive in between */
+  height: auto;
+  margin-bottom: 0.5rem;
+  animation: slideIn 1s ease-out, float 3s ease-in-out infinite 1s;
+}
+
+.welcome-message {
+  margin: 0;
+  font-size: 1.8rem;
+  line-height: 1.5;
+  max-width: 90%;
+}
+
+.cursor {
+  display: inline-block;
+  width: 2px;
+  background-color: #38bdf8;
+  animation: blink 0.75s step-end infinite;
+}
+
+@keyframes blink {
+  50% { background-color: transparent; }
+}
+
+@keyframes slideIn {
+  0% { transform: translateX(-100px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+  100% { transform: translateY(0px); }
 }
 
 .form-section {
-  flex: 1;
+  flex: 0 0 50%;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -37,7 +71,6 @@
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  
 }
 
 .login-form input {
@@ -91,4 +124,17 @@
   cursor: pointer;
   font-weight: bold;
   text-decoration: underline;
+}
+
+@media (max-width: 900px) {
+  .login-page {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .robot-section, .form-section {
+    flex: unset;
+    width: 100%;
+    max-width: 500px;
+  }
 }
