@@ -75,7 +75,7 @@ services:
     environment:
       #   - NODE_ENV=development
       - NODE_ENV=production
-      - VIT_API_BASE_API=
+      - VITE_API_BASE_API=
     depends_on:
       - api
     networks:
