@@ -1,4 +1,4 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Register.css';
 import BRAD_robot from '../assets/BRAD_robot.png';
@@ -14,11 +14,45 @@ const RegisterPage = () => {
     username: '',
     password: '',
     confirmPassword: '',
-    role: 'general', 
+    role: 'general',
   });
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+
+  const [displayedText, setDisplayedText] = useState([]);
+  const lines = [
+    "Hey there!",
+    "Ready to join the B.R.A.D family?",
+    "Create your account and start your journey with us!"
+  ];
+
+  useEffect(() => {
+    let currentLine = 0;
+    let currentChar = 0;
+    let tempText = [];
+
+    const type = () => {
+      if (currentChar < lines[currentLine].length) {
+        // Add next char to current line
+        tempText[currentLine] = (tempText[currentLine] || "") + lines[currentLine][currentChar];
+        setDisplayedText([...tempText]);
+        currentChar++;
+        setTimeout(type, 50); // typing speed
+      } else {
+        // Move to next line after small delay
+        currentLine++;
+        if (currentLine < lines.length) {
+          currentChar = 0;
+          tempText.push(""); // prepare next line
+          setTimeout(type, 500); // delay before next line starts typing
+        }
+      }
+    };
+
+    tempText.push("");
+    type();
+  }, []);
 
   const handleChange = (e) => {
     setForm({
@@ -58,68 +92,26 @@ const RegisterPage = () => {
   return (
     <div className="register-page">
       <div className="robot-section">
-        <div className="robot-content">
           <img src={BRAD_robot} alt="BRAD Robot" className="brad-robot" />
           <h2 className="welcome-message">
-            Hey there! Ready to join the B.R.A.D family? <br />
-            Create your account and <br />
-            start your journey with us!
-              <span className="cursor"></span>
+            {displayedText.map((line, idx) => (
+              <div key={idx}>
+                {line}
+                {idx === displayedText.length - 1 && <span className="cursor">|</span>}
+              </div>
+            ))}
           </h2>
-        </div>
       </div>
 
       <div className="form-section">
         <h2>Create an Account</h2>
         <form className="register-form" onSubmit={handleSubmit}>
-          <input
-            type="text"
-            name="firstname"
-            placeholder="First Name"
-            value={form.firstname}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="text"
-            name="lastname"
-            placeholder="Last Name"
-            value={form.lastname}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            value={form.username}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={handleChange}
-            required
-          />
-          <input
-            type="password"
-            name="confirmPassword"
-            placeholder="Confirm Password"
-            value={form.confirmPassword}
-            onChange={handleChange}
-            required
-          />
+          <input type="text" name="firstname" placeholder="First Name" value={form.firstname} onChange={handleChange} required />
+          <input type="text" name="lastname" placeholder="Last Name" value={form.lastname} onChange={handleChange} required />
+          <input type="email" name="email" placeholder="Email" value={form.email} onChange={handleChange} required />
+          <input type="text" name="username" placeholder="Username" value={form.username} onChange={handleChange} required />
+          <input type="password" name="password" placeholder="Password" value={form.password} onChange={handleChange} required />
+          <input type="password" name="confirmPassword" placeholder="Confirm Password" value={form.confirmPassword} onChange={handleChange} required />
 
           <button type="submit">Register</button>
           {error && <div className="error">{error}</div>}
