@@ -35,9 +35,9 @@ export class ReportService {
       console.error(`[API] Failed to queue report ${domain}:`, err.message);
     }
 
-    // 🔹 Notify all investigators
     try {
       const investigators = await this.userModel.find({ role: 'investigator' });
+
       if (investigators.length > 0) {
         const transporter = nodemailer.createTransport({
           service: 'Gmail',
@@ -47,18 +47,36 @@ export class ReportService {
           },
         });
 
-        const mailOptions = {
-          from: this.configService.get<string>('EMAIL_USER'),
-          to: investigators.map((inv) => inv.email), // all investigators
-          subject: '🚨 New Report Submitted for Analysis',
-          text: `A new suspicious domain has been reported \nPlease log in to the B.R.A.D dashboard to review it:\n https://capstone-brad.dns.net.za/login`,
-        };
+        for (const inv of investigators) {
+          const mailOptions = {
+            to: inv.email,
+            from: this.configService.get<string>('EMAIL_USER'),
+            subject: '🚨 New Report Submitted for Analysis',
+            text: `Hello ${inv.firstname || inv.username},
 
-        await transporter.sendMail(mailOptions);
-        console.log(`[EMAIL] Notification sent to ${investigators.length} investigators`);
+              A new suspicious domain has been reported:
+
+              Submission Detail
+              -----------------
+              Report ID: ${savedReport._id}
+              Submitted At: ${savedReport.createdAt.toLocaleString()}
+
+              Please log in to review the report:
+              [Login in BRAD Dashboard] https://capstone-brad.dns.net.za/login
+
+              Thank you,
+              BRAD Notification Service
+              (Automated Email – do not reply directly)
+`
+          };
+
+          await transporter.sendMail(mailOptions);
+        }
+
+        console.log(`[EMAIL] Notifications sent to ${investigators.length} investigators.`);
       }
-    } catch (err) {
-      console.error('[EMAIL] Failed to send investigator notification:', err.message);
+    } catch (emailErr) {
+      console.error('[EMAIL] Failed to notify investigators:', emailErr.message);
     }
 
     return savedReport;
