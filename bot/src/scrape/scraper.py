@@ -1,6 +1,5 @@
 from __future__ import annotations
 from playwright.sync_api import sync_playwright
-from playwright_stealth import stealth_sync
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse, urldefrag
 import urllib.robotparser as robotparser
@@ -307,7 +306,10 @@ def perform_crawl(
                             current_ua = _pick_ua()
                             fp = generate_fingerprint(current_ua, randomize=True)
                             new_proxy = proxy_getter() if proxy_getter else None
-                            browser, context, page = build_context_and_page(pw, new_proxy, fp)
+                            browser, context, page = build_context_and_page(
+                                pw, new_proxy, fp, headless=True, use_stealth=True
+                            )
+                            net.wire(page)  # reattach listeners
                             rp, crawl_delay, robots_url = _load_robots(start_url, current_ua, None)
                             effective_delay = min(max(crawl_delay if crawl_delay is not None else crawl_delay_default, 0.0), 5.0)
                             backoff.sleep()
@@ -335,7 +337,10 @@ def perform_crawl(
                             except Exception: pass
                             current_ua = _pick_ua()
                             fp = generate_fingerprint(current_ua, randomize=True)
-                            browser, context, page = build_context_and_page(pw, proxy_str, fp)
+                            browser, context, page = build_context_and_page(
+                                pw, proxy_str, fp, headless=True, use_stealth=True
+                            )
+                            net.wire(page)
                             pages_since_ua_rotate = 0
 
                         # enqueue children
@@ -361,8 +366,10 @@ def perform_crawl(
                             proxy_str = proxy_getter() if proxy_getter else None
                             current_ua = _pick_ua()
                             fp = generate_fingerprint(current_ua, randomize=True)
+                            browser, context, page = build_context_and_page(
+                                pw, proxy_str, fp, headless=True, use_stealth=True
+                            )
                             net.wire(page)
-                            browser, context, page = build_context_and_page(pw, proxy_str, fp)
                             if proxy_failures > 3:
                                 try:
                                     page.close(); context.close(); browser.close()
@@ -436,18 +443,20 @@ def perform_crawl(
 # ---------- single page fallback ----------
 def perform_scraping(domain: str, report_id: str) -> tuple:
     start_url = normalize_url(start_url)
+    domain = normalize_url(domain)
     screenshot_dir = "/app/screenshots"
     os.makedirs(screenshot_dir, exist_ok=True)
     logger.info(f"[Scraping Start] Domain: {domain} | Report ID: {report_id}")
 
     with sync_playwright() as pw:
         # basic fp for single scrape
-        from playwright_stealth import stealth_sync
         fp = generate_fingerprint(
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
             randomize=True
         )
-        browser, context, page = build_context_and_page(pw, None, fp)
+        browser, context, page = build_context_and_page(
+           pw, None, fp, headless=True, use_stealth=True
+       )
         try:
             s, flags, *_ = _scrape_current_page(page, domain, report_id, screenshot_dir, "screenshots")
             scraping_info = {
