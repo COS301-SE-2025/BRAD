@@ -149,22 +149,63 @@ export class ReportService {
 
 
   async updateDecisionAndReviewer(id: string, verdict: string, reviewedById: string) {
-    if (!['malicious', 'benign'].includes(verdict)) {
-      throw new Error('Invalid verdict');
-    }
+  if (!['malicious', 'benign'].includes(verdict)) {
+    throw new Error('Invalid verdict');
+  }
 
-    const updated = await this.reportModel.findByIdAndUpdate(
-    {_id:id,reviewedBy: reviewedById, analysisStatus: 'in-progress'},
+  const updated = await this.reportModel.findByIdAndUpdate(
+    { _id: id, reviewedBy: reviewedById, analysisStatus: 'in-progress' },
     { investigatorDecision: verdict, reviewedBy: reviewedById, analysisStatus: 'done' },
     { new: true }
-  );
+  ).populate('submittedBy', 'firstname username email');
 
-    if (!updated) {
-      throw new NotFoundException(`Report with id ${id} not found`);
-    }
-
-    return updated;
+  if (!updated) {
+    throw new NotFoundException(`Report with id ${id} not found`);
   }
+
+  try {
+    if (updated.submittedBy?.email) {
+      const transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+          user: this.configService.get<string>('EMAIL_USER'),
+          pass: this.configService.get<string>('EMAIL_PASS'),
+        },
+      });
+
+      const mailOptions = {
+        to: updated.submittedBy.email,
+        from: this.configService.get<string>('EMAIL_USER'),
+        subject: `📢 Your Report Has Been Analysed`,
+        text: `Hello ${updated.submittedBy.firstname || updated.submittedBy.username},
+
+        Your submitted report has been analysed by an investigator.
+
+        Submission Detail
+        -----------------
+        Domain: ${updated.domain} 
+        Report ID: ${updated._id}
+        Submitted At: ${updated.createdAt.toLocaleString()}
+        Verdict: ${verdict.toUpperCase()}
+
+        You can log in to the BRAD Dashboard to review the full analysis:
+        [Login in BRAD Dashboard] https://capstone-brad.dns.net.za/login
+
+        Thank you,
+        BRAD Notification Service
+        (Automated Email – do not reply directly)`
+      };
+
+      await transporter.sendMail(mailOptions);
+      console.log(`[EMAIL] Notified reporter (${updated.submittedBy.email}) of verdict.`);
+    }
+  } catch (err) {
+    console.error('[EMAIL] Failed to notify reporter:', err.message);
+  }
+
+  return updated;
+ }
+
 
   async claimReport(id: string, reviewedById: string) {
     const updated = await this.reportModel.findOneAndUpdate(
