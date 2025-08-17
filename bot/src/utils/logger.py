@@ -35,14 +35,23 @@ def get_logger(name: str) -> logging.Logger:
     use_json = os.getenv("LOG_JSON", "0") == "1"
     logger.setLevel(getattr(logging, level_name, logging.INFO))
 
-    # stdout handler (existing)
+    # stdout handler
     stream = logging.StreamHandler(sys.stdout)
     stream.setLevel(logger.level)
     stream.addFilter(JobContextFilter())
-    # set JSON or plain formatter (same as you have now) ...
-    # stream.setFormatter(...)
+    try:
+        if use_json:
+            from pythonjsonlogger import jsonlogger
+            stream.setFormatter(jsonlogger.JsonFormatter(
+                "%(asctime)s %(levelname)s %(name)s %(report_id)s %(message)s"
+            ))
+        else:
+            stream.setFormatter(PlainFormatter())
+    except Exception:
+        stream.setFormatter(PlainFormatter())
 
     logger.addHandler(stream)
+
 
     # file handler (new)
     if os.getenv("LOG_TO_FILE", "1") == "1":

@@ -11,7 +11,8 @@ from .forensics.report import ForensicReport
 from .utils.analysis import perform_scraping
 from src.utils.logger import get_logger, report_id_ctx
 from src.utils.job_logging_middleware import JobLoggingMiddleware
-
+from .utils.sanitize import sanitize_domain
+from .utils.serialize import serialize
 
 # ─── Logger ───
 logger = get_logger(__name__)
@@ -45,18 +46,6 @@ dramatiq.set_broker(redis_broker)
 logger.info("Redis broker set successfully.")
 
 # ─── Utility Functions ───
-def sanitize_domain(domain: str) -> str:
-    return domain.strip().replace("\u200b", "").replace("\u2060", "")
-
-def serialize(obj):
-    if isinstance(obj, dict):
-        return {k: serialize(v) for k, v in obj.items() if v not in (None, [], {}, "")}
-    elif isinstance(obj, list):
-        return [serialize(i) for i in obj if i not in (None, "", [])]
-    elif isinstance(obj, datetime):
-        return obj.isoformat()
-    return obj
-
 def report_analysis(report_id, report_obj: ForensicReport, scraping_info, abuse_flags):
     url = f"{API_URL}/reports/{report_id}/analysis"
     data = {
