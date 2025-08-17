@@ -1,10 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../styles/Login.css';
 import BRAD_robot from '../assets/BRAD_robot.png';
 import ForgotPasswordModal from '../components/ForgotPasswordModal';
 import API from "../api/axios";
-import { useEffect } from 'react';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -14,67 +13,97 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
+  // Typing animation state
+  const [displayedLines, setDisplayedLines] = useState([]);
+  const [currentLine, setCurrentLine] = useState(0);
+  const [currentText, setCurrentText] = useState('');
+  const lines = [
+    "Welcome back!",
+    "Ready to continue your journey with B.R.A.D? Log in to get started."
+  ];
+
   const handleLogin = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  if (!username || !password) {
-    setError('Please enter both username and password.');
-    return;
-  }
-
-  try {
-    const response = await API.post('http://localhost:3000/auth/login', {
-      identifier: username,  
-      password,
-    });
-
-
-    const { user, token } = response.data;
-
-    if (!token) {
-      setError('No token returned from server');
+    if (!username || !password) {
+      setError('Please enter both username and password.');
       return;
     }
 
-    localStorage.removeItem('user'); // ensure clean state
-    localStorage.setItem('user', JSON.stringify({
-      _id: user._id,
-      username: user.username,
-      token: response.data.token,
-      role: user.role,
-    }));
+    try {
+      const response = await API.post('http://localhost:3000/auth/login', {
+        identifier: username,
+        password,
+      });
 
+      const { user, token } = response.data;
 
-    if (user.role === 'investigator') {
-      navigate('/investigator/stats');
-    } else if (user.role === 'admin') {
-      navigate('/admin');
-    } else {
-      navigate('/dashboard');
+      if (!token) {
+        setError('No token returned from server');
+        return;
+      }
+
+      localStorage.removeItem('user'); 
+      localStorage.setItem('user', JSON.stringify({
+        _id: user._id,
+        username: user.username,
+        token: token,
+        role: user.role,
+      }));
+
+      if (user.role === 'investigator') {
+        navigate('/investigator/stats');
+      } else if (user.role === 'admin') {
+        navigate('/admin');
+      } else {
+        navigate('/dashboard');
+      }
+
+    } catch (err) {
+      if (err.response && err.response.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError('Login failed. Please try again.');
+      }
     }
+  };
 
-  } catch (err) {
-    if (err.response && err.response.data?.message) {
-      setError(err.response.data.message);
-    } else {
-      setError('Login failed. Please try again.');
-    }
-  }
-};
-
-useEffect(() => {
+  // Typing effect logic
+  useEffect(() => {
     document.title = 'B.R.A.D | Login';
-  }, []);
+    
+    if (currentLine < lines.length) {
+      if (currentText.length < lines[currentLine].length) {
+        const timeout = setTimeout(() => {
+          setCurrentText(lines[currentLine].slice(0, currentText.length + 1));
+        }, 50);
+        return () => clearTimeout(timeout);
+      } else {
+        const timeout = setTimeout(() => {
+          setDisplayedLines((prev) => [...prev, lines[currentLine]]);
+          setCurrentLine(currentLine + 1);
+          setCurrentText('');
+        }, 500);
+        return () => clearTimeout(timeout);
+      }
+    }
+  }, [currentLine, currentText]);
 
   return (
     <div className="login-page">
       <div className="robot-section">
         <img src={BRAD_robot} alt="BRAD Robot" className="brad-robot" />
         <h2 className="welcome-message">
-            Welcome back! Ready to continue your journey <br />
-            with B.R.A.D? Log in to get started.
+          {displayedLines.map((line, i) => (
+            <div key={i}>{line}</div>
+          ))}
+          {currentLine < lines.length && (
+            <div>
+              {currentText}
               <span className="cursor"></span>
-          </h2>
+            </div>
+          )}
+        </h2>
       </div>
 
       <div className="form-section">
@@ -103,7 +132,10 @@ useEffect(() => {
         </form>
 
         <div className="auth-links">
-          <button className="forgotPass-button" onClick={() => setShowForgotPassword(true)}>
+          <button
+            className="forgotPass-button"
+            onClick={() => setShowForgotPassword(true)}
+          >
             Forgot Password?
           </button>
           <p className="register-link">

@@ -32,7 +32,7 @@ All containers are connected via an internal Docker network, ensuring secure com
 
 ## Deployment Diagram
 
-![Deployment Diagram](deployment-model.png)
+![Deployment Diagram](images/deployment-model.png)
 
 ## Quality Requirements Support
 

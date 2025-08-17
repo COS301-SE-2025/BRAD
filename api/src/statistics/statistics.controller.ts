@@ -62,20 +62,20 @@ export class StatisticsController {
         return this.statisticsService.getAnalyzedReportsCount(userId, role);
     }
 
-    @UseGuards(AuthGuard, RolesGuard)
-    @Roles('admin', 'investigator')
-    @Get('most-reported-domain')        
-    @ApiBearerAuth("JWT-auth")
-    @ApiOperation({ summary: 'Get the most reported domain' })
-    @ApiResponse({ status: 200, description: 'Most reported domain' })
-    async getMostReportedDomain(@Req() req: Request) {
-    
-        return this.statisticsService.getMostReportedDomain();
-    }
+  @UseGuards(AuthGuard, RolesGuard)
+@Roles('admin', 'investigator')
+@Get('repeated-domains')
+@ApiBearerAuth("JWT-auth")
+@ApiOperation({ summary: 'Get all domains reported more than once' })
+@ApiResponse({ status: 200, description: 'List of domains reported more than once' })
+async getDomainsReportedMoreThanOnce(@Req() req: Request) {
+  return this.statisticsService.getDomainsReportedMoreThanOnce();
+}
+
 
     @UseGuards(AuthGuard, RolesGuard)
     @Roles('admin', 'investigator')
-    @Get('reports-marked-as-malicious')
+    @Get('malicious-reports')
     @ApiBearerAuth("JWT-auth")
     @ApiOperation({ summary: 'Get reports marked as malicious' })
     @ApiResponse({ status: 200, description: 'Reports marked as malicious' })
@@ -88,7 +88,7 @@ export class StatisticsController {
 
     @UseGuards(AuthGuard, RolesGuard)
     @Roles('admin', 'investigator')
-    @Get('reports-marked-as-safe')
+    @Get('safe-reports')
     @ApiBearerAuth("JWT-auth")
     @ApiOperation({ summary: 'Get reports marked as safe' })
     @ApiResponse({ status: 200, description: 'Reports marked as safe' })
@@ -163,4 +163,31 @@ export class StatisticsController {
         const role=user?.role;
         return this.statisticsService.getNoOfGeneralUsers(role);
     }
+
+
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin', 'investigator','general')
+    @Get('in-progress-reports')
+    @ApiBearerAuth("JWT-auth")
+    @ApiOperation({ summary: 'Get in-progress reports count' })
+    @ApiResponse({ status: 200, description: 'In-progress reports count' })
+    async getInProgressReportsCount(@Req() req: Request) {
+        const user=req['user'] as JwtPayload;
+
+        const role=user?.role;
+        return this.statisticsService.getInProgressReportsCount(user.id, role);
     }
+
+    @UseGuards(AuthGuard, RolesGuard)
+    @Roles('admin', 'investigator','general')
+    @Get('resolved-reports')
+    @ApiBearerAuth("JWT-auth")
+    @ApiOperation({ summary: 'Get resolved reports count' })
+    @ApiResponse({ status: 200, description: 'Resolved reports count' })
+    async getResolvedReportsCount(@Req() req: Request) {
+        const user=req['user'] as JwtPayload;
+
+        const role=user?.role;
+        return this.statisticsService.getResolvedReportsCount(user.id, role);
+    }
+}
