@@ -18,7 +18,7 @@ const ReportModal = ({ report, onClose, loggedInUser, view, handleDecision, refr
     setIsClaiming(true);
     try {
       const res = await API.post(`/reports/${report._id}/claim`, { investigatorId: loggedInUser._id });
-      Object.assign(report, res.data); // update local report
+      Object.assign(report, res.data);
       alert("Report successfully claimed!");
       if (refreshReports) refreshReports();
     } catch (err) {
@@ -30,36 +30,13 @@ const ReportModal = ({ report, onClose, loggedInUser, view, handleDecision, refr
   };
 
   const getDisplayStatus = (report) => {
-  if (!report.investigatorDecision && !report.reviewedBy) {
-    return "Pending";
-  } else if (!report.investigatorDecision && report.reviewedBy) {
-    return "In Progress";
-  } else if (report.investigatorDecision) {
-    return "Resolved";
-  } else {
+    if (!report.investigatorDecision && !report.reviewedBy) return "Pending";
+    if (!report.investigatorDecision && report.reviewedBy) return "In Progress";
+    if (report.investigatorDecision) return "Resolved";
     return "Unknown";
-  }
-};
-
-  const getStatusDetails = (report) => {
-    if (!report.investigatorDecision && !report.reviewedBy) {
-      return [
-        "• investigatorDecision = null",
-        "• Reviewedby = null"
-      ];
-    } else if (!report.investigatorDecision && report.reviewedBy) {
-      return [
-        "• investigatorDecision = null",
-        `• Reviewedby = ${report.reviewedBy.username || "not null"}`
-      ];
-    } else if (report.investigatorDecision) {
-      return [
-        `• investigatorDecision = ${report.investigatorDecision}`,
-        `• Reviewedby = ${report.reviewedBy?.username || "not null"}`
-      ];
-    }
-    return [];
   };
+
+  const showFullDetails = view !== "pending"; // Hide extra info for pending reports
 
   return (
     <div className="report-modal-overlay">
@@ -69,7 +46,7 @@ const ReportModal = ({ report, onClose, loggedInUser, view, handleDecision, refr
         <header className="report-modal-header">
           <h2>Investigation Report</h2>
           <div className="header-buttons">
-            {view === "pending" && report.status !== "in-progress" && (
+            {view === "pending" && !report.investigatorDecision && (
               <button className="claim-btn" disabled={isClaiming} onClick={handleClaim}>
                 {isClaiming ? "Claiming..." : "Claim Report"}
               </button>
@@ -131,105 +108,71 @@ const ReportModal = ({ report, onClose, loggedInUser, view, handleDecision, refr
                     <p><strong>ASN / Org:</strong> {analysis.geo.asn || "N/A"}</p>
                   </div>
                 )}
+              </div>
+            )}
+          </div>
 
-                {/* Stats */}
-                {analysis.stats && (
-                  <div className="info-section">
-                    <h4><BarChart size={18} /> Domain & Security Stats</h4>
-                    <div className="stats-grid">
-                      <p><strong>Domain Age:</strong> {analysis.stats.domain_age_days} days</p>
-                      <p><strong>SSL Days Left:</strong> {analysis.stats.ssl_days_remaining}</p>
-                    </div>
-                  </div>
-                )}
+          {/* Right Column - Only show if not pending */}
+          {showFullDetails && (
+            <div className="report-column scraping-column">
+              <ScrapingInfoViewer scrapingInfo={report.scrapingInfo} />
 
-                {/* Risk Section */}
+              {/* WHOIS Toggle */}
+              {analysis.whoisRaw && (
                 <div className="toggle-section">
-                  <button className="toggle-button" onClick={() => setShowRisk(prev => !prev)}>
-                    <Shield size={16} />{showRisk ? " Hide Risk Analysis ▲" : " Show Risk Analysis ▼"}
+                  <button className={`scraping-toggle-btn ${showWhois ? "active" : ""}`} onClick={() => setShowWhois(prev => !prev)}>
+                    <FileText size={16} />{showWhois ? " Hide WHOIS Raw ▲" : " Show WHOIS Raw ▼"}
                   </button>
-                  {showRisk && (
-                    <div className="risk-content">
-                      <p>
-                        <strong>Risk Level:</strong>
-                        <span className={`risk-badge ${analysis.riskLevel?.toLowerCase() || ""}`}>
-                          {analysis.riskLevel || "N/A"}
-                        </span>
-                      </p>
-                      <p><strong>Risk Score:</strong> {analysis.riskScore || "N/A"}</p>
-                      {analysis.riskReasons && (
-                        <div className="risk-breakdown">
-                          <h5>Risk Breakdown</h5>
-                          <ul>
-                            {Object.entries(analysis.riskReasons).map(([key, reason]) => (
-                              <li key={key}>• {reason}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                  {showWhois && (
+                    <div className="table-wrapper whois-table-wrapper">
+                      <table className="styled-table">
+                        <tbody>
+                          {Object.entries(analysis.whoisRaw).map(([key, value]) => (
+                            <tr key={key}>
+                              <td><strong>{key}</strong></td>
+                              <td>{Array.isArray(value) ? value.join(", ") : String(value)}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
                   )}
                 </div>
-              </div>
-            )}
-          </div>
+              )}
 
-          {/* Right Column - Scraping Info + WHOIS/DNS */}
-          <div className="report-column scraping-column">
-            <ScrapingInfoViewer scrapingInfo={report.scrapingInfo} />
+              {/* DNS Toggle */}
+              {analysis.dns && (
+                <div className="toggle-section">
+                  <button className={`scraping-toggle-btn ${showDns ? "active" : ""}`} onClick={() => setShowDns(prev => !prev)}>
+                    <Server size={16} />{showDns ? " Hide DNS Records ▲" : " Show DNS Records ▼"}
+                  </button>
+                  {showDns && (
+                    <div className="table-wrapper dns-table-wrapper">
+                      <table className="styled-table">
+                        <thead>
+                          <tr><th>Type</th><th>Value</th></tr>
+                        </thead>
+                        <tbody>
+                          {Object.entries(analysis.dns).flatMap(([type, entries]) =>
+                            Array.isArray(entries)
+                              ? entries.map((val, i) => (<tr key={`${type}-${i}`}><td>{type}</td><td>{val}</td></tr>))
+                              : (<tr key={type}><td>{type}</td><td>{String(entries)}</td></tr>)
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+              )}
 
-            {/* WHOIS Toggle */}
-            {analysis.whoisRaw && (
-              <div className="toggle-section">
-                <button className={`scraping-toggle-btn ${showWhois ? "active" : ""}`} onClick={() => setShowWhois(prev => !prev)}>
-                  <FileText size={16} />{showWhois ? " Hide WHOIS Raw ▲" : " Show WHOIS Raw ▼"}
-                </button>
-                {showWhois && (
-                  <div className="table-wrapper whois-table-wrapper">
-                    <table className="styled-table">
-                      <tbody>
-                        {Object.entries(analysis.whoisRaw).map(([key, value]) => (
-                          <tr key={key}>
-                            <td><strong>{key}</strong></td>
-                            <td>{Array.isArray(value) ? value.join(", ") : String(value)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            )}
+              {/* Stats & Risk sections remain hidden for pending */}
+            </div>
+          )}
 
-            {/* DNS Toggle */}
-            {analysis.dns && (
-              <div className="toggle-section">
-                <button className={`scraping-toggle-btn ${showDns ? "active" : ""}`} onClick={() => setShowDns(prev => !prev)}>
-                  <Server size={16} />{showDns ? " Hide DNS Records ▲" : " Show DNS Records ▼"}
-                </button>
-                {showDns && (
-                  <div className="table-wrapper dns-table-wrapper">
-                    <table className="styled-table">
-                      <thead>
-                        <tr><th>Type</th><th>Value</th></tr>
-                      </thead>
-                      <tbody>
-                        {Object.entries(analysis.dns).flatMap(([type, entries]) =>
-                          Array.isArray(entries)
-                            ? entries.map((val, i) => (<tr key={`${type}-${i}`}><td>{type}</td><td>{val}</td></tr>))
-                            : (<tr key={type}><td>{type}</td><td>{String(entries)}</td></tr>)
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Decision Buttons for In-Progress Reports */}
-        {view === "in_progress" && !report.investigatorDecision && (
+        {showFullDetails && view === "in_progress" && !report.investigatorDecision && (
           <section className="decision-section">
             <button className="decision-btn malicious" disabled={report.reviewedBy?._id !== loggedInUser?._id} onClick={() => handleDecision(report._id, "malicious")}>
               Mark as Malicious
