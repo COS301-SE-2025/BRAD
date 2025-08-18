@@ -9,7 +9,8 @@ import {
 
 import { getTotalReports,getMaliciousReports
   ,getSafeReports,getRepeatedDomains,getPendingReportsCount,
-  getInProgressReportsCount,getResolvedReportsCount 
+  getInProgressReportsCount,getResolvedReportsCount ,getReportsByYear,getReportsByWeek
+  ,getReportsByDay
  } from '../api/stats';
 
 const InvestigatorStats = () => {
@@ -25,9 +26,34 @@ const InvestigatorStats = () => {
     closed: 0,
     pendingEvidence: 0,
   });
+  const [barData, setBarData] = useState([]);
 
-
+  
     useEffect(() => {
+
+       const fetchBarData = async () => {
+    try {
+      let data;
+      if(timeFrame==='Weekly') data=await getReportsByWeek();
+      else if(timeFrame==='Daily') data = await getReportsByDay();
+      else data = await getReportsByYear();
+      const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+      let formatted ;
+if(timeFrame === 'Monthly') {
+        const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+        formatted = data.map(d => ({ month: months[d.month - 1], cases: d.count }));
+      } else if(timeFrame === 'Weekly') {
+        formatted = data.map(d => ({ month: `Week ${d.week}`, cases: d.count }));
+      } else {
+        formatted = data.map(d => ({ month: `${d.day}`, cases: d.count }));
+      }
+
+      setBarData(formatted);
+    } catch (err) {
+      console.error("Error fetching reports by year:", err);
+    }
+  };
     const fetchStats = async () => {
       try {
         const [total, malicious, safe, domains,open,closed,pending] = await Promise.all([
@@ -56,30 +82,15 @@ const InvestigatorStats = () => {
     };
 
     fetchStats();
-  }, [user._id, user.role]);
+    fetchBarData();
+  }, [timeFrame, user._id, user.role]);
+const pieData = [
+  { name: 'Pending reports', value: summary.open },
+  { name: 'Reports in progress', value: summary.closed },
+  { name: 'Resolved reports', value: summary.pendingEvidence },
+];
+const COLORS = ['#460279ff', '#4dabf7', '#d39430ff'];
 
-  const pieData = [
-    { name: 'Pending reports', value: summary.open },
-    { name: 'Reports in progress', value: summary.closed },
-    { name: 'Resolved reports', value: summary.pendingEvidence },
-  ];
-
-  const COLORS = ['#460279ff', '#4dabf7', '#d39430ff'];
-
-  const barData = [
-    { month: 'Jan', cases: 80 },
-    { month: 'Feb', cases: 90 },
-    { month: 'Mar', cases: 75 },
-    { month: 'Apr', cases: 85 },
-    { month: 'May', cases: 95 },
-    { month: 'Jun', cases: 100 },
-    { month: 'Jul', cases: 105 },
-    { month: 'Aug', cases: 80 },
-    { month: 'Sep', cases: 80 },
-    { month: 'Oct', cases: 50 },
-    { month: 'Nov', cases: 65 },
-    { month: 'Dec', cases: 70 },
-  ];
 
   return (
     <div className="investigator-stats">

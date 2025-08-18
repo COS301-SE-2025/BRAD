@@ -35,3 +35,18 @@ export const getInProgressReportsCount = async () => {
   const res = await API.get('/statistics/in-progress-reports');
   return res.data;
 };
+
+export const getReportsByYear = async () => {
+  const res = await API.get('/statistics/reports-by-year');
+  return res.data;
+};
+
+export const getReportsByWeek = async () => {
+  const res = await API.get('/statistics/reports-by-week');
+  return res.data;
+};
+
+export const getReportsByDay = async () => {
+  const res = await API.get('/statistics/reports-by-day');
+  return res.data;
+};
