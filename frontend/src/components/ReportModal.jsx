@@ -29,6 +29,38 @@ const ReportModal = ({ report, onClose, loggedInUser, view, handleDecision, refr
     }
   };
 
+  const getDisplayStatus = (report) => {
+  if (!report.investigatorDecision && !report.reviewedBy) {
+    return "Pending";
+  } else if (!report.investigatorDecision && report.reviewedBy) {
+    return "In Progress";
+  } else if (report.investigatorDecision) {
+    return "Resolved";
+  } else {
+    return "Unknown";
+  }
+};
+
+  const getStatusDetails = (report) => {
+    if (!report.investigatorDecision && !report.reviewedBy) {
+      return [
+        "• investigatorDecision = null",
+        "• Reviewedby = null"
+      ];
+    } else if (!report.investigatorDecision && report.reviewedBy) {
+      return [
+        "• investigatorDecision = null",
+        `• Reviewedby = ${report.reviewedBy.username || "not null"}`
+      ];
+    } else if (report.investigatorDecision) {
+      return [
+        `• investigatorDecision = ${report.investigatorDecision}`,
+        `• Reviewedby = ${report.reviewedBy?.username || "not null"}`
+      ];
+    }
+    return [];
+  };
+
   return (
     <div className="report-modal-overlay">
       <div className="report-modal">
@@ -50,7 +82,7 @@ const ReportModal = ({ report, onClose, loggedInUser, view, handleDecision, refr
         <div className="heading-section">
           {[
             { label: "Domain", value: report.domain },
-            { label: "Status", value: report.status },
+            { label: "Status", value: getDisplayStatus(report) },
             { label: "Investigator", value: report.reviewedBy?.username || "Unassigned" },
           ].map(({ label, value }, idx) => (
             <div className="heading-card" key={idx}>
