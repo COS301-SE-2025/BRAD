@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import ScrapingInfoViewer from "./ScrapingInfoViewer";
+import Notification from "./Notification";
 import {
   Globe, Building, User, Lock, Calendar, RefreshCcw,
-  BarChart, FileText, Server, Shield,
+  FileText, Server, Shield, Image as ImageIcon, Paperclip
 } from "lucide-react";
 import API from '../api/axios';
 import "../styles/ReportModal.css";
@@ -12,18 +13,25 @@ const ReportModal = ({ report, onClose, loggedInUser, view, handleDecision, refr
   const [showDns, setShowDns] = useState(false);
   const [showRisk, setShowRisk] = useState(true);
   const [isClaiming, setIsClaiming] = useState(false);
+  const [notification, setNotification] = useState(null);
+  const [activeEvidence, setActiveEvidence] = useState(null);
+
   const analysis = report.analysis || {};
+
+  const showNotification = (type, message) => {
+    setNotification({ type, message });
+  };
 
   const handleClaim = async () => {
     setIsClaiming(true);
     try {
       const res = await API.post(`/reports/${report._id}/claim`, { investigatorId: loggedInUser._id });
       Object.assign(report, res.data);
-      alert("Report successfully claimed!");
+      showNotification("success", "Report successfully claimed.");
       if (refreshReports) refreshReports();
     } catch (err) {
       console.error("Claim failed:", err);
-      alert("Failed to claim report. Try again.");
+      showNotification("error", err.response?.data?.message || "Failed to claim report.");
     } finally {
       setIsClaiming(false);
     }
@@ -41,6 +49,15 @@ const ReportModal = ({ report, onClose, loggedInUser, view, handleDecision, refr
   return (
     <div className="report-modal-overlay">
       <div className="report-modal">
+
+        {/* Notification Banner */}
+        {notification && (
+          <Notification
+            type={notification.type}
+            message={notification.message}
+            onClose={() => setNotification(null)}
+          />
+        )}
 
         {/* Modal Header */}
         <header className="report-modal-header">
@@ -112,77 +129,136 @@ const ReportModal = ({ report, onClose, loggedInUser, view, handleDecision, refr
             )}
           </div>
 
-          {/* Right Column - Only show if not pending */}
-          {showFullDetails && (
-            <div className="report-column scraping-column">
-              <ScrapingInfoViewer scrapingInfo={report.scrapingInfo} />
+          {/* Right Column */}
+          <div className="report-column scraping-column">
+            {showFullDetails && (
+              <>
+                <ScrapingInfoViewer scrapingInfo={report.scrapingInfo} />
 
-              {/* WHOIS Toggle */}
-              {analysis.whoisRaw && (
-                <div className="toggle-section">
-                  <button className={`scraping-toggle-btn ${showWhois ? "active" : ""}`} onClick={() => setShowWhois(prev => !prev)}>
-                    <FileText size={16} />{showWhois ? " Hide WHOIS Raw ▲" : " Show WHOIS Raw ▼"}
-                  </button>
-                  {showWhois && (
-                    <div className="table-wrapper whois-table-wrapper">
-                      <table className="styled-table">
-                        <tbody>
-                          {Object.entries(analysis.whoisRaw).map(([key, value]) => (
-                            <tr key={key}>
-                              <td><strong>{key}</strong></td>
-                              <td>{Array.isArray(value) ? value.join(", ") : String(value)}</td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
-                </div>
-              )}
+                {/* WHOIS Toggle */}
+                {analysis.whoisRaw && (
+                  <div className="toggle-section">
+                    <button className={`scraping-toggle-btn ${showWhois ? "active" : ""}`} onClick={() => setShowWhois(prev => !prev)}>
+                      <FileText size={16} />{showWhois ? " Hide WHOIS Raw ▲" : " Show WHOIS Raw ▼"}
+                    </button>
+                    {showWhois && (
+                      <div className="table-wrapper whois-table-wrapper">
+                        <table className="styled-table">
+                          <tbody>
+                            {Object.entries(analysis.whoisRaw).map(([key, value]) => (
+                              <tr key={key}>
+                                <td><strong>{key}</strong></td>
+                                <td>{Array.isArray(value) ? value.join(", ") : String(value)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
 
-              {/* DNS Toggle */}
-              {analysis.dns && (
-                <div className="toggle-section">
-                  <button className={`scraping-toggle-btn ${showDns ? "active" : ""}`} onClick={() => setShowDns(prev => !prev)}>
-                    <Server size={16} />{showDns ? " Hide DNS Records ▲" : " Show DNS Records ▼"}
-                  </button>
-                  {showDns && (
-                    <div className="table-wrapper dns-table-wrapper">
-                      <table className="styled-table">
-                        <thead>
-                          <tr><th>Type</th><th>Value</th></tr>
-                        </thead>
-                        <tbody>
-                          {Object.entries(analysis.dns).flatMap(([type, entries]) =>
-                            Array.isArray(entries)
-                              ? entries.map((val, i) => (<tr key={`${type}-${i}`}><td>{type}</td><td>{val}</td></tr>))
-                              : (<tr key={type}><td>{type}</td><td>{String(entries)}</td></tr>)
+                {/* DNS Toggle */}
+                {analysis.dns && (
+                  <div className="toggle-section">
+                    <button className={`scraping-toggle-btn ${showDns ? "active" : ""}`} onClick={() => setShowDns(prev => !prev)}>
+                      <Server size={16} />{showDns ? " Hide DNS Records ▲" : " Show DNS Records ▼"}
+                    </button>
+                    {showDns && (
+                      <div className="table-wrapper dns-table-wrapper">
+                        <table className="styled-table">
+                          <thead>
+                            <tr><th>Type</th><th>Value</th></tr>
+                          </thead>
+                          <tbody>
+                            {Object.entries(analysis.dns).flatMap(([type, entries]) =>
+                              Array.isArray(entries)
+                                ? entries.map((val, i) => (<tr key={`${type}-${i}`}><td>{type}</td><td>{val}</td></tr>))
+                                : (<tr key={type}><td>{type}</td><td>{String(entries)}</td></tr>)
+                            )}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* Evidence Section */}
+              {report.evidence && report.evidence.length > 0 && (
+                <div className="evidence-section">
+                  <h3>
+                    <Paperclip size={18} /> Evidence
+                  </h3>
+                  <div className="evidence-grid">
+                    {report.evidence.map((file, idx) => {
+                      const isImage = /\.(jpg|jpeg|png|gif)$/i.test(file);
+                      return (
+                        <div key={idx} className="evidence-card">
+                          {isImage ? (
+                            <img
+                              src={`http://localhost:3000/static/uploads/evidence/${file}`}
+                              alt={`Evidence ${idx + 1}`}
+                              onClick={() => setActiveEvidence(file)}
+                            />
+                          ) : (
+                            <a
+                              href={`http://localhost:3000/static/uploads/evidence/${file}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="evidence-file"
+                            >
+                              <Paperclip size={20} /> {file}
+                            </a>
                           )}
-                        </tbody>
-                      </table>
-                    </div>
-                  )}
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
 
-              {/* Stats & Risk sections remain hidden for pending */}
-            </div>
-          )}
-
+          </div>
         </div>
 
         {/* Decision Buttons for In-Progress Reports */}
         {showFullDetails && view === "in_progress" && !report.investigatorDecision && (
           <section className="decision-section">
-            <button className="decision-btn malicious" disabled={report.reviewedBy?._id !== loggedInUser?._id} onClick={() => handleDecision(report._id, "malicious")}>
+            <button
+              className="decision-btn malicious"
+              disabled={report.reviewedBy?._id !== loggedInUser?._id}
+              onClick={() => handleDecision(report._id, "malicious")}
+            >
               Mark as Malicious
             </button>
-            <button className="decision-btn benign" disabled={report.reviewedBy?._id !== loggedInUser?._id} onClick={() => handleDecision(report._id, "benign")}>
+            <button
+              className="decision-btn benign"
+              disabled={report.reviewedBy?._id !== loggedInUser?._id}
+              onClick={() => handleDecision(report._id, "benign")}
+            >
               Mark as Safe
             </button>
           </section>
         )}
 
+        {/* Evidence Preview Modal */}
+          {activeEvidence && (
+            <div className="evidence-preview-overlay" onClick={() => setActiveEvidence(null)}>
+              <div className="evidence-preview-modal" onClick={(e) => e.stopPropagation()}>
+                <header className="evidence-preview-header">
+                  <h4>Evidence Preview</h4>
+                  <button className="close-button" onClick={() => setActiveEvidence(null)}>✖</button>
+                </header>
+                <div className="evidence-preview-body">
+                  <img
+                    src={`http://localhost:3000/static/uploads/evidence/${activeEvidence}`}
+                    alt="Evidence Full"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
       </div>
     </div>
   );

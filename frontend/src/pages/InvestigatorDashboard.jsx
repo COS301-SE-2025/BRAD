@@ -103,8 +103,7 @@ const InvestigatorDashboard = ({ view }) => {
           />
         )}
 
-        {/* Image Modal */}
-        {showImageModal && activeImage && (
+        {/* {showImageModal && activeImage && (
           <div className="modal-overlay" onClick={() => setShowImageModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <h4>Evidence Preview: {activeImage}</h4>
@@ -116,7 +115,7 @@ const InvestigatorDashboard = ({ view }) => {
               <button className="close-button" onClick={() => setShowImageModal(false)}>Close</button>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Confirmation Modal */}
         {confirmModal.visible && (
