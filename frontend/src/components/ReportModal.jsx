@@ -91,6 +91,27 @@ const ReportModal = ({ report, onClose, loggedInUser, view, handleDecision, refr
 
           {/* Left Column - Forensic Analysis */}
           <div className="report-column forensic-column">
+
+            {/* Risk Analysis Section */}
+            {report.analysis && (
+              <div className="forensic-block">
+                <h3 className="section-title">
+                  <Shield size={18} /> Risk Analysis
+                </h3>
+                <div className="risk-summary">
+                  <p>
+                    <strong>Risk Level:</strong>{" "}
+                    <span className={`risk-badge ${report.analysis.riskLevel?.toLowerCase() || ""}`}>
+                      {report.analysis.riskLevel || "N/A"}
+                    </span>
+                  </p>
+                  <p>
+                    <strong>Risk Score:</strong> {report.analysis.riskScore || "N/A"}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {!analysis || Object.keys(analysis).length === 0 ? (
               <p className="no-analysis">No forensic analysis available.</p>
             ) : (
