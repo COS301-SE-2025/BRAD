@@ -3,23 +3,19 @@ import API from '../api/axios';
 import InvestigatorNavbar from '../components/InvestigatorNavbar';
 import PendingReports from '../components/PendingReports';
 import ReviewedReports from '../components/ReviewedReports';
-import ScrapingInfoViewer from '../components/ScrapingInfoViewer';
-import Notification from "../components/Notification";
-import ForensicReportBlock from '../components/ForensicReportBlock'; // ✅ imported here
-import '../styles/InvestigatorDashboard.css';
 import InProgressReports from '../components/InProgressReports';
+import Notification from "../components/Notification";
+import ReportModal from '../components/ReportModal'; 
+import '../styles/InvestigatorDashboard.css';
 
 const InvestigatorDashboard = ({ view }) => {
-
   const loggedInUser = JSON.parse(localStorage.getItem('user'));
 
   const [reports, setReports] = useState([]);
   const [selectedReport, setSelectedReport] = useState(null);
-  const [showScraping, setShowScraping] = useState(false);
-  const [showImageModal, setShowImageModal] = useState(false);
   const [activeImage, setActiveImage] = useState(null);
+  const [showImageModal, setShowImageModal] = useState(false);
   const [notification, setNotification] = useState(null);
-
   const [confirmModal, setConfirmModal] = useState({
     visible: false,
     action: null,
@@ -30,42 +26,23 @@ const InvestigatorDashboard = ({ view }) => {
     setNotification(prev => prev ? prev : { type, message });
   };
 
-  const handleCloseReport = async () => {
-  
-  setSelectedReport(null);
-};
+  const handleCloseReport = () => setSelectedReport(null);
 
-const handleClaimReport = async () => {
-  if (!selectedReport) return;
-
-  try {
-  
-
-    const res = await API.post(`/reports/${selectedReport._id}/claim`, {
-     
-    });
-
-    const updatedReport = res.data;
-
-    // ✅ Update reports so it moves from pending → in-progress immediately
-    setReports(prevReports =>
-      prevReports.map(r =>
-        r._id === updatedReport._id ? updatedReport : r
-      )
-    );
-
-    setSelectedReport(updatedReport);
-    showNotification("success", "Report successfully claimed.");
-  } catch (error) {
-    console.error("Claim error:", error);
-    showNotification(
-      "error",
-      error.response?.data?.message || "Failed to claim report."
-    );
-  }
-};
-
-
+  const handleClaimReport = async () => {
+    if (!selectedReport) return;
+    try {
+      const res = await API.post(`/reports/${selectedReport._id}/claim`);
+      const updatedReport = res.data;
+      setReports(prevReports =>
+        prevReports.map(r => r._id === updatedReport._id ? updatedReport : r)
+      );
+      setSelectedReport(updatedReport);
+      showNotification("success", "Report successfully claimed.");
+    } catch (error) {
+      console.error("Claim error:", error);
+      showNotification("error", error.response?.data?.message || "Failed to claim report.");
+    }
+  };
 
   const fetchReports = async () => {
     try {
@@ -117,122 +94,16 @@ const handleClaimReport = async () => {
 
         {/* Report Modal */}
         {selectedReport && (
-  <div className="modal-overlay">
-    <div className="modal-content">
-      <h3>Analysis for {selectedReport.domain}</h3>
-
-                    { view === 'in_progress'
-  && selectedReport.reviewedBy?._id !== loggedInUser?._id && (
-    <p style={{ color: 'gray', fontStyle: 'italic' }}>
-      This report is assigned to {selectedReport.reviewedBy?.username}. You can view but not make a decision.
-    </p>
-)}
-
-     {/* ✅ Show Claim button only in pending view */}
-{view === 'pending' && !selectedReport.investigator && (
-  <button
-    className="claim-button"
-    onClick={handleClaimReport}
-  >
-    Claim Report
-  </button>
-)}
-
-              {/* Evidence Preview */}
-              {selectedReport?.evidence?.length > 0 && (
-                <div className="evidence-preview">
-                  <h4>Submitted Evidence</h4>
-                  {selectedReport.evidence.map((filename, index) => (
-                    <div
-                      key={index}
-                      onClick={() => {
-                        setActiveImage(filename);
-                        setShowImageModal(true);
-                      }}
-                      style={{
-                        cursor: 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                        padding: '4px 0'
-                      }}
-                    >
-                      <span role="img" aria-label="image">🖼️</span>
-                      <span style={{ color: 'black' }}>{filename}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {selectedReport.analysis ? (
-                <>
-                  {/* ✅ Replaced giant inline block with reusable component */}
-                  <ForensicReportBlock analysis={selectedReport.analysis} />
-
-                  <ScrapingInfoViewer
-                    scrapingInfo={selectedReport.scrapingInfo}
-                    showScraping={showScraping}
-                    setShowScraping={setShowScraping}
-                  />
-                </>
-              ) : (
-                <p>No analysis available.</p>
-              )}
-
-
-
-
-            {view === 'in_progress' && !selectedReport.investigatorDecision && (
-  <div className="modal-buttons">
-    <button
-      className="malicious"
-      disabled={selectedReport.reviewedBy?._id !== loggedInUser?._id}
-      style={{
-        backgroundColor:
-          selectedReport.reviewedBy?._id !== loggedInUser?._id ? '#ccc' : '#e74c3c',
-        cursor:
-          selectedReport.reviewedBy?._id !== loggedInUser?._id ? 'not-allowed' : 'pointer'
-      }}
-      onClick={() =>
-        setConfirmModal({
-          visible: true,
-          message: `Are you sure you want to mark this report as MALICIOUS?`,
-          action: () => handleDecision(selectedReport._id, 'malicious')
-        })
-      }
-    >
-      Mark as Malicious
-    </button>
-    <button
-      className="benign"
-      disabled={selectedReport.reviewedBy?._id !== loggedInUser?._id}
-      style={{
-        backgroundColor:
-          selectedReport.reviewedBy?._id !== loggedInUser?._id ? '#ccc' : '#2ecc71',
-        cursor:
-          selectedReport.reviewedBy?._id !== loggedInUser?._id ? 'not-allowed' : 'pointer'
-      }}
-      onClick={() =>
-        setConfirmModal({
-          visible: true,
-          message: `Are you sure you want to mark this report as SAFE?`,
-          action: () => handleDecision(selectedReport._id, 'benign')
-        })
-      }
-    >
-      Mark as Safe
-    </button>
-  </div>
-)}
-
-
-              <button className="close-button" onClick={handleCloseReport}>Close</button>
-            </div>
-          </div>
+          <ReportModal
+            report={selectedReport}
+            onClose={handleCloseReport}
+            loggedInUser={loggedInUser}
+            view={view}
+            handleDecision={handleDecision}
+          />
         )}
 
-        {/* Image Modal */}
-        {showImageModal && activeImage && (
+        {/* {showImageModal && activeImage && (
           <div className="modal-overlay" onClick={() => setShowImageModal(false)}>
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <h4>Evidence Preview: {activeImage}</h4>
@@ -244,7 +115,7 @@ const handleClaimReport = async () => {
               <button className="close-button" onClick={() => setShowImageModal(false)}>Close</button>
             </div>
           </div>
-        )}
+        )} */}
 
         {/* Confirmation Modal */}
         {confirmModal.visible && (

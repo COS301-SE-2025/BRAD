@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import FAQ from '../components/FAQ';
 import '../styles/Help.css';
 import userManual from '../assets/B.R.A.D-User-Manual.pdf';
+import BackButton from '../components/BackButton';
 
 const Help = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -10,6 +11,7 @@ const Help = () => {
 
   return (
     <div className="help-page">
+      <BackButton />
       <div className="help-header">
         <h1>Hi, how can we help?</h1>
         <input
