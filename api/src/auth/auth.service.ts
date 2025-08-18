@@ -10,6 +10,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
 @Injectable()
 export class AuthService {
   constructor(@InjectModel(User.name) private userModel: Model<User>,
@@ -173,4 +174,24 @@ async changePassword(username: string, dto: ChangePasswordDto): Promise<any> {
 
     return { message: 'Password changed successfully. You can now log in.' };
   }
+
+  async updateUser(userId: string, dto: UpdateUserDto): Promise<User> {
+  const user = await this.userModel.findById(userId);
+  if (!user) throw new NotFoundException('User not found');
+
+  // Verify password
+  const isPasswordValid = await bcrypt.compare(dto.currentPassword, user.password);
+  if (!isPasswordValid) throw new BadRequestException('Incorrect password');
+
+  // Allowed fields to update
+  const allowedFields = ['firstname', 'lastname', 'username', 'email'];
+  for (const key of allowedFields) {
+    if (dto[key] && dto[key].trim() !== '') {
+      user[key] = dto[key].trim();
+    }
+  }
+
+  await user.save();
+  return user;
+}
 }
