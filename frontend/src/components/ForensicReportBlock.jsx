@@ -1,5 +1,17 @@
-import React, { useState } from 'react';
-import '../styles/ForensicReportBlock.css';
+import React, { useState } from "react";
+import {
+  Globe,
+  Building,
+  User,
+  Lock,
+  Calendar,
+  RefreshCcw,
+  BarChart,
+  FileText,
+  Server,
+  Shield,
+} from "lucide-react";
+import "../styles/ForensicReportBlock.css";
 
 const ForensicReportBlock = ({ analysis = {} }) => {
   const [showWhois, setShowWhois] = useState(false);
@@ -12,74 +24,74 @@ const ForensicReportBlock = ({ analysis = {} }) => {
 
   return (
     <div className="forensic-block">
-      <h3 className="section-title">🕵️ Forensic Analysis</h3>
+      <h3 className="section-title">
+        <Shield size={18} /> Forensic Analysis
+      </h3>
 
       {/* Summary Cards */}
       <div className="summary-cards">
-        <div className="summary-card">
-          🌐 <span className="label">IP Address:</span>
-          <span className="value">{analysis.ip || 'N/A'}</span>
-        </div>
-        <div className="summary-card">
-          🏢 <span className="label">Registrar:</span>
-          <span className="value">{analysis.registrar || 'N/A'}</span>
-        </div>
-        <div className="summary-card">
-          👤 <span className="label">WHOIS Owner:</span>
-          <span className="value">{analysis.whoisOwner || 'N/A'}</span>
-        </div>
-        <div className="summary-card">
-          🔒 <span className="label">SSL Valid:</span>
-          <span className="value">{analysis.sslValid ? 'Yes' : 'No'}</span>
-        </div>
-        <div className="summary-card">
-          📅 <span className="label">SSL Expiry:</span>
-          <span className="value">{analysis.sslExpires || 'N/A'}</span>
-        </div>
-        <div className="summary-card">
-          🔄 <span className="label">Reverse IP:</span>
-          <span className="value">{analysis.reverseIp || 'N/A'}</span>
-        </div>
+        {[
+          { icon: <Globe size={18} />, label: "IP Address", value: analysis.ip },
+          { icon: <Building size={18} />, label: "Registrar", value: analysis.registrar },
+          { icon: <User size={18} />, label: "WHOIS Owner", value: analysis.whoisOwner },
+          { icon: <Lock size={18} />, label: "SSL Valid", value: analysis.sslValid ? "Yes" : "No" },
+          { icon: <Calendar size={18} />, label: "SSL Expiry", value: analysis.sslExpires },
+          { icon: <RefreshCcw size={18} />, label: "Reverse IP", value: analysis.reverseIp },
+        ].map(({ icon, label, value }, idx) => (
+          <div className="summary-card" key={idx}>
+            {icon}
+            <span className="label">{label}</span>
+            <span className="value">{value || "N/A"}</span>
+          </div>
+        ))}
       </div>
 
-      {/* Geo */}
+      {/* Hosting Info */}
       {analysis.geo && (
         <div className="info-section">
-          <p><strong>🌍 Hosting Country:</strong> {analysis.geo.country || 'N/A'}</p>
-          <p><strong>🏢 ASN / Org:</strong> {analysis.geo.asn || 'N/A'}</p>
+          <h4><Globe size={18} /> Hosting Info</h4>
+          <p><strong>Country:</strong> {analysis.geo.country || "N/A"}</p>
+          <p><strong>ASN / Org:</strong> {analysis.geo.asn || "N/A"}</p>
         </div>
       )}
 
       {/* Stats */}
       {analysis.stats && (
         <div className="info-section">
-          <h4>📊 Domain & Security Stats</h4>
-          <p><strong>Domain Age:</strong> {analysis.stats.domain_age_days} days</p>
-          <p><strong>SSL Days Left:</strong> {analysis.stats.ssl_days_remaining}</p>
-          <p><strong>DNS Security:</strong></p>
-          <ul>
-            <li>SPF: {analysis.stats.dns?.has_spf ? '✅' : '❌'}</li>
-            <li>DMARC: {analysis.stats.dns?.has_dmarc ? '✅' : '❌'}</li>
-            <li>MX Count: {analysis.stats.dns?.mx_count}</li>
-            <li>NS Count: {analysis.stats.dns?.ns_count}</li>
-          </ul>
+          <h4><BarChart size={18} /> Domain & Security Stats</h4>
+          <div className="stats-grid">
+            <p><strong>Domain Age:</strong> {analysis.stats.domain_age_days} days</p>
+            <p><strong>SSL Days Left:</strong> {analysis.stats.ssl_days_remaining}</p>
+          </div>
+          <div className="dns-stats">
+            <h5>DNS Security</h5>
+            <table className="styled-table small">
+              <tbody>
+                <tr><td>SPF</td><td>{analysis.stats.dns?.has_spf ? "Enabled" : "Missing"}</td></tr>
+                <tr><td>DMARC</td><td>{analysis.stats.dns?.has_dmarc ? "Enabled" : "Missing"}</td></tr>
+                <tr><td>MX Count</td><td>{analysis.stats.dns?.mx_count}</td></tr>
+                <tr><td>NS Count</td><td>{analysis.stats.dns?.ns_count}</td></tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
 
       {/* Risk Section */}
-      <div className="risk-section">
+      <div className="toggle-section">
         <button className="toggle-button" onClick={() => setShowRisk(prev => !prev)}>
-          {showRisk ? '📉 Hide Risk Analysis ▲' : '📈 Show Risk Analysis ▼'}
+          <Shield size={16} />
+          {showRisk ? " Hide Risk Analysis ▲" : " Show Risk Analysis ▼"}
         </button>
         {showRisk && (
-          <>
-            <p><strong>Risk Level:</strong> 
-              <span className={`risk-badge ${analysis.riskLevel?.toLowerCase() || ''}`}>
-                {analysis.riskLevel || 'N/A'}
+          <div className="risk-content">
+            <p>
+              <strong>Risk Level:</strong>
+              <span className={`risk-badge ${analysis.riskLevel?.toLowerCase() || ""}`}>
+                {analysis.riskLevel || "N/A"}
               </span>
             </p>
-            <p><strong>Risk Score:</strong> {analysis.riskScore || 'N/A'}</p>
-
+            <p><strong>Risk Score:</strong> {analysis.riskScore || "N/A"}</p>
             {analysis.riskReasons && (
               <div className="risk-breakdown">
                 <h5>Risk Breakdown</h5>
@@ -90,15 +102,16 @@ const ForensicReportBlock = ({ analysis = {} }) => {
                 </ul>
               </div>
             )}
-          </>
+          </div>
         )}
       </div>
 
       {/* WHOIS */}
       {analysis.whoisRaw && (
-        <div className="whois-section">
+        <div className="toggle-section">
           <button className="toggle-button" onClick={() => setShowWhois(prev => !prev)}>
-            {showWhois ? '📄 Hide WHOIS Raw ▲' : '📄 Show WHOIS Raw ▼'}
+            <FileText size={16} />
+            {showWhois ? " Hide WHOIS Raw ▲" : " Show WHOIS Raw ▼"}
           </button>
           {showWhois && (
             <div className="table-wrapper">
@@ -107,7 +120,7 @@ const ForensicReportBlock = ({ analysis = {} }) => {
                   {Object.entries(analysis.whoisRaw).map(([key, value]) => (
                     <tr key={key}>
                       <td><strong>{key}</strong></td>
-                      <td>{Array.isArray(value) ? value.join(', ') : String(value)}</td>
+                      <td>{Array.isArray(value) ? value.join(", ") : String(value)}</td>
                     </tr>
                   ))}
                 </tbody>
@@ -119,9 +132,10 @@ const ForensicReportBlock = ({ analysis = {} }) => {
 
       {/* DNS */}
       {analysis.dns && (
-        <div className="dns-section">
+        <div className="toggle-section">
           <button className="toggle-button" onClick={() => setShowDns(prev => !prev)}>
-            {showDns ? '🌍 Hide DNS Records ▲' : '🌍 Show DNS Records ▼'}
+            <Server size={16} />
+            {showDns ? " Hide DNS Records ▲" : " Show DNS Records ▼"}
           </button>
           {showDns && (
             <div className="table-wrapper">
@@ -131,11 +145,9 @@ const ForensicReportBlock = ({ analysis = {} }) => {
                 </thead>
                 <tbody>
                   {Object.entries(analysis.dns).flatMap(([type, entries]) =>
-                    Array.isArray(entries) ? entries.map((val, i) => (
-                      <tr key={`${type}-${i}`}><td>{type}</td><td>{val}</td></tr>
-                    )) : (
-                      <tr key={type}><td>{type}</td><td>{String(entries)}</td></tr>
-                    )
+                    Array.isArray(entries)
+                      ? entries.map((val, i) => (<tr key={`${type}-${i}`}><td>{type}</td><td>{val}</td></tr>))
+                      : (<tr key={type}><td>{type}</td><td>{String(entries)}</td></tr>)
                   )}
                 </tbody>
               </table>

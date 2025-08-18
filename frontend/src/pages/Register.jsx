@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import '../styles/Register.css';
 import BRAD_robot from '../assets/BRAD_robot.png';
 import API from '../api/axios';
+import BackButton from '../components/BackButton';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -34,18 +35,16 @@ const RegisterPage = () => {
 
     const type = () => {
       if (currentChar < lines[currentLine].length) {
-        // Add next char to current line
         tempText[currentLine] = (tempText[currentLine] || "") + lines[currentLine][currentChar];
         setDisplayedText([...tempText]);
         currentChar++;
-        setTimeout(type, 50); // typing speed
+        setTimeout(type, 50);
       } else {
-        // Move to next line after small delay
         currentLine++;
         if (currentLine < lines.length) {
           currentChar = 0;
-          tempText.push(""); // prepare next line
-          setTimeout(type, 500); // delay before next line starts typing
+          tempText.push("");
+          setTimeout(type, 500); 
         }
       }
     };
@@ -91,6 +90,7 @@ const RegisterPage = () => {
 
   return (
     <div className="register-page">
+      <BackButton />
       <div className="robot-section">
           <img src={BRAD_robot} alt="BRAD Robot" className="brad-robot" />
           <h2 className="welcome-message">

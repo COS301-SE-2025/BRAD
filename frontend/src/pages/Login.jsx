@@ -4,6 +4,7 @@ import '../styles/Login.css';
 import BRAD_robot from '../assets/BRAD_robot.png';
 import ForgotPasswordModal from '../components/ForgotPasswordModal';
 import API from "../api/axios";
+import BackButton from '../components/BackButton';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -13,7 +14,6 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
-  // Typing animation state
   const [displayedLines, setDisplayedLines] = useState([]);
   const [currentLine, setCurrentLine] = useState(0);
   const [currentText, setCurrentText] = useState('');
@@ -68,7 +68,6 @@ const LoginPage = () => {
     }
   };
 
-  // Typing effect logic
   useEffect(() => {
     document.title = 'B.R.A.D | Login';
     
@@ -91,6 +90,7 @@ const LoginPage = () => {
 
   return (
     <div className="login-page">
+      <BackButton />
       <div className="robot-section">
         <img src={BRAD_robot} alt="BRAD Robot" className="brad-robot" />
         <h2 className="welcome-message">
