@@ -116,7 +116,8 @@ export class AuthService {
     },
   });
 
-  const resetLink = `http://localhost:5173/reset-password?token=${token}`;
+//   const resetLink = `http://localhost:5173/reset-password?token=${token}`;
+  const resetLink = `${process.env.DOMAIN_NAME}/reset-password?token=${token}`;
 
   const mailOptions = {
     to: user.email,
