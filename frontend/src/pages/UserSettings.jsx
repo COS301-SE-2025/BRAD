@@ -13,8 +13,8 @@ const UserSettings = () => {
   const storedUser = JSON.parse(localStorage.getItem('user')) || {};
 
   const [form, setForm] = useState({
-    firstName: '',
-    lastName: '',
+    firstname: '',
+    lastname: '',
     username: '',
     email: '',
   });
@@ -53,7 +53,7 @@ const UserSettings = () => {
       setMessage('Profile updated successfully!');
       setShowPasswordModal(false);
       setCurrentPassword('');
-      setForm({ firstName: '', lastName: '', username: '', email: '' });
+      setForm({ firstname: '', lastname: '', username: '', email: '' });
       localStorage.setItem('user', JSON.stringify(response.data));
     } catch (err) {
       setMessage(err.response?.data?.message || 'Update failed');
@@ -85,8 +85,8 @@ const UserSettings = () => {
 
           <h2>Update Your Information</h2>
           <form className="settings-form" onSubmit={handleSubmit}>
-            <input type="text" name="firstName" placeholder="New First Name" value={form.firstName} onChange={handleChange} />
-            <input type="text" name="lastName" placeholder="New Last Name" value={form.lastName} onChange={handleChange} />
+            <input type="text" name="firstname" placeholder="New First Name" value={form.firstname} onChange={handleChange} />
+            <input type="text" name="lastname" placeholder="New Last Name" value={form.lastname} onChange={handleChange} />
             <input type="text" name="username" placeholder="New Username" value={form.username} onChange={handleChange} />
             <input type="email" name="email" placeholder="New Email" value={form.email} onChange={handleChange} />
             <button type="submit">Update Profile</button>
