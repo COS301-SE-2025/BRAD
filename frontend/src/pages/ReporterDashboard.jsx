@@ -274,7 +274,8 @@ const ReporterDashboard = () => {
             <div className="modal-content" onClick={(e) => e.stopPropagation()}>
               <h3>Evidence Preview: {activeImage}</h3>
               <img
-                src={`http://localhost:3000/static/uploads/evidence/${activeImage}`}
+                // src={`http://localhost:3000/static/uploads/evidence/${activeImage}`}
+                src={`/api/static/uploads/evidence/${activeImage}`}
                 alt="Evidence"
                 style={{ maxWidth: '80%', maxHeight: '80vh', borderRadius: '5px' }}
               />

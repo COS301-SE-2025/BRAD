@@ -1,20 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import '../styles/ReporterDashboard.css';
-import ReporterNavbar from '../components/ReporterNavbar';
-import Notification from '../components/Notification';
-import API from '../api/axios';
+import React, { useState, useEffect } from "react";
+import "../styles/ReporterDashboard.css";
+import ReporterNavbar from "../components/ReporterNavbar";
+import Notification from "../components/Notification";
+import API from "../api/axios";
 
 const ReporterDashboard = () => {
-  const [domain, setDomain] = useState('');
+  const [domain, setDomain] = useState("");
   const [reports, setReports] = useState([]);
-  const [filter, setFilter] = useState('');
+  const [filter, setFilter] = useState("");
   const [selectedReport, setSelectedReport] = useState(null);
-  const user = JSON.parse(localStorage.getItem('user'));
+  const user = JSON.parse(localStorage.getItem("user"));
   const [evidenceFiles, setEvidenceFiles] = useState([]);
   const [activeImage, setActiveImage] = useState(null);
   const [showImageModal, setShowImageModal] = useState(false);
   const [notification, setNotification] = useState(null);
-
 
   const MAX_FILES = 5;
 
@@ -27,7 +26,7 @@ const ReporterDashboard = () => {
     const newFiles = Array.from(e.target.files);
     const combined = [...evidenceFiles, ...newFiles];
     if (combined.length > MAX_FILES) {
-      showNotification('error', 'You can only attach up to 5 files.');
+      showNotification("error", "You can only attach up to 5 files.");
       setEvidenceFiles(combined.slice(0, MAX_FILES));
     } else {
       setEvidenceFiles(combined);
@@ -39,7 +38,7 @@ const ReporterDashboard = () => {
     const droppedFiles = Array.from(e.dataTransfer.files);
     const combined = [...evidenceFiles, ...droppedFiles];
     if (combined.length > MAX_FILES) {
-      showNotification('error', 'You can only attach up to 5 files.');
+      showNotification("error", "You can only attach up to 5 files.");
       setEvidenceFiles(combined.slice(0, MAX_FILES));
     } else {
       setEvidenceFiles(combined);
@@ -47,40 +46,43 @@ const ReporterDashboard = () => {
   };
 
   const handleRemoveFile = (index) => {
-    setEvidenceFiles(prev => prev.filter((_, i) => i !== index));
+    setEvidenceFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const submitReport = async () => {
-    if (!domain) return showNotification('error', 'Please enter a domain/URL');
+    if (!domain) return showNotification("error", "Please enter a domain/URL");
 
     const formData = new FormData();
-    formData.append('domain', domain);
-    formData.append('submittedBy', user._id);
+    formData.append("domain", domain);
+    formData.append("submittedBy", user._id);
 
     evidenceFiles.forEach((file) => {
-      formData.append('evidence', file);
+      formData.append("evidence", file);
     });
 
     try {
-      await API.post('/report', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      await API.post("/report", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
       });
 
-      setDomain('');
+      setDomain("");
       setEvidenceFiles([]);
-      showNotification('success', 'Report submitted successfully!');
+      showNotification("success", "Report submitted successfully!");
       setTimeout(() => fetchReports(), 1000);
     } catch (err) {
-      showNotification('error', err.response?.data?.message || 'Failed to submit report');
+      showNotification(
+        "error",
+        err.response?.data?.message || "Failed to submit report"
+      );
     }
   };
 
   const fetchReports = async () => {
     try {
-      const response = await API.get('/reports');
+      const response = await API.get("/reports");
       setReports(response.data);
     } catch (err) {
-      console.error('Error fetching reports:', err);
+      console.error("Error fetching reports:", err);
     }
   };
 
@@ -91,14 +93,13 @@ const ReporterDashboard = () => {
   }, []);
 
   useEffect(() => {
-    document.title = 'B.R.A.D | Reporter';
+    document.title = "B.R.A.D | Reporter";
   }, []);
 
   return (
     <div className="dashboard-container">
       <ReporterNavbar />
       <div className="dashboard-content">
-
         {notification && (
           <Notification
             type={notification.type}
@@ -151,12 +152,12 @@ const ReporterDashboard = () => {
                       onClick={() => handleRemoveFile(index)}
                       className="remove-file-button"
                       style={{
-                        marginLeft: '10px',
-                        color: 'red',
-                        cursor: 'pointer',
-                        border: 'none',
-                        background: 'transparent',
-                        fontWeight: 'bold',
+                        marginLeft: "10px",
+                        color: "red",
+                        cursor: "pointer",
+                        border: "none",
+                        background: "transparent",
+                        fontWeight: "bold",
                       }}
                     >
                       ✕
@@ -168,70 +169,84 @@ const ReporterDashboard = () => {
           </div>
         </div>
 
-    {selectedReport && (
-    <div className="modal-overlay">
-        <div className="modal-content">
-        <h3>Report for {selectedReport.domain}</h3>
-        <p><strong>Submitted:</strong> {new Date(selectedReport.createdAt).toLocaleString()}</p>
-        <p><strong>Status:</strong> {selectedReport.investigatorDecision ? 'Resolved' : 'Pending'}</p>
-        <p><strong>Verdict:</strong> {selectedReport.investigatorDecision ?? 'Not decided'}</p>
-        <p><strong>Risk Score:</strong> {selectedReport.analysis?.riskScore ?? 'N/A'}</p>
-
-        {selectedReport.evidence && selectedReport.evidence.length > 0 && (
-        <>
-          <p><strong>Attached Evidence:</strong></p>
-          <div className="evidence-preview">
-            {selectedReport.evidence.map((fileUrl, idx) => (
-              <img
-                key={idx}
-                src={fileUrl}
-                alt={`evidence-${idx}`}
-                className="evidence-thumbnail"
-                style={{
-                  maxWidth: '150px',
-                  maxHeight: '150px',
-                  marginRight: '10px',
-                  marginBottom: '10px',
-                  borderRadius: '5px',
-                  cursor: 'pointer',
-                  objectFit: 'cover',
-                }}
-              />
-            ))}
-          </div>
-        </>
-      )}
-
-        <button
-            onClick={() => setSelectedReport(null)}
-            style={{ marginTop: '20px' }}
-        >
-            Close
-        </button>
-        </div>
-        </div>
-        )}  
-
-        {showImageModal && activeImage && (
-        <div className="modal-overlay">
+        {selectedReport && (
+          <div className="modal-overlay">
             <div className="modal-content">
-            <h3>Image Preview</h3>
-            <img
-                src={`http://localhost:3000/static/uploads/evidence/${activeImage}`}
-                alt="Evidence"
-                style={{
-                maxWidth: '100%',
-                maxHeight: '80vh',
-                borderRadius: '10px',
-                marginBottom: '10px',
-                }}
-            />
-            <button onClick={() => setShowImageModal(false)}>Close</button>
+              <h3>Report for {selectedReport.domain}</h3>
+              <p>
+                <strong>Submitted:</strong>{" "}
+                {new Date(selectedReport.createdAt).toLocaleString()}
+              </p>
+              <p>
+                <strong>Status:</strong>{" "}
+                {selectedReport.investigatorDecision ? "Resolved" : "Pending"}
+              </p>
+              <p>
+                <strong>Verdict:</strong>{" "}
+                {selectedReport.investigatorDecision ?? "Not decided"}
+              </p>
+              <p>
+                <strong>Risk Score:</strong>{" "}
+                {selectedReport.analysis?.riskScore ?? "N/A"}
+              </p>
+
+              {selectedReport.evidence &&
+                selectedReport.evidence.length > 0 && (
+                  <>
+                    <p>
+                      <strong>Attached Evidence:</strong>
+                    </p>
+                    <div className="evidence-preview">
+                      {selectedReport.evidence.map((fileUrl, idx) => (
+                        <img
+                          key={idx}
+                          src={fileUrl}
+                          alt={`evidence-${idx}`}
+                          className="evidence-thumbnail"
+                          style={{
+                            maxWidth: "150px",
+                            maxHeight: "150px",
+                            marginRight: "10px",
+                            marginBottom: "10px",
+                            borderRadius: "5px",
+                            cursor: "pointer",
+                            objectFit: "cover",
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </>
+                )}
+
+              <button
+                onClick={() => setSelectedReport(null)}
+                style={{ marginTop: "20px" }}
+              >
+                Close
+              </button>
             </div>
-        </div>
+          </div>
         )}
 
-
+        {showImageModal && activeImage && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <h3>Image Preview</h3>
+              <img
+                // src={`http://localhost:3000/static/uploads/evidence/${activeImage}`}
+                src={`/api/static/uploads/evidence/${activeImage}`}
+                alt="Evidence"
+                style={{
+                  maxWidth: "100%",
+                  maxHeight: "80vh",
+                  borderRadius: "10px",
+                  marginBottom: "10px",
+                }}
+              />
+              <button onClick={() => setShowImageModal(false)}>Close</button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

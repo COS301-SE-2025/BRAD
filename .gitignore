@@ -20,4 +20,8 @@ __pycache__/
 screenshots/
 uploads/
 
+# Ignore Traefik Let's Encrypt storage
+letsencrypt/acme.json
+
+
 
