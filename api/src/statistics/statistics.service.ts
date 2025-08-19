@@ -99,24 +99,15 @@ async getDomainsReportedMoreThanOnce(): Promise<{ domain: string; count: number 
     }
     return this.reportModel.countDocuments({ investigatorDecision: 'benign' });
   }
-async getReportCountByMonth(role: string, month: number): Promise<{ month: number; count: number }> {
+async getReportsByYear(role: string): Promise<{ month: number; count: number }[]> {
   if (role !== 'admin' && role !== 'investigator') {
     throw new ForbiddenException('Role not permitted to view statistics');
-  }
-
-  if (month < 1 || month > 12) {
-    throw new BadRequestException('Invalid month. Must be between 1 and 12.');
   }
 
   const result = await this.reportModel.aggregate([
     {
       $addFields: {
-        reportMonth: { $month: '$createdAt' }
-      }
-    },
-    {
-      $match: {
-        reportMonth: month
+        reportMonth: { $month: { date: '$createdAt' } }
       }
     },
     {
@@ -131,12 +122,105 @@ async getReportCountByMonth(role: string, month: number): Promise<{ month: numbe
         month: '$_id',
         count: 1
       }
+    },
+    {
+      $sort: { month: 1 }
     }
   ]);
 
-  return result[0] || { month, count: 0 };
+  const monthsData = Array.from({ length: 12 }, (_, i) => {
+    const found = result.find(r => r.month === i + 1);
+    return { month: i + 1, count: found ? found.count : 0 };
+  });
+
+  return monthsData;
 }
 
+async getReportsByWeek(role: string): Promise<{ week: number; count: number }[]> {
+  if (role !== 'admin' && role !== 'investigator') {
+    throw new ForbiddenException('Role not permitted to view statistics');
+  }
+
+  const result = await this.reportModel.aggregate([
+    {
+      $addFields: {
+      
+        reportWeek: { $isoWeek: '$createdAt' }
+      }
+    },
+    {
+      $group: {
+        _id: '$reportWeek',
+        count: { $sum: 1 }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        week: '$_id',
+        count: 1
+      }
+    },
+    {
+      $sort: { week: 1 }
+    }
+  ]);
+  
+  const weeksData = Array.from({ length: 52 }, (_, i) => {
+    const found = result.find(r => r.week === i + 1);
+    return { week: i + 1, count: found ? found.count : 0 };
+  });
+
+  return weeksData;
+}
+
+async getReportsByDay (role:string): Promise<{ day: number; count: number }[]> {
+  if (role !== 'admin' && role !== 'investigator') {
+    throw new ForbiddenException('Role not permitted to view statistics');
+  }
+const now = new Date();
+const currentMonth = now.getMonth() + 1;
+const currentYear = now.getFullYear();
+
+  const result = await this.reportModel.aggregate([
+    {
+      $addFields: {
+        reportMonth: { $month: '$createdAt' },
+      reportYear: { $year: '$createdAt' },
+      reportDay: { $dayOfMonth: '$createdAt' }
+      }
+    },
+    {
+       $match: {
+      reportMonth: currentMonth,
+      reportYear: currentYear
+    }
+    },
+    {
+      $group: {
+        _id: '$reportDay',
+        count: { $sum: 1 }
+      }
+    },
+    {
+      $project: {
+        _id: 0,
+        day: '$_id',
+        count: 1
+      }
+    },
+    {
+      $sort: { day: 1 }
+    }
+  ]);
+
+  const daysData = Array.from({ length: 31 }, (_, i) => {
+    const found = result.find(r => r.day === i + 1);
+    return { day: i + 1, count: found ? found.count : 0 };
+  });
+
+  return daysData;
+}
 
 async getReportSubmittedToday(role:string): Promise<number> {
     if(role !== 'admin' && role !== 'investigator') {

@@ -32,16 +32,16 @@
 
 This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)** project, **a cybersecurity web application** that automates the analysis of potentially malicious URLs. Users can submit suspicious links through the website, where an AI-powered bot safely visits and analyzes the domain. The system extracts metadata, detects threats like malware, and compiles forensic reports. All findings are aggregated into a centralized platform that supports **incident reporting, dashboard visualization, and historical threat analysis**.
 
-## Contents:
+<!-- ## Contents:
 
 - [Documentation](#documentation)
 - [Demo videos](#demo-videos)
 - [Installation](#installation)
 - [Technologies used](#technologies-used)
 - [Team](#team-members)
-- [Contact Us](#contact-us)
+- [Contact Us](#contact-us) -->
 
-## Repository Structure
+<!-- ## Repository Structure
 
 ```
 📂 BRAD
@@ -54,7 +54,7 @@ This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)**
 ├── 📄 docker-compose.yml   # Docker setup
 ├── 📄 .gitignore           # Ignore unnecessary files
 ├── 📄 .dockerignore        # Ignore unnecessary files
-```
+``` -->
 
 ## Documentation
 
@@ -64,7 +64,8 @@ This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)**
   <!-- - [User Stories](/docs/User_Stories.md) -->
   <!-- - [Architectural Requirements](/docs/Architectural_Requirements.md) -->
   <!-- - [Quality Requirements](/docs/Quality_Requirements.pdf) -->
-- [Github Contributions](/docs/GitHub_Contributions.md)
+- [GitHub Contributions](docs/GitHub-contributions.md)
+- [Coding Standards](docs/Coding-standards.md)
     <!-- - [Github Contributions](/docs/requirement-specs/GitHub-contributions.pdf) -->
     <!-- - [API Documentation](/docs/requirement-specs/API_Documentation.md) -->
 - [Older Versions](/docs/versions/)
@@ -86,55 +87,11 @@ This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)**
 - [Project Board](https://github.com/orgs/COS301-SE-2025/projects/220/views/1)
 - [Project Plan](/docs/Project-plan.md)
 - [Burn Down Charts](/docs/burn-down-charts.md)
+- [User Manual](/docs/User%20Manual/B.R.A.D-User-Manual.pdf)
 
 ## Installation
 
-### **1. Clone the Repository**
-
-```sh
-git clone https://github.com/COS301-SE-2025/BRAD.git
-
-cd BRAD
-```
-
-### **_Docker not running yet_**
-
-### **2. Running the Project (Docker)**
-
-Ensure you have **Docker** installed, then run:
-
-(first time only)
-
-```sh
-docker compose build
-```
-
-then
-
-```sh
-docker compose up
-```
-
-<!-- This will start the **daemon, API, CLI, and UI**. -->
-
-### **3. Viewing the Project**
-
-You should see a message similar to this:
-
-```sh
-Local: http://localhost:5173/
-```
-
-Simply type this link into a browser to view the project.
-
-### **4. Running Tests**
-
-<!-- Tests can be run locally using [Act](https://github.com/nektos/act), which provides developers with the ability to run GitHub workflows locally.
-To do this, first install Act and then simply run the `act` command. To run specific tests the `-W` can be specified as follows:
-
-```sh
-act -W path/to/workflow.yml
-``` -->
+- [Technical Installation Manual](/docs/Technical-installation-manual.md)
 
 ## Technologies used
 
@@ -158,18 +115,13 @@ act -W path/to/workflow.yml
 
 ## CI/CD & GitHub Actions
 
-<!-- - **CI/CD** is handled using **GitHub Actions**.
+- **CI/CD** is handled using **GitHub Actions**.
 - On each push, the pipeline will:
   - **Run tests** (unit, integration, E2E)
   - **Build the project**
-  - **Deploy to a containerized environment** -->
+  - **Deploy to a containerized environment**
 
-## Contribution Outline
-
-1. **Create a branch** for your feature: `git checkout -b feature-name`
-2. **Commit changes** with clear messages.
-3. **Open a Pull Request (PR)** for review.
-4. **Ensure tests pass** before merging. -->
+<!-- ## Contribution Outline -->
 
 ## Team members
 

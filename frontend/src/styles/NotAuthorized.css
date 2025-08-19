@@ -28,7 +28,7 @@
 
 .back-button {
   padding: 0.7rem 1.4rem;
-  background: #10b981;
+  background: transparent;
   color: white;
   font-size: 1rem;
   border: none;
@@ -37,5 +37,5 @@
 }
 
 .back-button:hover {
-  background: #059669;
+  color: #7dd3fc; 
 }
