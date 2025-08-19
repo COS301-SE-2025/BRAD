@@ -31,7 +31,7 @@ export class ReportController {
   @Post('report')
   @UseInterceptors(FilesInterceptor('evidence',5,{
     storage: diskStorage({
-     destination: path.join(__dirname, '..', '..','uploads', 'evidence'),
+    destination: path.join(__dirname, '..', '..','..', '..', '..','..','uploads', 'evidence'),
 
       
       // Ensure the uploads directory exists

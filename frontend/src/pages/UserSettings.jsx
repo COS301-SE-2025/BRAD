@@ -49,7 +49,7 @@ const UserSettings = () => {
   const handlePasswordConfirm = async () => {
     try {
       const payload = { ...form, currentPassword };
-      const response = await updateUser(payload); // Call your API
+      const response = await updateUser(payload); 
       setMessage('Profile updated successfully!');
       setShowPasswordModal(false);
       setCurrentPassword('');
