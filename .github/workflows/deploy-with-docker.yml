@@ -1,11 +1,11 @@
 name: BRAD CI/CD Pipeline
 
 on:
-  push:
-    branches:
-      - main
-      - dev
-      - pipeline
+  #   push:
+  #     branches:
+  #       - main
+  #       - dev
+  #       - pipeline
   pull_request:
     branches:
       - main
