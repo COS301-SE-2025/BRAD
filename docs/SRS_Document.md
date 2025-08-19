@@ -1761,7 +1761,7 @@ critical quality requirements. This ensures that BRAD is not only
 functional but secure, adaptable, and resilient in the face of
 ever-evolving cyber-security threats.
 
-<img src="./images/architectureDiagram4.png"
+<img src="./images/architectureDiagram5.png"
 style="width:7.59514in;height:11.24167in" />
 
 <p align="right"><a href="#table-of-contents">⬆️ Back to Table of Contents</a></p>
