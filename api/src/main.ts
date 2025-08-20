@@ -4,11 +4,18 @@ import * as dotenv from 'dotenv';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { join } from 'path';
 import * as express from 'express';
+import { json, urlencoded } from 'express';
+import * as compression from 'compression';
 
 dotenv.config();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  // --- Body limits & compression (before routes) ---
+  app.use(json({ limit: process.env.BODY_LIMIT || '20mb' }));
+  app.use(urlencoded({ extended: true, limit: process.env.BODY_LIMIT || '20mb' }));
+  app.use(compression());
 
   const config = new DocumentBuilder()
     .setTitle('BRAD API')
