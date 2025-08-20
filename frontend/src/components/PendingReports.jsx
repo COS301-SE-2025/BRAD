@@ -10,6 +10,10 @@ const PendingReports = ({ reports = [], onSelect, setReports }) => {
     [reports]
   );
 
+  const handleViewReport = (report) => {
+    onSelect(report); // open the report modal
+  };
+
   // Map an average (0–100) to a level
   const toLevel = (avg) => (avg >= 70 ? "High" : avg >= 40 ? "Medium" : "Low");
 
@@ -89,6 +93,14 @@ const PendingReports = ({ reports = [], onSelect, setReports }) => {
                   "N/A"
                 )}
               </p>
+
+                <button
+                className="view-button"
+                onClick={() => handleViewReport(report)}
+              >
+                View Analysis
+              </button>
+
             </div>
           );
         })}

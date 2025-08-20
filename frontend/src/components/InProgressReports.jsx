@@ -81,7 +81,7 @@ const InProgressReports = ({ reports, onSelect, setReports }) => {
                 className="view-button"
                 onClick={() => handleViewReport(report)}
               >
-                View Report
+                View Analysis
               </button>
             </div>
           );
