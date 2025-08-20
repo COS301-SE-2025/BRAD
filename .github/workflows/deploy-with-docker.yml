@@ -1,0 +1,42 @@
+name: BRAD CI/CD Pipeline
+
+on:
+  #   push:
+  #     branches:
+  #       - main
+  #       - dev
+  #       - pipeline
+  pull_request:
+    branches:
+      - main
+      - dev
+      - pipeline
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up .env file
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+        #   cat .env # optional: shows contents (safe if no secrets leak in logs)
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and start services
+        run: |
+          docker compose up -d --build
+
+      #   - name: Run tests (optional)
+      #     run: |
+      #       docker compose run --rm api npm test
+
+      - name: Stop services
+        if: always()
+        run: docker compose down
