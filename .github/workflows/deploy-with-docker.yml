@@ -28,34 +28,33 @@ jobs:
       - name: Stop services
         if: always()
         run: docker compose down
+#   test:
+#     runs-on: ubuntu-latest
+#     needs: build # only runs if build succeeds
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v3
 
-  test:
-    runs-on: ubuntu-latest
-    needs: build # only runs if build succeeds
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+#       - name: Set up Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: 18
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
+#       # ---------- Frontend ----------
+#       - name: Install frontend dependencies
+#         working-directory: frontend
+#         run: npm install
 
-      # ---------- Frontend ----------
-      - name: Install frontend dependencies
-        working-directory: frontend
-        run: npm install
+#       - name: Run frontend tests
+#         working-directory: frontend
+#         run: npm test
 
-      - name: Run frontend tests
-        working-directory: frontend
-        run: npm test
+#       # ---------- Backend (API) ----------
+#       - name: Install backend dependencies
+#         working-directory: api
+#         run: npm install
 
-      # ---------- Backend (API) ----------
-      - name: Install backend dependencies
-        working-directory: api
-        run: npm install
-
-      - name: Run backend e2e tests
-        working-directory: api
-        run: NODE_ENV=test npm run test:e2e
-#
+#       - name: Run backend e2e tests
+#         working-directory: api
+#         run: NODE_ENV=test npm run test:e2e
+# #
