@@ -6,14 +6,27 @@ import dns.resolver
 from datetime import datetime
 from typing import Dict, Any
 from .threat_utils import get_geo_info
+from urllib.parse import urlparse
 
-def sanitize_domain(domain: str) -> str:
-    return domain.replace("http://", "").replace("https://", "").split("/")[0].split("?")[0]
+def sanitize_domain(value: str) -> str:
+    raw = (value or "").strip().lower().replace("\u200b","").replace("\u2060","")
+    host = urlparse(raw).netloc or raw.split("/")[0]
+    host = host.rstrip(".")
+    try:
+        # ensure punycode (IDN) is handled
+        host = host.encode("idna").decode("ascii")
+    except Exception:
+        pass
+    return host
 
 def get_ip(domain: str) -> str:
     try:
         socket.setdefaulttimeout(3)
-        return socket.gethostbyname(domain)
+        infos = socket.getaddrinfo(domain, None)
+        # prefer IPv4 first, else IPv6
+        addrs = [ai[4][0] for ai in infos]
+        v4 = [a for a in addrs if ":" not in a]
+        return (v4 or addrs)[0]
     except Exception:
         return "Unavailable"
 
@@ -30,19 +43,23 @@ def get_whois_info(domain: str) -> Dict[str, Any]:
     try:
         socket.setdefaulttimeout(5)
         w = whois.whois(domain)
+        wr = dict(w)
+        # normalize common datetime fields to isoformat if needed
+        for k in ("creation_date", "updated_date", "expiration_date"):
+            v = wr.get(k)
+            if isinstance(v, list):
+                wr[k] = [x.isoformat() if hasattr(x, "isoformat") else str(x) for x in v]
+            elif hasattr(v, "isoformat"):
+                wr[k] = v.isoformat()
         return {
             "registrar": w.registrar or "Unavailable",
             "whoisOwner": w.org or w.name or "Unknown",
             "creation_date": w.creation_date,
-            "whoisRaw": dict(w)
+            "whoisRaw": wr
         }
     except Exception:
-        return {
-            "registrar": "Unavailable",
-            "whoisOwner": "Unknown",
-            "creation_date": None,
-            "whoisRaw": {}
-        }
+        return {"registrar": "Unavailable", "whoisOwner": "Unknown", "creation_date": None, "whoisRaw": {}}
+
 
 def get_ssl_info(domain: str) -> Dict[str, Any]:
     try:
@@ -51,14 +68,32 @@ def get_ssl_info(domain: str) -> Dict[str, Any]:
             s.settimeout(3)
             s.connect((domain, 443))
             cert = s.getpeercert()
-            expires_raw = cert.get("notAfter", "Unknown")
+            not_after = cert.get("notAfter")
             expires = (
-                datetime.strptime(expires_raw, "%b %d %H:%M:%S %Y %Z")
-                if expires_raw != "Unknown" else None
+                datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z")
+                if not_after else None
             )
-            return {"valid": True, "expires": expires}
+            # valid only if we have an expiry in the future
+            now = datetime.utcnow()
+            is_valid = bool(expires and expires > now)
+
+            # pull extra details (issuer, subject, SANs)
+            subject = dict(x[0] for x in cert.get("subject", []))
+            issuer = dict(x[0] for x in cert.get("issuer", []))
+            san = []
+            for k, v in cert.get("subjectAltName", []):
+                if k.lower() == "dns":
+                    san.append(v)
+
+            return {
+                "valid": is_valid,
+                "expires": expires,
+                "issuer": issuer.get("organizationName") or issuer.get("commonName"),
+                "subjectCN": subject.get("commonName"),
+                "subjectAltNames": san,
+            }
     except Exception:
-        return {"valid": False, "expires": None}
+        return {"valid": False, "expires": None, "issuer": None, "subjectCN": None, "subjectAltNames": []}
 
 def get_dns_records(domain: str) -> Dict[str, Any]:
     records = {}
@@ -72,6 +107,15 @@ def get_dns_records(domain: str) -> Dict[str, Any]:
             records[record_type] = [str(r.to_text()) for r in answers]
         except Exception:
             records[record_type] = []
+
+    # NEW: DMARC TXT at _dmarc.domain
+    try:
+        dmarc_name = f"_dmarc.{domain}"
+        answers = resolver.resolve(dmarc_name, "TXT")
+        records["DMARC"] = [str(r.to_text()) for r in answers]
+    except Exception:
+        records["DMARC"] = []
+
     return records
 
 def gather_forensics(domain: str) -> Dict[str, Any]:
