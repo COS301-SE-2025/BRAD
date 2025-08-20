@@ -219,13 +219,15 @@ const ReportModal = ({ report, onClose, loggedInUser, view, handleDecision, refr
                         <div key={idx} className="evidence-card">
                           {isImage ? (
                             <img
-                              src={`http://localhost:3000/static/uploads/evidence/${file}`}
+                            //   src={`http://localhost:3000/static/uploads/evidence/${file}`}
+                              src={`/api/static/uploads/evidence/${file}`}
                               alt={`Evidence ${idx + 1}`}
                               onClick={() => setActiveEvidence(file)}
                             />
                           ) : (
                             <a
-                              href={`http://localhost:3000/static/uploads/evidence/${file}`}
+                            //   href={`http://localhost:3000/static/uploads/evidence/${file}`}
+                              href={`/api/static/uploads/evidence/${file}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="evidence-file"
@@ -273,7 +275,8 @@ const ReportModal = ({ report, onClose, loggedInUser, view, handleDecision, refr
                 </header>
                 <div className="evidence-preview-body">
                   <img
-                    src={`http://localhost:3000/static/uploads/evidence/${activeEvidence}`}
+                    // src={`http://localhost:3000/static/uploads/evidence/${activeEvidence}`}
+                    src={`/api/static/uploads/evidence/${activeEvidence}`}
                     alt="Evidence Full"
                   />
                 </div>
