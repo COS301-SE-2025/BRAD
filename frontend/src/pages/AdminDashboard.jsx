@@ -3,17 +3,28 @@ import '../styles/AdminDashboard.css';
 import AdminNavbar from '../components/AdminNavbar';
 import CreateUser from '../components/CreateUser';
 import ManageUsers from '../components/ManageUsers';
-import { getAllUsers,createUser, createAdmin,deleteUser, promoteUser, demoteUser,changeRoleToAdmin } from '../api/admin';
+import Notification from '../components/Notification';
+import {
+  getAllUsers,
+  createUser,
+  deleteUser,
+  promoteUser,
+  demoteUser,
+  changeRoleToAdmin
+} from '../api/admin';
 
 const AdminDashboard = () => {
   const [view, setView] = useState('create');
   const [users, setUsers] = useState([]);
+  const [notification, setNotification] = useState(null);
+
+  const showNotification = (type, message) => {
+    setNotification({ type, message });
+    setTimeout(() => setNotification(null), 4000);
+  };
 
   useEffect(() => {
     fetchUsers();
-  }, []);
-
-  useEffect(() => {
     document.title = 'B.R.A.D | Admin';
   }, []);
 
@@ -21,80 +32,75 @@ const AdminDashboard = () => {
     try {
       const res = await getAllUsers();
       setUsers(res.data);
-    } catch (err) {
-      console.error('Failed to fetch users:', err);
+    } catch {
+      showNotification('error', 'Failed to fetch users.');
     }
   };
 
-const addUser = async (user) => {
-  try {
-    const res = await createUser(user);
-    setUsers([...users, res.data]);
-    setSuccessMessage('User created successfully!');
-  } catch (err) {
-    console.error('User creation failed:', err);
-
-    if (err.response) {
-      const { status, data } = err.response;
-
-      if (status === 409) {
-        alert(data.message || 'User already exists. Please use a different username or email.');
-      } else if (status === 400) {
-        alert(data.message || 'Invalid input. Please review the user details.');
-      } else if (status === 403) {
-        alert(data.message || 'You do not have permission to perform this action.');
+  const addUser = async (user) => {
+    try {
+      const res = await createUser(user);
+      setUsers([...users, res.data]);
+      showNotification('success', 'User created successfully!');
+    } catch (err) {
+      if (err.response) {
+        const { status, data } = err.response;
+        if (status === 409) showNotification('error', data.message || 'User already exists.');
+        else if (status === 400) showNotification('error', data.message || 'Invalid input.');
+        else if (status === 403) showNotification('error', data.message || 'Permission denied.');
+        else showNotification('error', data.message || 'Unexpected error.');
       } else {
-        alert(data.message || 'An unexpected error occurred. Please try again.');
+        showNotification('error', 'Network error. Please check your connection.');
       }
-    } else {
-      alert('Network error or server is unreachable. Please check your connection.');
     }
-  }
-};
+  };
 
-const updateRole = async (userId, currentRole, newRole) => {
-  try {
-    let res;
+  const updateRole = async (userId, currentRole, newRole) => {
+    try {
+      let res;
+      if (newRole === 'investigator') res = await promoteUser(userId);
+      else if (newRole === 'reporter') res = await demoteUser(userId);
+      else if (newRole === 'admin') res = await changeRoleToAdmin(userId);
 
-    if (newRole === 'investigator') {
-      res = await promoteUser(userId);
-    } else if (newRole === 'reporter') {
-      res = await demoteUser(userId);
-    } else if (newRole === 'admin') {
-      res = await changeRoleToAdmin(userId);
+      if (res) {
+        setUsers(users.map((u) => u._id === userId ? { ...u, role: res.data.role } : u));
+        showNotification('success', `Role updated to ${newRole}.`);
+      }
+    } catch {
+      showNotification('error', 'Failed to update role.');
     }
+  };
 
-    if (res) {
-      setUsers(users.map((u) =>
-        u._id === userId ? { ...u, role: res.data.role } : u
-      ));
+  const removeUser = async (userId) => {
+    try {
+      await deleteUser(userId);
+      setUsers(users.filter((u) => u._id !== userId));
+      showNotification('success', 'User deleted successfully.');
+    } catch {
+      showNotification('error', 'Failed to delete user.');
     }
-  } catch (err) {
-    console.error('Role update failed:', err);
-    alert('Failed to change role. Make sure you have permissions.');
-  }
-};
-
-const removeUser = async (userId) => {
-  try {
-    await deleteUser(userId); 
-    setUsers(users.filter((u) => u._id !== userId));
-  } catch (err) {
-    console.error('Failed to delete user:', err);
-    alert('Failed to delete user. Please try again.');
-  }
-};
+  };
 
   return (
     <div className="admin-dashboard">
       <AdminNavbar setView={setView} />
 
       <div className="admin-content">
+        {notification && (
+          <Notification
+            type={notification.type}
+            message={notification.message}
+            onClose={() => setNotification(null)}
+          />
+        )}
         <h2>Admin Dashboard</h2>
         {view === 'create' && <CreateUser addUser={addUser} />}
         {view === 'manage' && (
-        <ManageUsers users={users} updateRole={updateRole} removeUser={removeUser} />
-
+          <ManageUsers
+            users={users}
+            updateRole={updateRole}
+            removeUser={removeUser}
+          />
         )}
       </div>
     </div>

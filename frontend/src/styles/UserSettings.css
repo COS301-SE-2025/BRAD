@@ -1,26 +1,64 @@
 .user-settings-container {
   display: flex;
-  background: linear-gradient(to bottom right, #000814, #001f3f, #0077b6);
   min-height: 100vh;
-  color: rgb(255, 255, 255);
+  background: linear-gradient(to bottom right, #000814, #001f3f, #0077b6);
+  color: white;
+}
+
+.user-settings-container nav {
+  flex-shrink: 0;
 }
 
 .settings-form-section {
   flex: 1;
-  padding: 2.5rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
 }
 
-.settings-form-section h2 {
-  font-size: 1.8rem;
-  margin-bottom: 1.5rem;
+.settings-box {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2rem;
+  border-radius: 10px;
+  width: 100%;
+  max-width: 600px;
+  box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+  text-align: center;
+}
+
+.profile-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.profile-image {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #2563eb;
+  margin-bottom: 0.75rem;
+}
+
+.profile-details {
+  text-align: center;
+}
+.profile-details h3 {
+  margin: 0.2rem 0;
+}
+.profile-details p {
+  margin: 0.15rem 0;
+  font-size: 0.95rem;
+  color: #d1d5db;
 }
 
 .settings-form {
-  max-width: 500px;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  margin-left: 200px;
 }
 
 .settings-form input {
@@ -28,26 +66,137 @@
   font-size: 1rem;
   border: 1px solid #94a3b8;
   border-radius: 6px;
-  width: 100%;
+  background: transparent;
+  color: white;
+}
+
+.settings-form input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
 }
 
 .settings-form button {
-  background-color: #001f3f;
+  background-color: #2563eb;
   color: white;
   border: none;
   padding: 0.75rem;
   font-size: 1rem;
   border-radius: 6px;
   cursor: pointer;
-  width: 525px;
+  transition: background 0.3s ease;
 }
-
 .settings-form button:hover {
-  background-color: #1546b1;
+  background-color: #1d4ed8;
 }
 
 .success-message {
   margin-top: 1rem;
   color: #10b981;
   font-weight: bold;
+}
+
+@media (max-width: 768px) {
+  .settings-form-section {
+    padding: 1.5rem;
+    align-items: flex-start; 
+  }
+  .settings-box {
+    padding: 1.5rem;
+  }
+}
+
+.profile-icon {
+  font-size: 100px;
+  color: #2563eb;
+  margin-bottom: 0.75rem;
+}
+
+.password-modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+}
+
+.password-modal .modal-content {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 2rem;
+  width: 90%;
+  max-width: 420px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  animation: fadeInScale 0.3s ease;
+  backdrop-filter: blur(12px);
+}
+
+.password-modal .modal-content h3 {
+  margin-bottom: 1rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #f9fafb;
+}
+
+
+.password-modal .modal-content input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 1.5rem;
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  font-size: 1rem;
+}
+
+.password-modal .modal-content input::placeholder {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+
+.password-modal .modal-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.password-modal .modal-buttons button {
+  flex: 1;
+  padding: 0.75rem;
+  border-radius: 6px;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.password-modal .modal-buttons button:first-child {
+  background-color: #2563eb; 
+  color: white;
+}
+
+.password-modal .modal-buttons button:first-child:hover {
+  background-color: #1d4ed8;
+}
+
+.password-modal .modal-buttons button:last-child {
+  background-color: rgba(255, 255, 255, 0.1); 
+  color: #f9fafb;
+}
+
+.password-modal .modal-buttons button:last-child:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }

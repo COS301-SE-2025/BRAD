@@ -18,6 +18,7 @@ import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
 import Multer from 'multer';
 import { extname } from 'path';
+import { use } from 'passport';
 
 
 @ApiTags('Reports')
@@ -30,7 +31,7 @@ export class ReportController {
   @Post('report')
   @UseInterceptors(FilesInterceptor('evidence',5,{
     storage: diskStorage({
-     destination: path.join(__dirname, '..', '..','..', '..', '..','..','uploads', 'evidence'),
+    destination: path.join(__dirname, '..', '..','..', '..', '..','..','uploads', 'evidence'),
 
       
       // Ensure the uploads directory exists
@@ -85,7 +86,7 @@ export class ReportController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin', 'investigator', 'general')
   @Get('reports')
-  @ApiBearerAuth() // JWT
+  @ApiBearerAuth('JWT-auth') // JWT
   @ApiOperation({ summary: 'Get reports submitted by user or all (admin/investigator)' })
   @ApiResponse({ status: 200, description: 'List of reports' })
   async getReports(@Req() req: Request) {
@@ -112,18 +113,20 @@ export class ReportController {
   @Patch('reports/:id/analysis')
   async updateAnalysis(@Param('id') id: string, @Body() body: any) {
     return this.reportService.updateAnalysis(id, {
-      analysis: body.analysis,
-      scrapingInfo: body.scrapingInfo,
-      riskScore: body.analysis?.riskScore,
-      whois: body.analysis?.whois || body.whois,
-      analysisStatus: body.analysisStatus,
-    });
+    analysis: body.analysis,               // full ForensicReport dict
+    scrapingInfo: body.scrapingInfo,       // from perform_scraping
+    abuseFlags: body.abuseFlags,           // flags found during scraping
+    analysisStatus: body.analysisStatus,   // "done"/"error"
+  });
   }
+
+@UseGuards(AuthGuard, RolesGuard)
+
   
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('investigator')
   @Patch('report/:id/decision')
-  @ApiBearerAuth() // JWT
+  @ApiBearerAuth('JWT-auth') // JWT
   @ApiOperation({ summary: 'Investigator submits decision (malicious/benign)' })
   @ApiParam({ name: 'id', type: 'string' })
   @ApiBody({
@@ -134,15 +137,23 @@ export class ReportController {
       },
     },
   })
-  @ApiResponse({ status: 200, description: 'Decision updated' })
-  async updateDecision(@Param('id') id: string, @Body('verdict') verdict: string) {
-    return this.reportService.updateInvestigatorDecision(id, verdict);
+ @ApiResponse({ status: 200, description: 'Decision updated' })
+async updateDecision(@Param('id') id: string, @Body('verdict') verdict: string, @Req() req: Request) {
+  const user = req['user'] as JwtPayload;
+  const reviewerId = user?.id;
+
+  if (!reviewerId) {
+    throw new UnauthorizedException('Authenticated user required');
   }
+
+  // Call a new service method that updates decision AND reviewedBy
+  return this.reportService.updateDecisionAndReviewer(id, verdict, reviewerId);
+}
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('admin', 'investigator')
   @Get('forensics/:id')
-  @ApiBearerAuth() // JWT
+  @ApiBearerAuth('JWT-auth') // JWT
   @ApiOperation({ summary: 'Perform a forensic analysis on a report' })
   @ApiParam({ name: 'id', type: 'string' })
   @ApiResponse({ status: 200, description: 'Analysis result' })
@@ -160,4 +171,43 @@ export class ReportController {
     if (!req['bot']) throw new UnauthorizedException('No bot credentials found');
     return { success: true, bot: req['bot'] };
   }
+@UseGuards(AuthGuard, RolesGuard)
+@Roles('investigator')
+@Post('reports/:id/claim')
+@ApiBearerAuth('JWT-auth')
+@ApiOperation({ summary: 'Claim a report for review (set status to in-progress)' })
+@ApiParam({ name: 'id', type: 'string' })
+@ApiResponse({ status: 200, description: 'Report claimed successfully' })
+@ApiResponse({ status: 404, description: 'Report not found' })
+@ApiResponse({ status: 400, description: 'Report already claimed' })
+async claimReport(@Param('id') id: string, @Req() req: Request) {
+  const user = req['user'] as JwtPayload;
+  const reviewerId = user?.id;
+
+  if (!reviewerId) {
+    throw new UnauthorizedException('Authenticated user required');
+  }
+
+  return this.reportService.claimReport(id, reviewerId);
+}
+
+
+@UseGuards(AuthGuard, RolesGuard)
+@Roles('investigator')
+@Post('reports/:id/release')
+@ApiBearerAuth('JWT-auth')
+@ApiOperation({ summary: 'Release a claimed report (set status back to pending)' })
+@ApiParam({ name: 'id', type: 'string' })
+@ApiResponse({ status: 200, description: 'Report released successfully' })
+@ApiResponse({ status: 400, description: 'Cannot release report' })
+async releaseReport(@Param('id') id: string, @Req() req: Request) {
+  const user = req['user'] as JwtPayload;
+  const reviewerId = user?.id;
+
+  if (!reviewerId) {
+    throw new UnauthorizedException('Authenticated user required');
+  }
+
+  return this.reportService.releaseReport(id, reviewerId);
+}
 }

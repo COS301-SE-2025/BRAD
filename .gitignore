@@ -16,3 +16,12 @@ __pycache__/
 .pytest_cache/
 
 .coverage
+
+screenshots/
+uploads/
+
+# Ignore Traefik Let's Encrypt storage
+letsencrypt/acme.json
+
+
+
