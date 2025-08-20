@@ -1,21 +1,24 @@
-# Use the official Playwright image with Python and Chromium
+# Use the official Playwright image with Python + Chromium preinstalled
 FROM mcr.microsoft.com/playwright/python:v1.44.0-jammy
 
-# Set working directory
 WORKDIR /app
 
-# Copy dependency list and install
+# Copy only requirements first for better layer caching
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy source code
+# Copy source
 COPY ./src ./src
 
-# Unbuffer Python output for real-time logs
+# Ensure runtime dirs exist
+RUN mkdir -p /app/screenshots
+
+# Recommended env
 ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
 
-# Install Playwright dependencies
-RUN playwright install --with-deps
+# Playwright browsers are already present; if you ever need to re-install, uncomment:
+# RUN playwright install chromium
 
-# Run the bot
+# Start Dramatiq worker (make sure module name matches your actor module)
 CMD ["dramatiq", "src.worker", "--processes", "1", "--threads", "1"]

@@ -1,3 +1,4 @@
+// report.schema.ts
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { ApiProperty } from '@nestjs/swagger';
@@ -10,22 +11,20 @@ export class Report {
   @Prop({ required: true, trim: true })
   domain: string;
 
- @ApiProperty({
-  description: 'Optional screenshot or file evidence',
-  example: ['uploads/evidence/file1.png', 'uploads/evidence/file2.png'],
-  required: false,
-  type: [String],
-})
-@Prop({ type: [String], default: [] })
-evidence: string[];
-
+  @ApiProperty({
+    description: 'Optional screenshot or file evidence',
+    example: ['uploads/evidence/file1.png', 'uploads/evidence/file2.png'],
+    required: false,
+    type: [String],
+  })
+  @Prop({ type: [String], default: [] })
+  evidence: string[];
 
   @ApiProperty({ example: '665c861c8b23919a3f823fa1', type: String })
   @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   submittedBy: Types.ObjectId;
 
-
-   @ApiProperty({ example: '665c861c8b23919a3f823fa1', type: String })
+  @ApiProperty({ example: '665c861c8b23919a3f823fa1', type: String })
   @Prop({ type: Types.ObjectId, ref: 'User', required: false })
   reviewedBy?: Types.ObjectId;
 
@@ -39,41 +38,79 @@ evidence: string[];
     nullable: true,
   })
   @Prop({ type: Object, default: null })
-  analysis: Record<string, any>;
+  analysis: Record<string, any> | null;
 
+  // ── NEW shape for recursive crawler ───────────────────────────────────────────
   @Prop({ type: Object, default: null })
   scrapingInfo?: {
-    htmlRaw?: string;
-    screenshotPath?: string;
-    structuredInfo?: {
-      headings?: string[];
-      links?: string[];
-      forms?: string[];
+    scan?: {
+      startUrl?: string;
+      submittedAt?: string;   // ISO
+      userAgent?: string;
+      maxPages?: number;
+      maxDepth?: number;
+      delaySeconds?: number;
+      obeyRobots?: boolean;
     };
-    crawledLinks?: string[];
-  };
-  
+    summary?: {
+      pagesCrawled?: number;
+      pagesFlagged?: number;
+      requestsSampled?: number;
+    };
+    network?: {
+      requests?: Array<{
+        url: string;
+        method: string;
+        resourceType?: string;
+      }>;
+    };
+    pages?: Array<{
+      url: string;
+      title: string;
+      htmlHash: string;
+      screenshotPath?: string;
+      structuredInfo?: {
+        headings?: string[];
+        links?: string[];
+        forms?: string[];
+      };
+      flags?: {
+        suspiciousJS?: string[];
+        obfuscatedScripts?: boolean;
+        usesMetaRefresh?: boolean;
+        suspiciousInlineEvents?: Array<Record<string, string>>;
+        redirectChain?: string[];
+        keywordMatches?: number;
+        malwareDetected?: boolean;
+      };
+      riskScore?: number;
+    }>;
+    screenshots?: string[];
+  } | null;
+
   @Prop({ type: Object, default: null })
   abuseFlags?: {
-    suspiciousJS?: string[];
-    obfuscatedScripts?: boolean;
-    redirectChain?: string[];
-    usesMetaRefresh?: boolean;
-    suspiciousInlineEvents?: string[];
-    captchaDetected?: boolean;
-  };
-  
-  @Prop()
-  riskScore?: number;
+    pagesFlagged?: string[]; // URLs meeting risk threshold
+    redirectChains?: Record<string, string[]>; // startURL -> chain[]
+    globalSuspicion?: {
+      anyObfuscation?: boolean;
+      anyMetaRefresh?: boolean;
+      totalSuspiciousJS?: number;
+      totalKeywordMatches?: number;
+    };
+  } | null;
 
-  @ApiProperty({ enum: ['bot', 'pending', 'in-progress', 'done', 'error'], default: 'bot' })
-  @Prop({ enum: ['bot', 'pending', 'in-progress', 'done', 'error'], default: 'bot' })
-  analysisStatus: string;
+  @Prop()
+  riskScore?: number; // overall (optional)
+
+  // ── Unify statuses across backend & bot ──────────────────────────────────────
+  @ApiProperty({ enum: ['bot','pending','in-progress','done','error'], default: 'bot' })
+  @Prop({ enum: ['bot','pending','in-progress','done','error'], default: 'bot' })
+  analysisStatus: 'bot' | 'pending' | 'in-progress' | 'done' | 'error';
 
   @ApiProperty({ enum: ['malicious', 'benign', null], nullable: true })
   @Prop({ type: String, enum: ['malicious', 'benign', null], default: null })
   investigatorDecision: 'malicious' | 'benign' | null;
-
 }
 
 export const ReportSchema = SchemaFactory.createForClass(Report);
