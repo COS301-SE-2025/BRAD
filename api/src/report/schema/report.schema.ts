@@ -66,8 +66,8 @@ evidence: string[];
   @Prop()
   riskScore?: number;
 
-  @ApiProperty({ enum: ['bot', 'pending', 'in-progress', 'done', 'error'], default: 'bot' })
-  @Prop({ enum: ['bot', 'pending', 'in-progress', 'done', 'error'], default: 'bot' })
+  @ApiProperty({ enum: ['bot', 'pending', 'in-progress', 'done', 'error'], default: 'pending' })
+  @Prop({ enum: ['bot', 'pending', 'in-progress', 'done', 'error'], default: 'pending' })
   analysisStatus: string;
 
   @ApiProperty({ enum: ['malicious', 'benign', null], nullable: true })
