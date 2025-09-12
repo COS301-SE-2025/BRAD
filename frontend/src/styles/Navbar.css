@@ -1,0 +1,78 @@
+.navbar {
+  width: 70px;
+  background:  rgba(173, 216, 230, 0.25);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0.5rem;
+  align-items: flex-start;
+  transition: width 0.3s ease;
+  overflow-x: hidden;
+}
+
+.navbar:hover {
+  width: 220px;
+}
+
+.brand-section {
+  text-align: center;
+  margin-bottom: 2rem;
+  width: 100%;
+}
+
+.nav-logo {
+  height: 50px;
+  margin-bottom: 0.5rem;
+}
+
+.nav-title {
+  font-size: 1rem;
+  font-weight: bold;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.navbar:hover .nav-title {
+  opacity: 1;
+}
+
+.nav-link {
+  list-style: none;
+  padding: 0;
+  width: 100%;
+  margin: 0;
+}
+
+.nav-link li {
+  margin-bottom: 0.5rem;
+  cursor: pointer;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  padding: 0.6rem 0.8rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.nav-icon {
+  font-size: 1.2rem;
+  min-width: 30px;
+  text-align: center;
+}
+
+.nav-text {
+  margin-left: 0.8rem;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.navbar:hover .nav-text {
+  opacity: 1;
+}
+
+.nav-item:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}

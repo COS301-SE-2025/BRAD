@@ -1,0 +1,89 @@
+.investigator-dashboard {
+  display: flex;
+  background: linear-gradient(to bottom right, #000814, #001f3f, #0077b6);
+  color: #fff;
+  min-height: 100vh;
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.dashboard-main {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.dashboard-main h2 {
+  color: #ffffff;
+  margin-bottom: 2rem;
+}
+
+.report-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.report-card-grid {
+  background-color: rgba(173, 216, 230, 0.25);
+  border-radius: 10px;
+  padding: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.report-card-grid:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+}
+
+.report-card-grid.high-risk {
+  border-left: 6px solid red;
+}
+
+.report-card-grid.reviewed {
+  border-left: 6px solid green;
+}
+
+.report-domain {
+  color: #00a86b;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 0.6rem;
+  word-break: break-word;
+}
+
+.report-date {
+  color: #fff;
+  display: flex;
+  align-items: center;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.report-risk {
+  color: orange;
+  display: flex;
+  align-items: center;
+  font-size: 0.95rem;
+  margin-bottom: 0.8rem;
+}
+
+.report-verdict {
+  color: #fff;
+  font-size: 0.95rem;
+  margin-bottom: 0.8rem;
+}
+
+.report-card-grid .view-button {
+  background-color: #10b981;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.report-card-grid .view-button:hover {
+  background-color: #059669;
+}

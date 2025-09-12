@@ -1,16 +1,22 @@
-.PHONY: backend run-backend frontend run-frontend bot run-bot stop restart clean dev-init all
+.PHONY: all api run-api test-api frontend run-frontend bot venv-bot run-bot test-bot dev-init clean stop-all run-all restart-all test-all status
 
 # === Directory Variables ===
-BACKEND_DIR=backend
+API_DIR=api
 FRONTEND_DIR=frontend
 BOT_DIR=bot
+PYTHON=bot/venv/Scripts/python.exe
+PIP=$(PYTHON) -m pip
 
-# === Backend ===
-backend:
-	cd $(BACKEND_DIR) && npm install
 
-run-backend:
-	cd $(BACKEND_DIR) && npm start
+# === API (NestJS Backend) ===
+api:
+	cd $(API_DIR) && npm install
+
+run-api:
+	cd $(API_DIR) && npm run start:dev
+
+test-api:
+	cd $(API_DIR) && npm run test
 
 # === Frontend ===
 frontend:
@@ -19,50 +25,32 @@ frontend:
 run-frontend:
 	cd $(FRONTEND_DIR) && npm run dev
 
-# === Bot ===
-bot:
-	cd $(BOT_DIR) && npm install
+# === Bot (Python) ===
+venv-bot:
+	cd $(BOT_DIR) && py -m venv venv && \
+	venv/Scripts/python.exe -m pip install -r requirements.txt
 
 run-bot:
-	cd $(BOT_DIR) && npm start
+	cd $(BOT_DIR) && py src/bot.py
+
+test-bot:
+
 
 # === First-Time Setup ===
 dev-init:
-	@echo "Installing backend dependencies..."
-	cd $(BACKEND_DIR) && npm install
+	@echo "Installing API dependencies..."
+	cd $(API_DIR) && npm install
 	@echo "Installing frontend dependencies..."
 	cd $(FRONTEND_DIR) && npm install
-	@echo "Installing bot dependencies..."
-	cd $(BOT_DIR) && npm install
-	@echo "All dependencies installed!"
+	@echo "Setting up Python bot virtual environment..."
+	cd $(BOT_DIR) && python -m venv venv && \
+	. venv/bin/activate && pip install -r requirements.txt
+	@echo "All dependencies installed."
 
-# === Restart Message (Manual Start) ===
-restart:
-	@$(MAKE) stop
-	@echo "System stopped."
-	@echo "Now run in separate terminals:"
-	@echo " make run-backend"
-	@echo " make run-frontend"
-	@echo " make run-bot"
-
-# === Remove all node_modules ===
+# === Clean ===
 clean:
-	@echo "Removing all node_modules folders..."
-	rm -rf $(BACKEND_DIR)/node_modules \
-	       $(FRONTEND_DIR)/node_modules \
-	       $(BOT_DIR)/node_modules
-	@echo "You will need to run 'make dev-init' again."
+	@echo "Removing node_modules folders..."
+	rm -rf $(API_DIR)/node_modules \
+	       $(FRONTEND_DIR)/node_modules
+	@echo "To clean bot venv, manually delete bot/venv/ if needed."
 
-# === Help ===
-all:
-	@echo "Available make commands:"
-	@echo " Setup:"
-	@echo "   make dev-init      # Install all dependencies"
-	@echo " Run:"
-	@echo "   make run-backend   # Start Express backend"
-	@echo "   make run-frontend  # Start Vite React frontend"
-	@echo "   make run-bot       # Run Puppeteer bot"
-	@echo " Maintenance:"
-	@echo "   make stop          # Stop all running node processes"
-	@echo "   make restart       # Stop all and show next steps"
-	@echo "   make clean         # Delete all node_modules"

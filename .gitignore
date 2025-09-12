@@ -6,3 +6,22 @@ logs/
 .cache/
 dist/
 coverage/
+venv/
+
+# Ignore Python bytecode
+__pycache__/
+*.py[cod]
+
+# (Optional) Ignore test cache
+.pytest_cache/
+
+.coverage
+
+screenshots/
+uploads/
+
+# Ignore Traefik Let's Encrypt storage
+letsencrypt/acme.json
+
+
+

@@ -1,0 +1,24 @@
+.back-button {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  background: transparent;
+  color: #ffffff;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  z-index: 1200;
+  padding: 0;
+}
+
+.back-button:hover {
+  color: #7dd3fc; 
+}
+
+@media (max-width: 768px) {
+  .back-button {
+    top: 60px; 
+    left: 0.5rem;
+    font-size: 1.4rem;
+  }
+}
