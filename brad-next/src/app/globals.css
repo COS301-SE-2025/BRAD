@@ -4,8 +4,8 @@
 
 /* your design tokens */
 :root {
-  --bg: #ffffff;
-  --card: #f8fafc;
+  --bg: #ffffff; 
+  --card: #a0cdfa55; /* light blue with ~50% opacity */
   --text: #0b1220;
   --muted: #6b7280;
   --primary: #1b82ff;
@@ -13,7 +13,7 @@
 
 .dark {
   --bg: #071025;
-  --card: #0b1a2b;
+  --card: #0b1a2bcc; /* dark blue with ~80% opacity */
   --text: #e6eef9;
   --muted: #9aa6c0;
   --primary: #4aa6ff;
