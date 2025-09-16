@@ -1,0 +1,44 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* your design tokens */
+:root {
+  --bg: #ffffff;
+  --card: #f8fafc;
+  --text: #0b1220;
+  --muted: #6b7280;
+  --primary: #1b82ff;
+}
+
+.dark {
+  --bg: #071025;
+  --card: #0b1a2b;
+  --text: #e6eef9;
+  --muted: #9aa6c0;
+  --primary: #4aa6ff;
+}
+
+/* small helpers used in components */
+.card {
+  background-color: var(--card);
+  border-radius: 0.75rem;
+  box-shadow: 0 6px 20px rgba(2,6,23,0.06);
+}
+.input {
+  @apply block w-full rounded-md border border-slate-200 px-3 py-2 text-sm placeholder:opacity-60;
+  background-color: transparent;
+  color: inherit;
+}
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  @apply px-4 py-2 rounded-md font-medium;
+}
+.container {
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
