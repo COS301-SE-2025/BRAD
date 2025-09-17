@@ -18,7 +18,7 @@ export default function Sidebar({ onToggle }) {
     { icon: <Clock size={20} />, label: "In Progress", href: "/investigator/in-progress" },
     { icon: <CheckCircle size={20} />, label: "Resolved", href: "/investigator/resolved" },
     { icon: <HelpCircle size={20} />, label: "Help", href: "/help" },
-    { icon: <Settings size={20} />, label: "Settings", href: "/settings" },
+    { icon: <Settings size={20} />, label: "Settings", href: "/user-settings" },
     { icon: <LogOut size={20} />, label: "Log out", href: "/login" },
   ]
 
