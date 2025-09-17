@@ -2,12 +2,12 @@
 import { useState, useEffect } from "react"
 import { Home, ClipboardList, Clock, CheckCircle, HelpCircle, Settings, LogOut } from "lucide-react"
 import Link from "next/link"
-import Image from "next/image"
-import Logo from "@/components/Logo"
+import Logo from "./Logo"
 
 export default function Sidebar({ onToggle }) {
   const [expanded, setExpanded] = useState(false)
 
+  // Notify parent of expanded state
   useEffect(() => {
     if (onToggle) onToggle(expanded)
   }, [expanded, onToggle])
@@ -30,10 +30,7 @@ export default function Sidebar({ onToggle }) {
         expanded ? "w-56" : "w-16"
       }`}
     >
-      {/* Logo */}
       <Logo expanded={expanded} size={32} />
-
-      {/* Menu */}
       <nav className="flex-1 mt-6">
         {menuItems.map((item, idx) => (
           <Link key={idx} href={item.href}>

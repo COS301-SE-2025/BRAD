@@ -12,7 +12,7 @@ export default function ReportsTreemap({ data }) {
           data={data}
           dataKey="value"
           nameKey="name"
-          stroke="#fff"
+          stroke="#000000ff"
           fill="#8884d8"
           content={({ x, y, width, height, name, value, index }) => {
             if (width <= 0 || height <= 0) return null
