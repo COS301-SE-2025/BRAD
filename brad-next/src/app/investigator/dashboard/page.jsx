@@ -41,7 +41,12 @@ export default function InvestigatorDashboard() {
         }`}
       >
         {/* Sticky greeting header */}
-        <UserGreeting username="InvestigatorX" />
+        <UserGreeting
+          username="InvestigatorX"
+          title="Welcome back"
+          subtitle="Here are the latest insights on your reports."
+        />
+
 
         {/* Dashboard Content */}
         <div className="p-8">
