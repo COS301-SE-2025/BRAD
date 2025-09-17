@@ -17,6 +17,7 @@ export default function UserSettingsPage() {
   const [message, setMessage] = useState("")
   const [showPasswordModal, setShowPasswordModal] = useState(false)
   const [currentPassword, setCurrentPassword] = useState("")
+  const [sidebarExpanded, setSidebarExpanded] = useState(false)
 
   useEffect(() => {
     document.title = "B.R.A.D | User Settings"
@@ -57,10 +58,14 @@ export default function UserSettingsPage() {
   return (
     <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
       {/* Sidebar */}
-      <Sidebar />
+      <Sidebar onToggle={setSidebarExpanded} />
 
-      {/* Main content */}
-      <div className="flex-1 p-8">
+      {/* Main content shifts based on sidebar state */}
+      <div
+        className={`flex-1 p-8 transition-all duration-300 ${
+          sidebarExpanded ? "ml-56" : "ml-16"
+        }`}
+      >
         {/* Top bar with theme toggle */}
         <div className="flex justify-end mb-6">
           <ThemeToggle />
@@ -79,7 +84,9 @@ export default function UserSettingsPage() {
               <FaUserCircle className="w-16 h-16 text-brad-500" />
             )}
             <div>
-              <h3 className="text-xl font-semibold">{storedUser.username || "Unknown User"}</h3>
+              <h3 className="text-xl font-semibold">
+                {storedUser.username || "Unknown User"}
+              </h3>
               <p>
                 <strong>Name:</strong>{" "}
                 {storedUser.firstname || "N/A"} {storedUser.lastname || ""}
