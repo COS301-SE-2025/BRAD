@@ -5,13 +5,12 @@ import { usePathname } from "next/navigation"
 import {
   Home,
   ClipboardList,
-  Clock,
-  CheckCircle,
   FilePlus2,
   HelpCircle,
   Settings,
   LogOut,
   Users,
+  ListChecks,
 } from "lucide-react"
 import Link from "next/link"
 import Logo from "./Logo"
@@ -42,20 +41,20 @@ export default function Sidebar({ onToggle }) {
     investigator: [
       { icon: <Home size={20} />, label: "Dashboard", href: "/investigator/dashboard" },
       { icon: <ClipboardList size={20} />, label: "Pending Reports", href: "/investigator/pending" },
-      { icon: <Clock size={20} />, label: "In Progress", href: "/investigator/in-progress" },
-      { icon: <CheckCircle size={20} />, label: "Resolved", href: "/investigator/resolved" },
+      { icon: <ClipboardList size={20} />, label: "In Progress", href: "/investigator/in-progress" },
+      { icon: <ClipboardList size={20} />, label: "Resolved", href: "/investigator/resolved" },
       { icon: <HelpCircle size={20} />, label: "Help", href: "/investigator/help" },
-
     ],
     reporter: [
       { icon: <Home size={20} />, label: "Dashboard", href: "/reporter/dashboard" },
       { icon: <FilePlus2 size={20} />, label: "Report", href: "/reporter/report" },
       { icon: <HelpCircle size={20} />, label: "Help", href: "/reporter/help" },
-
     ],
     admin: [
       { icon: <Home size={20} />, label: "Dashboard", href: "/admin/dashboard" },
       { icon: <Users size={20} />, label: "Manage Users", href: "/admin/users" },
+      { icon: <ListChecks size={20} />, label: "View Reports", href: "/admin/reports" },
+      { icon: <HelpCircle size={20} />, label: "Help", href: "/admin/help" },
     ],
   }
 

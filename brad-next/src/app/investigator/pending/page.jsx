@@ -31,7 +31,7 @@ export default function PendingReportsPage() {
     { domain: "spamgenerator.net", date: "2025-09-20", risk: 54, status: "pending" },
   ]
   return (
-    <div className="flex">
+    <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
       <Sidebar onToggle={setSidebarExpanded} />
       <main
         className={`flex-1 bg-[var(--bg)] text-[var(--text)] transition-all duration-300 min-h-screen ${

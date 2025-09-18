@@ -6,6 +6,8 @@
 :root {
   --bg: #ffffff; 
   --card: #a0cdfa55; /* light blue with ~50% opacity */
+  --card-nested: #ffffff97;;  /* lighter background for nested cards */
+  --input-bg: #f5faff; /* very light blue, almost white */
   --text: #0b1220;
   --muted: #6b7280;
   --primary: #1b82ff;
@@ -20,7 +22,9 @@
 .dark {
   --bg: #262f43;
   --card: #0b1a2bcc; /* dark blue with ~80% opacity */
+  --card-nested: #262f43;; /* darker shade for nested cards */
   --text: #e6eef9;
+  --input-bg: #1e2a44; /* slightly lighter than dark background */
   --muted: #9aa6c0;
   --primary: #4aa6ff;
 
@@ -31,25 +35,71 @@
   --faq-brad-text: #ffffff;
 }
 
-/* small helpers used in components */
+/* ===== COMPONENT HELPERS ===== */
 .card {
   background-color: var(--card);
   border-radius: 0.75rem;
   box-shadow: 0 6px 20px rgba(2,6,23,0.06);
+  padding: 1rem;
 }
 
+/* nested card variant */
+.card .card {
+  background-color: var(--card-nested);
+}
+
+/* inputs */
 .input {
-  @apply block w-full rounded-md border border-slate-200 px-3 py-2 text-sm placeholder:opacity-60;
-  background-color: transparent;
+  @apply block w-full rounded-md px-3 py-2 text-sm placeholder:opacity-60;
+  background-color: var(--input-bg);
   color: var(--text);
+  border: 1px solid var(--muted);
 }
 
+/* focus state for inputs */
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(27, 130, 255, 0.3); /* subtle primary glow */
+}
+
+/* dropdowns stay the same but explicitly reuse same classes */
+select.input {
+  @apply block w-full rounded-md px-3 py-2 text-sm;
+  background-color: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--muted);
+  appearance: none;
+  padding-right: 2rem; /* space for dropdown arrow */
+}
+
+select.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(27, 130, 255, 0.3);
+}
+
+/* buttons */
 .btn-primary {
   background-color: var(--primary);
   color: white;
   @apply px-4 py-2 rounded-md font-medium;
 }
 
+.btn-sm {
+  @apply px-3 py-1 rounded-md text-sm font-medium;
+  background-color: var(--primary);
+  color: white;
+}
+
+/* danger (remove) button with red trash icon support */
+.btn-danger {
+  background-color: #ef4444;
+  color: white;
+  @apply px-3 py-1 rounded-md flex items-center gap-2;
+}
+
+/* container */
 .container {
   max-width: 1100px;
   margin-left: auto;
@@ -89,6 +139,7 @@
   color: var(--text);
 }
 
+/* contact section */
 .contact-section {
   margin-top: 1rem;
   display: flex;

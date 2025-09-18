@@ -30,7 +30,7 @@ export default function InvestigatorDashboard() {
   ]
 
   return (
-    <div className="flex">
+    <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
       {/* Sidebar stays fixed on the left */}
       <Sidebar onToggle={setSidebarExpanded} />
 
