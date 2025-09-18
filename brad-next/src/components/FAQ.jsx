@@ -99,7 +99,9 @@ const AdminQuestions = [
 
 export default function FAQ({ searchTerm = "", role = "reporter" }) {
   let questions = ReporterQuestions
-  // Future roles can be added (investigator/admin)
+  if (role === "investigator") questions = InvestigatorQuestions
+  if (role === "admin") questions = AdminQuestions
+
   const filtered = questions.filter((q) =>
     q.question.toLowerCase().includes(searchTerm.toLowerCase())
   )

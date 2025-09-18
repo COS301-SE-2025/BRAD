@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import ReporterSidebar from "@/components/ReporterSidebar"
+import Sidebar from "@/components/Sidebar"
 import UserGreeting from "@/components/UserGreeting"
 import ReportFileCard from "@/components/ReportFileCard"
 import ReportProgressBar from "@/components/ReportProgressBar"
@@ -27,7 +27,7 @@ export default function ReporterDashboard() {
     { id: 12, domain: "virusdownload.com", date: "2025-09-12", risk: 91, status: "resolved", verdict: "malicious" },
   ])
 
-  // sidebar expanded state (ReporterSidebar will notify via onToggle)
+  // sidebar expanded state (Sidebar will notify via onToggle)
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
 
   // status filter (internal values are lower-case to match report.status)
@@ -41,7 +41,6 @@ export default function ReporterDashboard() {
     document.title = "B.R.A.D | Reporter Dashboard"
   }, [])
 
-  // map the internal status (lowercase) to the display status expected by ReportProgressBar
   const mapStatusForProgress = (status) => {
     if (!status) return "Pending"
     switch (status) {
@@ -56,16 +55,11 @@ export default function ReporterDashboard() {
     }
   }
 
-  // prepare data for treemap: group counts per status for this user's reports
   const treemapData = useMemo(() => {
-    const counts = reports.reduce(
-      (acc, r) => {
-        acc[r.status] = (acc[r.status] || 0) + 1
-        return acc
-      },
-      {}
-    )
-    // Convert to array shape expected by your ReportsTreemap component (assumes [{ name, value }])
+    const counts = reports.reduce((acc, r) => {
+      acc[r.status] = (acc[r.status] || 0) + 1
+      return acc
+    }, {})
     return Object.keys(counts).map((status) => ({
       name: status,
       value: counts[status],
@@ -74,26 +68,21 @@ export default function ReporterDashboard() {
 
   return (
     <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
-      {/* Sidebar (reports parent reacts to expanded via onToggle) */}
-      <ReporterSidebar onToggle={setSidebarExpanded} />
+      {/* Sidebar */}
+      <Sidebar onToggle={setSidebarExpanded} />
 
-      {/* Main content - shift right depending on sidebar state */}
-      <div
-        className={`flex-1 transition-all duration-300 p-8 ${
-          sidebarExpanded ? "ml-56" : "ml-16"
-        }`}
-      >
-        {/* Sticky user greeting (your component already applies sticky) */}
+      {/* Main content */}
+      <div className={`flex-1 transition-all duration-300 p-8 ${sidebarExpanded ? "ml-56" : "ml-16"}`}>
+        {/* Greeting */}
         <UserGreeting
           username={storedUser.username}
           title="Welcome back"
           subtitle="Here you can view your report history"
         />
 
-        {/* Top controls: section title + filter */}
+        {/* Controls */}
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mt-6 mb-4">
           <h2 className="text-xl font-semibold">Your Reports</h2>
-
           <div className="flex items-center gap-3">
             <label className="text-sm text-[var(--muted)]">Filter:</label>
             <select
@@ -109,22 +98,19 @@ export default function ReporterDashboard() {
           </div>
         </div>
 
-        {/* Layout: left = report list, right = treemap/summary */}
+        {/* Layout: reports left, treemap right */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left column: report history (spans 2 of 3 on large screens) */}
-          <div className="lg:col-span-2 space-y-4">
+          {/* Left: report cards */}
+          <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredReports.length > 0 ? (
               filteredReports.map((report) => (
                 <div key={report.id} className="card p-4">
-                  {/* Report card */}
                   <ReportFileCard report={report} />
-
-                  {/* Progress bar - pass display status (capitalized) */}
                   <ReportProgressBar status={mapStatusForProgress(report.status)} />
                 </div>
               ))
             ) : (
-              <div className="text-center mt-10">
+              <div className="text-center mt-10 col-span-full">
                 <p className="text-lg">You have no reports yet.</p>
                 <a href="/reporter/report" className="btn-primary mt-4 inline-block">
                   Report Your First Domain
@@ -133,30 +119,20 @@ export default function ReporterDashboard() {
             )}
           </div>
 
-          {/* Right column: treemap and quick stats */}
+          {/* Right: treemap & summary */}
           <aside className="lg:col-span-1 space-y-4">
             <div className="card p-4">
               <h3 className="text-lg font-semibold mb-3">Report Status Overview</h3>
-              {/* Pass only this user's reports (treemapData computed above) */}
               <ReportsTreemap data={treemapData} />
             </div>
 
-            {/* Quick stats summary (counts & average risk) */}
             <div className="card p-4">
               <h4 className="font-medium mb-2">Summary</h4>
               <div className="text-sm text-[var(--muted)] space-y-2">
-                <div>
-                  <strong>Total:</strong> {reports.length}
-                </div>
-                <div>
-                  <strong>Pending:</strong> {reports.filter((r) => r.status === "pending").length}
-                </div>
-                <div>
-                  <strong>In Progress:</strong> {reports.filter((r) => r.status === "in-progress").length}
-                </div>
-                <div>
-                  <strong>Resolved:</strong> {reports.filter((r) => r.status === "resolved").length}
-                </div>
+                <div><strong>Total:</strong> {reports.length}</div>
+                <div><strong>Pending:</strong> {reports.filter((r) => r.status === "pending").length}</div>
+                <div><strong>In Progress:</strong> {reports.filter((r) => r.status === "in-progress").length}</div>
+                <div><strong>Resolved:</strong> {reports.filter((r) => r.status === "resolved").length}</div>
                 <div>
                   <strong>Average risk:</strong>{" "}
                   {reports.length > 0

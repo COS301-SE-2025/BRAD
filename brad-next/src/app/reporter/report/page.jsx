@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import ReporterSidebar from "@/components/ReporterSidebar"
+import Sidebar from "@/components/Sidebar"
 import UserGreeting from "@/components/UserGreeting"
 import ReportForm from "@/components/ReportForm"
 import ReportStepsCarousel from "@/components/ReportStepsCarousel"
@@ -20,7 +20,7 @@ export default function ReportPage() {
   return (
     <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
       {/* Sidebar - will notify parent via onToggle when hovered */}
-      <ReporterSidebar onToggle={setSidebarExpanded} />
+      <Sidebar onToggle={setSidebarExpanded} />
 
       {/* Main content - shifts right depending on sidebar state */}
       <div
