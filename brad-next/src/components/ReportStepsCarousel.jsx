@@ -6,20 +6,22 @@ const steps = [
   {
     title: "Submit URL & Evidence",
     description: "Enter the suspicious URL and optionally upload evidence files.",
+    image: "/file-upload.png",
   },
   {
     title: "Bot Analysis",
     description: "Our bot analyzes the URL and scrapes for malware or threats.",
+    image: "/analysing.png",
   },
   {
     title: "Investigator Review",
-    description:
-      "Investigators review the bot’s findings and your evidence to make a verdict.",
+    description: "Investigators review the bot’s findings and your evidence to make a verdict.",
+    image: '/magnifying-glass.png'
   },
   {
     title: "Report Resolved",
-    description:
-      "You will receive the final verdict and can view the resolved report.",
+    description: "You will receive the final verdict and can view the resolved report.",
+    image: '/file.svg',
   },
 ]
 
@@ -41,6 +43,11 @@ export default function ReportStepsCarousel() {
         transition={{ duration: 0.4 }}
         className="text-center"
       >
+        <img
+          src={steps[current].image}
+          alt={steps[current].title}
+          className="mx-auto mb-4 h-20 w-20"
+        />
         <h3 className="text-xl font-bold text-gray-900 dark:text-gray-100">
           {steps[current].title}
         </h3>
