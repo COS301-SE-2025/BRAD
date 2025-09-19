@@ -11,6 +11,7 @@
   --text: #0b1220;
   --muted: #6b7280;
   --primary: #1b82ff;
+  --landing-bg: linear-gradient(to bottom right, #ffffff, #dceeff, #90e0ef); /* light mode gradient */
 
   /* FAQ colors */
   --faq-user-bg: rgba(173, 216, 230, 0.25);
@@ -27,12 +28,19 @@
   --input-bg: #1e2a44; /* slightly lighter than dark background */
   --muted: #9aa6c0;
   --primary: #4aa6ff;
+  --landing-bg: linear-gradient(to bottom right, #000814, #001f3f, #0077b6); /* dark mode gradient */
+
 
   /* FAQ colors */
   --faq-user-bg: rgba(70, 130, 180, 0.35); /* slightly darker user bubble */
   --faq-user-text: #e6eef9;
   --faq-brad-bg: rgba(20, 30, 50, 0.6); /* darker BRAD bubble */
   --faq-brad-text: #ffffff;
+}
+
+/* Utility for landing background */
+.landing-bg {
+  background: var(--landing-bg);
 }
 
 /* ===== COMPONENT HELPERS ===== */

@@ -10,7 +10,7 @@ import { Timer, Search, Globe, FileText } from "lucide-react";
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen bg-[var(--bg)] text-[var(--text)]">
+    <div className="flex flex-col min-h-screen landing-bg text-[var(--text)]">
       {/* Navbar */}
       <nav className="sticky top-0 z-50 flex items-center justify-between px-8 py-4 bg-white dark:bg-gray-900 shadow-md">
         <div className="flex items-center gap-3">
@@ -32,7 +32,7 @@ export default function LandingPage() {
       </nav>
 
       {/* Hero Section */}
-      <section className="flex flex-col md:flex-row items-center justify-between px-12 py-16 bg-gray-50 dark:bg-gray-900">
+      <section className="flex flex-col md:flex-row items-center justify-between px-12 py-16">
         <div className="md:w-1/2">
           <h1 className="text-3xl md:text-5xl font-bold mb-4">
             Welcome to B.R.A.D.
@@ -83,7 +83,7 @@ export default function LandingPage() {
       </section>
 
       {/* About BRAD */}
-      <section className="px-12 py-16 bg-gray-50 dark:bg-gray-800 text-center">
+      <section className="px-12 py-16 text-center">
         <h2 className="text-2xl font-bold mb-4">About B.R.A.D.</h2>
         <p className="max-w-3xl mx-auto text-gray-700 dark:text-gray-300">
           <strong>B.R.A.D.</strong> (Bot to Report Abusive Domains) is a tool
