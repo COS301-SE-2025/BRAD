@@ -114,79 +114,46 @@ def report_analysis(
         return False
 
 
-@dramatiq.actor(max_retries=MAX_RETRIES, time_limit=120000)  # 120s hard cap per job
+@dramatiq.actor(max_retries=3, time_limit=120000)
 def process_report(job):
-    """Expected job: { 'report_id': '...', 'domain': 'https://example.com', optional crawl knobs }"""
+    """Dispatches each report job into its own sandboxed bot-runner container."""
     report_id = job.get("report_id")
     domain = job.get("domain")
     if not report_id or not domain:
         logger.warning(f"Skipping invalid job payload: {job}")
         return
 
-    if not isinstance(domain, str):
-        logger.warning(f"Invalid domain type for job {report_id}: {type(domain)}")
-        return
-
     token = report_id_ctx.set(report_id)
-    t0 = time.perf_counter()
-    logger.debug(f"Received job payload: {job}")
-    logger.info(f"[BOT] Starting analysis for {domain} (Report ID: {report_id})")
+    logger.info(f"[DISPATCHER] Spawning sandbox for {domain} (Report ID: {report_id})")
 
     try:
-        domain = sanitize_domain(domain)
+        client = docker.from_env()
 
-        # 1) Forensics
-        logger.debug("Running forensic data collection...")
-        forensic = ForensicReport(domain)
-        forensic.run()  # sets risk_level, risk_score, etc.
-        logger.debug("Forensic data collection complete.")
-
-        # 2) Recursive scraping
-        logger.debug("Performing scraping and abuse flag extraction...")
-        # Clamp knobs to sane bounds to avoid runaway jobs
-        max_pages = int(job.get("max_pages", 12) or 12)
-        max_pages = max(1, min(100, max_pages))
-        max_depth = int(job.get("max_depth", 2) or 2)
-        max_depth = max(0, min(5, max_depth))
-        delay_seconds = float(job.get("delay_seconds", 1.5) or 1.5)
-        delay_seconds = max(0.0, min(5.0, delay_seconds))
-
-        scraping_info, abuse_flags = perform_scraping(
-            domain,
-            report_id,
-            max_pages=max_pages,
-            max_depth=max_depth,
-            delay_seconds=delay_seconds,
-            obey_robots=job.get("obey_robots", True),
-            user_agent=job.get("user_agent", None)
-            or "BRADBot/1.0 (+https://example.invalid/bot) Playwright",
+        container = client.containers.run(
+            "brad-bot-runner:latest",
+            environment={
+                "TARGET_URL": domain,
+                "REPORT_ID": report_id,
+                "API_URL": os.getenv("API_URL"),
+                "BOT_ACCESS_KEY": os.getenv("BOT_ACCESS_KEY"),
+            },
+            network="brad_network",
+            volumes={
+                os.path.abspath("./screenshots"): {
+                    "bind": "/app/screenshots",
+                    "mode": "rw",
+                },
+                os.path.abspath("./logs/bot"): {"bind": "/app/logs", "mode": "rw"},
+            },
+            detach=True,
+            remove=True,
         )
-        logger.debug("Scraping and abuse flag extraction complete.")
 
-        # 3) Send to API
-        if report_analysis(report_id, forensic, scraping_info, abuse_flags):
-            elapsed_ms = int((time.perf_counter() - t0) * 1000)
-            site_summary = (scraping_info or {}).get("summary", {})
-            site_risk_score = site_summary.get("siteRiskScore")
-            site_risk_level = site_summary.get("siteRiskLevel")
-            if site_risk_score is not None:
-                logger.info(
-                    f"[BOT] Report {report_id} analyzed "
-                    f"(forensic={forensic.risk_level}/{forensic.risk_score}, "
-                    f"site={site_risk_level}/{site_risk_score}, "
-                    f"{elapsed_ms}ms)"
-                )
-            else:
-                logger.info(
-                    f"[BOT] Report {report_id} analyzed (risk={forensic.risk_level}, score={forensic.risk_score}, {elapsed_ms}ms)"
-                )
-        else:
-            logger.warning(
-                f"[BOT] Report {report_id} analysis completed but failed to update API."
-            )
+        logger.info(f"[DISPATCHER] Sandbox {container.id[:12]} started for {domain}")
     except Exception as e:
-        logger.error(f"[BOT] Analysis failed for {domain}: {e}", exc_info=True)
+        logger.error(
+            f"[DISPATCHER] Failed to spawn sandbox for {domain}: {e}", exc_info=True
+        )
         raise
     finally:
         report_id_ctx.reset(token)
-        logger.debug(f"[BOT] Finished processing report {report_id}.")

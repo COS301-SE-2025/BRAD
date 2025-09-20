@@ -34,6 +34,7 @@ services:
       - ./bot:/app
       - ./screenshots:/app/screenshots
       - ./logs/bot:/app/logs
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - redis
       - api
@@ -43,6 +44,7 @@ services:
       - LOG_DIR=/app/logs
       - LOG_FILE_MAX_BYTES=5242880
       - LOG_BACKUP_COUNT=5
+      - DOCKER_HOST=unix://var/run/docker.sock
     env_file:
       - .env
     networks:
