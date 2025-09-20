@@ -8,8 +8,8 @@ from urllib3.util.retry import Retry
 import dramatiq
 from dramatiq.brokers.redis import RedisBroker
 
-# from src.forensics.report import ForensicReport
-# from src.scraper.analysis import perform_scraping
+from src.forensics.report import ForensicReport
+from src.scraper.analysis import perform_scraping
 import docker
 from src.utils.logger import get_logger, report_id_ctx
 from src.utils.job_logging_middleware import JobLoggingMiddleware

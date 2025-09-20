@@ -52,7 +52,8 @@ services:
   bot-runner:
     build: ./bot-runner
     image: brad-bot-runner:latest
-    networks: -brad_net
+    networks:
+      - brad_net
 
   fastapi-queue:
     build: ./fastapi-queue
