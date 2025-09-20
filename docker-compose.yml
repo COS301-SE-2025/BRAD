@@ -48,6 +48,12 @@ services:
     networks:
       - brad_net
 
+  # No container_name or volume: This will only be ran dynamically and not with docker compose
+  bot-runner:
+    build: ./bot-runner
+    image: brad-bot-runner:latest
+    networks: -brad_net
+
   fastapi-queue:
     build: ./fastapi-queue
     container_name: brad-fastapi

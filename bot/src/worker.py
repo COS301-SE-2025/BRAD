@@ -8,8 +8,9 @@ from urllib3.util.retry import Retry
 import dramatiq
 from dramatiq.brokers.redis import RedisBroker
 
-from src.forensics.report import ForensicReport
-from src.scraper.analysis import perform_scraping
+# from src.forensics.report import ForensicReport
+# from src.scraper.analysis import perform_scraping
+import docker
 from src.utils.logger import get_logger, report_id_ctx
 from src.utils.job_logging_middleware import JobLoggingMiddleware
 
@@ -39,7 +40,7 @@ session = requests.Session()
 session.headers.update(headers)
 retry = Retry(
     total=5,
-    backoff_factor=0.6,             # 0.6, 1.2, 2.4, ...
+    backoff_factor=0.6,  # 0.6, 1.2, 2.4, ...
     status_forcelist=[429, 500, 502, 503, 504],
     allowed_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
     raise_on_status=False,
@@ -55,6 +56,7 @@ redis_broker.add_middleware(JobLoggingMiddleware())
 dramatiq.set_broker(redis_broker)
 logger.info("Redis broker set successfully.")
 
+
 def sanitize_domain(domain: str) -> str:
     """Trim zero-width chars, ensure http(s) scheme, and lowercase host."""
     d = (domain or "").strip().replace("\u200b", "").replace("\u2060", "")
@@ -68,16 +70,24 @@ def sanitize_domain(domain: str) -> str:
     netloc = (parsed.netloc or "").lower()
     return parsed._replace(netloc=netloc).geturl()
 
+
 def serialize(obj):
     if isinstance(obj, dict):
-        return {k: serialize(v) for k, v in obj.items() if v is not None and v != "" and v != [] and v != {}}
+        return {
+            k: serialize(v)
+            for k, v in obj.items()
+            if v is not None and v != "" and v != [] and v != {}
+        }
     if isinstance(obj, list):
         return [serialize(i) for i in obj if i is not None and i != "" and i != []]
     if isinstance(obj, datetime):
         return obj.isoformat()
     return obj
 
-def report_analysis(report_id, report_obj: ForensicReport, scraping_info, abuse_flags) -> bool:
+
+def report_analysis(
+    report_id, report_obj: ForensicReport, scraping_info, abuse_flags
+) -> bool:
     url = f"{API_BASE}/reports/{report_id}/analysis"
     data = {
         "analysis": serialize(report_obj.to_dict()),
@@ -94,11 +104,15 @@ def report_analysis(report_id, report_obj: ForensicReport, scraping_info, abuse_
     except Exception as e:
         body = ""
         try:
-            body = resp.text[:500] if 'resp' in locals() and resp is not None else ""
+            body = resp.text[:500] if "resp" in locals() and resp is not None else ""
         except Exception:
             pass
-        logger.error(f"Failed to PATCH analysis for {report_id}: {e} {(' | body='+body) if body else ''}", exc_info=True)
+        logger.error(
+            f"Failed to PATCH analysis for {report_id}: {e} {(' | body='+body) if body else ''}",
+            exc_info=True,
+        )
         return False
+
 
 @dramatiq.actor(max_retries=MAX_RETRIES, time_limit=120000)  # 120s hard cap per job
 def process_report(job):
@@ -108,7 +122,7 @@ def process_report(job):
     if not report_id or not domain:
         logger.warning(f"Skipping invalid job payload: {job}")
         return
-    
+
     if not isinstance(domain, str):
         logger.warning(f"Invalid domain type for job {report_id}: {type(domain)}")
         return
@@ -144,7 +158,8 @@ def process_report(job):
             max_depth=max_depth,
             delay_seconds=delay_seconds,
             obey_robots=job.get("obey_robots", True),
-            user_agent=job.get("user_agent", None) or "BRADBot/1.0 (+https://example.invalid/bot) Playwright",
+            user_agent=job.get("user_agent", None)
+            or "BRADBot/1.0 (+https://example.invalid/bot) Playwright",
         )
         logger.debug("Scraping and abuse flag extraction complete.")
 
@@ -162,9 +177,13 @@ def process_report(job):
                     f"{elapsed_ms}ms)"
                 )
             else:
-                logger.info(f"[BOT] Report {report_id} analyzed (risk={forensic.risk_level}, score={forensic.risk_score}, {elapsed_ms}ms)")
+                logger.info(
+                    f"[BOT] Report {report_id} analyzed (risk={forensic.risk_level}, score={forensic.risk_score}, {elapsed_ms}ms)"
+                )
         else:
-            logger.warning(f"[BOT] Report {report_id} analysis completed but failed to update API.")
+            logger.warning(
+                f"[BOT] Report {report_id} analysis completed but failed to update API."
+            )
     except Exception as e:
         logger.error(f"[BOT] Analysis failed for {domain}: {e}", exc_info=True)
         raise
