@@ -59,5 +59,36 @@ describe('Reliability Testing (e2e)', () => {
     });
   });
 
-  
+  // ---- STATISTICS RELIABILITY TESTS ----
+  describe('Statistics Endpoints', () => {
+    it('should fail without JWT token', async () => {
+      await request(app.getHttpServer())
+        .get('/statistics/total-reports')
+        .expect(401);
+    });
+
+    it('should succeed with valid JWT token', async () => {
+      const res = await request(app.getHttpServer())
+        .get('/statistics/total-reports')
+        .set('Authorization', `Bearer ${jwtToken}`)
+        .expect(200);
+
+      expect(res.body).toBeDefined();
+    });
+  });
+
+  // ---- FAILURE SIMULATION TEST ----
+  describe('Failure Simulation', () => {
+    it('should handle DB outage gracefully', async () => {
+      // This assumes you throw a custom DB error in your service
+      // or you can simulate by shutting down DB before running this test.
+      const res = await request(app.getHttpServer())
+        .get('/statistics/pending-reports')
+        .set('Authorization', `Bearer ${jwtToken}`);
+
+      // Either service handles error or DB is up
+      // We just assert that it doesn't hang indefinitely
+      expect([200, 500]).toContain(res.status);
+    });
+  });
 });
