@@ -1,6 +1,7 @@
-"use client"
-import { FaCalendarAlt, FaUser, FaShieldAlt } from "react-icons/fa"
-import { MdDangerous, MdCheckCircle } from "react-icons/md"
+"use client";
+
+import { FaCalendarAlt, FaUser, FaShieldAlt } from "react-icons/fa";
+import { MdDangerous, MdCheckCircle } from "react-icons/md";
 
 export default function ReportFileCard({ report }) {
   return (
@@ -13,45 +14,49 @@ export default function ReportFileCard({ report }) {
       {/* Report content */}
       <div className="mt-2 space-y-3">
         {/* Domain */}
-        <h3 className="text-lg font-semibold text-[var(--text)]">
+        <h3 className="text-lg font-semibold text-[var(--text)] truncate max-w-full">
           {report.domain}
         </h3>
 
         {/* Date */}
         <div className="flex items-center text-sm text-[var(--muted)] gap-2">
-          <FaCalendarAlt className="text-brad-500" />
-          <span>{report.date}</span>
+          <FaCalendarAlt className="text-brad-500 flex-shrink-0" />
+          <span className="truncate block w-full">{new Date(report.createdAt).toLocaleString()}</span>
         </div>
 
         {/* Risk score */}
         <div className="flex items-center text-sm gap-2">
           <FaShieldAlt
-            className={report.risk > 70 ? "text-red-500" : "text-green-500"}
+            className={report.risk > 70 ? "text-red-500 flex-shrink-0" : "text-green-500 flex-shrink-0"}
           />
-          <span>
-            Risk Score: <b>{report.risk}</b>
+          <span className="truncate block w-full">
+            Risk Score: <b>{report.analysis.riskScore}</b>
           </span>
         </div>
 
         {/* Extra info based on status */}
         {report.status === "in-progress" && (
           <div className="flex items-center text-sm gap-2">
-            <FaUser className="text-brad-500" />
-            <span>Investigator: {report.investigator}</span>
+            <FaUser className="text-brad-500 flex-shrink-0" />
+            <span className="truncate block w-full">
+              Investigator: {report.investigator}
+            </span>
           </div>
         )}
 
         {report.status === "resolved" && (
           <div className="flex items-center text-sm gap-2">
-            {report.verdict === "malicious" ? (
-              <MdDangerous className="text-red-500" />
+            {report.investigatorDecision === "malicious" ? (
+              <MdDangerous className="text-red-500 flex-shrink-0" />
             ) : (
-              <MdCheckCircle className="text-green-500" />
+              <MdCheckCircle className="text-green-500 flex-shrink-0" />
             )}
-            <span>Verdict: {report.verdict}</span>
+            <span className="truncate block w-full">
+              Verdict: {report.investigatorDecision}
+            </span>
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }
