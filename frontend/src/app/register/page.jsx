@@ -1,26 +1,36 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AuthLayout from "../../components/AuthLayout";
 import Notification from "../../components/Notification";
-import * as auth from "../../lib/api/auth";
+import API from "../../lib/api/axios";
 import { useRouter } from "next/navigation";
+import BackButton from "../../components/BackButton";
 
 export default function RegisterPage() {
   const router = useRouter();
   const [form, setForm] = useState({
-    name: "",
+    firstname: "",
     lastname: "",
     email: "",
     username: "",
     password: "",
     confirmPassword: "",
+    role: "general",
   });
+
   const [loading, setLoading] = useState(false);
   const [notify, setNotify] = useState(null);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+    setError("");
+    setSuccess("");
   };
 
   const handleSubmit = async (e) => {
@@ -39,39 +49,28 @@ export default function RegisterPage() {
     }
 
     try {
-      const data = await auth.register({
-        name: form.name,
-        lastname: form.lastname,
-        email: form.email,
-        username: form.username,
-        password: form.password,
-      });
-
-      if (data?.success === false) {
-        setNotify({
-          type: "error",
-          title: "Registration failed",
-          message: data.message || "Try again",
-        });
-      } else {
-        setNotify({
-          type: "success",
-          title: "Account created",
-          message: "Redirecting to login…",
-        });
-        setTimeout(() => router.push("/login"), 1500);
-      }
+      const userData = { ...form };
+      const response = await API.post("/auth/register", userData);
+      setSuccess(response.data.message);
+      setTimeout(() => router.push("/login"), 1500); 
     } catch (err) {
-      const message =
-        err?.response?.data?.message || err.message || "Network error";
-      setNotify({ type: "error", title: "Registration error", message });
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("Registration failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    document.title = "B.R.A.D | Register";
+  }, []);
+
   return (
     <AuthLayout>
+      <BackButton />
       <div className="flex items-center justify-center py-12">
         <div className="w-full max-w-md">
           <h3 className="text-lg font-semibold mb-1 text-center">
@@ -97,8 +96,8 @@ export default function RegisterPage() {
             <div className="flex items-center gap-2">
               <label className="w-24 text-xs font-medium">First Name</label>
               <input
-                name="name"
-                value={form.name}
+                name="firstname" 
+                value={form.firstname}
                 onChange={handleChange}
                 required
                 className="flex-1 px-2 py-1 rounded-md border input"

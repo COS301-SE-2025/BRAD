@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AuthLayout from "../../components/AuthLayout";
 import Notification from "../../components/Notification";
-import * as auth from "../../lib/api/auth";
+import API from "../../lib/api/axios";
 import { useRouter } from "next/navigation";
+import BackButton from "../../components/BackButton";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -12,62 +13,98 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [notify, setNotify] = useState(null);
+  const [error, setError] = useState(null);
 
-  const handleSubmit = async (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true);
-    setNotify(null);
+
+    if (!username || !password) {
+      setError("Please enter both username and password.");
+      return;
+    }
 
     try {
-      // CALL BACKEND - do not change backend endpoint or behavior
-      const data = await auth.login({ username, password });
+      setLoading(true);
 
-      // backend might return an object like { success: true, role: 'investigator', token: '...' }
-      // we can't assume exact shape: handle common cases:
-      if (data?.success === false) {
-        setNotify({ type: "error", title: "Login failed", message: data.message || "Invalid credentials" });
+      const response = await API.post("/auth/login", {
+        identifier: username,
+        password,
+      });
+
+      const { user, token } = response.data;
+
+      if (!token) {
+        setError("No token returned from server");
+        return;
+      }
+
+      localStorage.removeItem("user");
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          _id: user._id,
+          username: user.username,
+          token: token,
+          role: user.role,
+        })
+      );
+
+      if (user.role === "investigator") {
+        router.push("/investigator/dashboard");
+      } else if (user.role === "admin") {
+        router.push("/admin/dashboard");
       } else {
-        // optionally save token if backend returns one (ONLY if your backend expects tokens in client storage)
-        if (data?.token) {
-          // If backend expects cookies, this isn't necessary. Only set token when your backend uses token auth.
-          try {
-            localStorage.setItem("token", data.token);
-          } catch (err) {
-            // ignore storage errors
-          }
-        }
-
-        setNotify({ type: "success", title: "Signed in", message: "Redirecting..." });
-
-        // redirect based on role if backend provides it
-        const role = data?.role || data?.user?.role || "reporter";
-        if (role === "admin") router.push("/admin");
-        else if (role === "investigator") router.push("/investigator");
-        else router.push("/reporter");
+        router.push("/reporter/dashboard");
       }
     } catch (err) {
-      const message = err?.response?.data?.message || err.message || "Network error";
-      setNotify({ type: "error", title: "Login error", message });
+      if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else {
+        setError("Login failed. Please try again.");
+      }
     } finally {
       setLoading(false);
     }
   };
 
+  useEffect(() => {
+    document.title = 'B.R.A.D | Login';
+  }, []);
+
   return (
     <AuthLayout>
+      <BackButton />
       <div>
         <h3 className="text-xl font-semibold mb-2">Sign in to your account</h3>
-        <p className="text-sm mb-6 text-gray-600 dark:text-gray-300">Enter your username and password to continue.</p>
+        <p className="text-sm mb-6 text-gray-600 dark:text-gray-300">
+          Enter your username and password to continue.
+        </p>
+
+        {error && (
+          <div className="mb-4">
+            <Notification
+              type="error"
+              title="Login Error"
+              onClose={() => setError(null)}
+            >
+              {error}
+            </Notification>
+          </div>
+        )}
 
         {notify && (
           <div className="mb-4">
-            <Notification type={notify.type} title={notify.title} onClose={() => setNotify(null)}>
+            <Notification
+              type={notify.type}
+              title={notify.title}
+              onClose={() => setNotify(null)}
+            >
               {notify.message}
             </Notification>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label className="block text-sm font-medium mb-1">Username</label>
             <input
@@ -99,7 +136,12 @@ export default function LoginPage() {
               Remember me
             </label>
 
-            <a href="/reset-password" className="text-sm text-brad-500 underline">Forgot password?</a>
+            <a
+              href="/reset-password"
+              className="text-sm text-brad-500 underline"
+            >
+              Forgot password?
+            </a>
           </div>
 
           <div>
@@ -113,12 +155,22 @@ export default function LoginPage() {
           </div>
 
           <div className="text-center text-sm">
-            Don’t have an account yet? <a href="/register" className="text-brad-500 underline">Register</a>
+            Don’t have an account yet?{" "}
+            <a href="/register" className="text-brad-500 underline">
+              Register
+            </a>
           </div>
         </form>
 
         <div className="mt-6 text-xs text-gray-600 dark:text-gray-400">
-          By logging in you agree to our <a href="/B.R.A.D-User-Manual.pdf" className="text-brad-500 underline">Terms & Privacy</a>.
+          By logging in you agree to our{" "}
+          <a
+            href="/B.R.A.D-User-Manual.pdf"
+            className="text-brad-500 underline"
+          >
+            Terms & Privacy
+          </a>
+          .
         </div>
       </div>
     </AuthLayout>
