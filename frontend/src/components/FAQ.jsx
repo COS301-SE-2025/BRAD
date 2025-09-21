@@ -1,44 +1,41 @@
-import React from 'react';
-import '../styles/Help.css';
-import userIcon from '../assets/user-icon.png';
-import bradRobot from '../assets/BRAD_robot.png';
+"use client"
 
 const ReporterQuestions = [
   {
-    question: 'What is B.R.A.D.?',
+    question: "What is B.R.A.D.?",
     answer:
-      'B.R.A.D. (Bot to Report Abusive Domains) is a platform that allows users to report suspicious URLs. The system uses AI-based and human investigator analysis to determine the risk level of submitted websites.'
+      "B.R.A.D. (Bot to Report Abusive Domains) is a platform that allows users to report suspicious URLs. The system uses AI-based and human investigator analysis to determine the risk level of submitted websites.",
   },
   {
-    question: 'How do I submit a report?',
+    question: "How do I submit a report?",
     answer:
-      'After logging in as a Reporter, you can submit a report by entering the suspicious URL and optionally uploading evidence such as screenshots or documents. Click the "Submit" button to finalize your report.'
+      "After logging in as a Reporter, you can submit a report by entering the suspicious URL and optionally uploading evidence such as screenshots or documents. Click the 'Submit' button to finalize your report.",
   },
   {
-    question: 'How are reports analysed?',
+    question: "How are reports analysed?",
     answer:
-      'Once a report is submitted, it is first evaluated by B.R.A.D.\'s AI bot. Then, an investigator reviews the bot\'s analysis and any attached evidence to make a final decision.'
+      "Once a report is submitted, it is first evaluated by B.R.A.D.'s AI bot. Then, an investigator reviews the bot's analysis and any attached evidence to make a final decision.",
   },
   {
-    question: 'How long does it take to get a report resolved?',
+    question: "How long does it take to get a report resolved?",
     answer:
-      'The AI bot typically analyzes a report within seconds. Manual investigation may take up to 24 hours depending on workload.'
+      "The AI bot typically analyzes a report within seconds. Manual investigation may take up to 24 hours depending on workload.",
   },
   {
-    question: 'Can I track the status of my reports?',
+    question: "Can I track the status of my reports?",
     answer:
-      'Yes. As a Reporter, you can view your report history and see which reports are still pending or have been resolved. Resolved reports will also display the final decision and risk score.'
+      "Yes. As a Reporter, you can view your report history and see which reports are still pending or have been resolved. Resolved reports will also display the final decision and risk score.",
   },
   {
-    question: 'How will adding evidence help analysing my report?',
+    question: "How will adding evidence help analysing my report?",
     answer:
-      'A reporter is able to submit optional evidence in the form of screenshots, documents etc. This can be used to give the Investigator more insight on where the URL was found, who shared the URL, etc. This can help the investigator during their analysis and improve the accuracy of the report.'
+      "A reporter is able to submit optional evidence in the form of screenshots, documents etc. This can be used to give the Investigator more insight on where the URL was found, who shared the URL, etc. This can help the investigator during their analysis and improve the accuracy of the report.",
   },
   {
-    question: 'Who can I contact for technical support?',
+    question: "Who can I contact for technical support?",
     answer:
-      'You can contact the B.R.A.D. development team via the email provided in the Help menu\'s Contact section.'
-  }
+      "You can contact the B.R.A.D. development team via the email provided in the Help menu's Contact section.",
+  },
 ];
 
 const InvestigatorQuestions = [
@@ -100,27 +97,24 @@ const AdminQuestions = [
   }
 ];
 
-const FAQ = ({ searchTerm = '', role = 'reporter' }) => {
-  let questions = ReporterQuestions;
-
-  if (role === 'investigator') {
-    questions = InvestigatorQuestions;
-  } else if (role === 'admin') {
-    questions = AdminQuestions;
-  }
+export default function FAQ({ searchTerm = "", role = "reporter" }) {
+  let questions = ReporterQuestions
+  if (role === "investigator") questions = InvestigatorQuestions
+  if (role === "admin") questions = AdminQuestions
 
   const filtered = questions.filter((q) =>
-  q.question.toLowerCase().includes((searchTerm || '').toLowerCase())
+    q.question.toLowerCase().includes(searchTerm.toLowerCase())
+  )
 
-  
-);
+  const userIconUrl = "/user-icon.png"
+  const bradRobotUrl = "/BRAD_robot.png"
 
   return (
-    <div className="faq-chat">
+    <div className="faq-chat mt-6">
       {filtered.map((q, idx) => (
         <div key={idx} className="faq-exchange">
           <div className="faq-user">
-            <img src={userIcon} alt="User" className="faq-avatar" />
+            <img src={userIconUrl} alt="User" className="faq-avatar" />
             <div className="faq-question">
               <p>{q.question}</p>
             </div>
@@ -129,12 +123,10 @@ const FAQ = ({ searchTerm = '', role = 'reporter' }) => {
             <div className="faq-answer">
               <p>{q.answer}</p>
             </div>
-            <img src={bradRobot} alt="BRAD Robot" className="faq-avatar" />
+            <img src={bradRobotUrl} alt="BRAD Robot" className="faq-avatar" />
           </div>
         </div>
       ))}
     </div>
-  );
-};
-
-export default FAQ;
+  )
+}
