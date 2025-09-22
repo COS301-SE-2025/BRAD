@@ -27,7 +27,7 @@ export default function ReportFileCard({ report }) {
         {/* Risk score */}
         <div className="flex items-center text-sm gap-2">
           <FaShieldAlt
-            className={report.risk > 70 ? "text-red-500 flex-shrink-0" : "text-green-500 flex-shrink-0"}
+            className={report.riskScore> 70 ? "text-red-500 flex-shrink-0" : "text-green-500 flex-shrink-0"}
           />
           <span className="truncate block w-full">
             Risk Score: <b>{report.analysis.riskScore}</b>

@@ -1,5 +1,6 @@
 "use client"
-import { useState } from "react"
+
+import { useState, useEffect } from "react"
 import Sidebar from "@/components/Sidebar"
 import UserGreeting from "@/components/UserGreeting"
 import StatCard from "@/components/StatCard"
@@ -8,30 +9,115 @@ import ReportsBarChart from "@/components/ReportsBarChart"
 import ReportsTreemap from "@/components/ReportsTreemap"
 import TopDomains from "@/components/TopDomains"
 
+import {
+  getTotalReports,
+  getMaliciousReports,
+  getSafeReports,
+  getRepeatedDomains,
+  getPendingReportsCount,
+  getInProgressReportsCount,
+  getResolvedReportsCount,
+  getReportsByYear,
+  getReportsByWeek,
+  getReportsByDay,
+} from "@/lib/api/stats"
+
 export default function InvestigatorDashboard() {
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
+  const storedUser = JSON.parse(localStorage.getItem("user")) || { username: "Investigator" }
 
-  // Mock data for now (will hook to API later)
-  const stats = { totalReports: 1200, malicious: 800, safe: 400 }
-  const distribution = [
-    { name: "Malicious", value: stats.malicious },
-    { name: "Safe", value: stats.safe },
-  ]
-  const treemapData = [
-    { name: "Pending", value: 150 },
-    { name: "In Progress", value: 200 },
-    { name: "Resolved", value: 850 },
-  ]
-  const topDomains = [
-    { domain: "malicious-site.com", count: 45 },
-    { domain: "phishing-link.net", count: 32 },
-    { domain: "unsafe-download.org", count: 20 },
-    { domain: "fake-login.io", count: 15 },
-  ]
+  // Dashboard states
+  const [summary, setSummary] = useState({
+    total: 0,
+    malicious: 0,
+    safe: 0,
+    topDomains: [],
+    open: 0,
+    closed: 0,
+    pendingEvidence: 0,
+  })
+
+  const [distribution, setDistribution] = useState([])
+  const [barData, setBarData] = useState([])
+  const [timeFrame, setTimeFrame] = useState("Monthly")
+
+  // === Fetch Stats ===
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [total, malicious, safe, domains, open, closed, pending] =
+          await Promise.all([
+            getTotalReports(),
+            getMaliciousReports(),
+            getSafeReports(),
+            getRepeatedDomains(),
+            getPendingReportsCount(),
+            getInProgressReportsCount(),
+            getResolvedReportsCount(),
+          ])
+
+        setSummary({
+          total: total || 0,
+          malicious: malicious || 0,
+          safe: safe || 0,
+          topDomains: domains || [],
+          open: open || 0,
+          closed: closed || 0,
+          pendingEvidence: pending || 0,
+        })
+
+        setDistribution([
+          { name: "Malicious Reports", value: malicious || 0 },
+          { name: "Safe Reports", value: safe || 0 },
+        ])
+      } catch (err) {
+        console.error("Error fetching investigator stats:", err)
+      }
+    }
+
+    fetchStats()
+  }, [])
+
+  // === Fetch Reports over Time ===
+  useEffect(() => {
+    const fetchBarData = async () => {
+      try {
+        let data
+        if (timeFrame === "Weekly") data = await getReportsByWeek()
+        else if (timeFrame === "Daily") data = await getReportsByDay()
+        else data = await getReportsByYear()
+
+        let formatted
+        if (timeFrame === "Monthly") {
+          const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+          formatted = data.map((d) => ({
+            label: months[d.month - 1],
+            cases: d.count,
+          }))
+        } else if (timeFrame === "Weekly") {
+          formatted = data.map((d) => ({
+            label: `Week ${d.week}`,
+            cases: d.count,
+          }))
+        } else {
+          formatted = data.map((d) => ({
+            label: `${d.day}`,
+            cases: d.count,
+          }))
+        }
+
+        setBarData(formatted)
+      } catch (err) {
+        console.error("Error fetching reports over time:", err)
+      }
+    }
+
+    fetchBarData()
+  }, [timeFrame])
 
   return (
     <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
-      {/* Sidebar stays fixed on the left */}
+      {/* Sidebar */}
       <Sidebar onToggle={setSidebarExpanded} />
 
       {/* Main content */}
@@ -40,33 +126,38 @@ export default function InvestigatorDashboard() {
           sidebarExpanded ? "ml-56" : "ml-16"
         }`}
       >
-        {/* Sticky greeting header */}
+        {/* Greeting */}
         <UserGreeting
-          username="InvestigatorX"
+          username={storedUser.username}
           title="Welcome back"
           subtitle="Here are the latest insights on your reports."
         />
-
 
         {/* Dashboard Content */}
         <div className="p-8">
           {/* Stats */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-            <StatCard title="Total Reports" value={stats.totalReports} color="text-brad-500" />
-            <StatCard title="Malicious Reports" value={stats.malicious} color="text-red-500" />
-            <StatCard title="Safe Reports" value={stats.safe} color="text-green-500" />
+            <StatCard title="Total Reports" value={summary.total} color="text-brad-500" />
+            <StatCard title="Malicious Reports" value={summary.malicious} color="text-red-500" />
+            <StatCard title="Safe Reports" value={summary.safe} color="text-green-500" />
           </div>
 
           {/* Charts */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <ReportDistributionChart data={distribution} />
-            <ReportsTreemap data={treemapData} />
+            <ReportsTreemap
+              data={[
+                { name: "Pending", value: summary.open },
+                { name: "In Progress", value: summary.closed },
+                { name: "Resolved", value: summary.pendingEvidence },
+              ]}
+            />
           </div>
 
           {/* Reports over time & Top Domains */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-            <ReportsBarChart />
-            <TopDomains domains={topDomains} />
+            <ReportsBarChart data={barData} timeFrame={timeFrame} onTimeFrameChange={setTimeFrame} />
+            <TopDomains domains={summary.topDomains} />
           </div>
         </div>
       </main>

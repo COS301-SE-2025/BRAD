@@ -1,5 +1,5 @@
 "use client"
-import { useState } from "react"
+
 import {
   BarChart,
   Bar,
@@ -11,47 +11,16 @@ import {
   ResponsiveContainer,
 } from "recharts"
 
-// Helper functions to generate mock data
-const generateMonthlyData = () => {
-  const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
-  return months.map((m) => ({
-    label: m,
-    cases: Math.floor(Math.random() * 1500) + 200, // mock values
-  }))
-}
-
-const generateWeeklyData = () => {
-  return Array.from({ length: 4 }, (_, i) => ({
-    label: `Week ${i + 1}`,
-    cases: Math.floor(Math.random() * 500) + 100,
-  }))
-}
-
-const generateDailyData = () => {
-  return Array.from({ length: 30 }, (_, i) => ({
-    label: `${i + 1}`,
-    cases: Math.floor(Math.random() * 100) + 10,
-  }))
-}
-
-export default function ReportsBarChart() {
-  const [period, setPeriod] = useState("Monthly")
-
-  const dataSets = {
-    Monthly: generateMonthlyData(),
-    Weekly: generateWeeklyData(),
-    Daily: generateDailyData(),
-  }
-
+export default function ReportsBarChart({ data, timeFrame, onTimeFrameChange }) {
   return (
     <div className="card p-6">
       <div className="flex justify-between items-center mb-4">
         <h3 className="font-semibold">Reports Over Time</h3>
 
-        {/* Dropdown */}
+        {/* Dropdown for timeframe selection */}
         <select
-          value={period}
-          onChange={(e) => setPeriod(e.target.value)}
+          value={timeFrame}
+          onChange={(e) => onTimeFrameChange(e.target.value)}
           className="border rounded px-2 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-brad-400"
         >
           <option value="Daily">Daily</option>
@@ -62,8 +31,8 @@ export default function ReportsBarChart() {
 
       {/* Chart */}
       <ResponsiveContainer width="100%" height={300}>
-        <BarChart data={dataSets[period]}>
-          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" /> {/* adds grid */}
+        <BarChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
           <XAxis dataKey="label" />
           <YAxis />
           <Tooltip />

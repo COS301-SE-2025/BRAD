@@ -10,18 +10,18 @@ export default function ReportsPage() {
 
   // Mock reports
   const [reports, setReports] = useState([
-    { id: 1, domain: "malicious-site.com", date: "2025-09-01", risk: 92, status: "pending" },
-    { id: 2, domain: "phishy.co", date: "2025-09-02", risk: 55, status: "in-progress", investigator: "Agent Smith" },
-    { id: 3, domain: "spammy.net", date: "2025-09-03", risk: 12, status: "resolved", verdict: "benign" },
-    { id: 4, domain: "fakebank-login.com", date: "2025-09-04", risk: 97, status: "pending" },
-    { id: 5, domain: "tracking-adsite.net", date: "2025-09-05", risk: 43, status: "in-progress", investigator: "Agent Roe" },
-    { id: 6, domain: "copycat-bank.org", date: "2025-09-06", risk: 88, status: "resolved", verdict: "malicious" },
-    { id: 7, domain: "freecrypto-giveaway.io", date: "2025-09-07", risk: 99, status: "pending" },
-    { id: 8, domain: "socialmedia-fake.net", date: "2025-09-08", risk: 81, status: "in-progress", investigator: "Agent K" },
-    { id: 9, domain: "unsecure-portal.co", date: "2025-09-09", risk: 72, status: "resolved", verdict: "malicious" },
-    { id: 10, domain: "adwarehub.org", date: "2025-09-10", risk: 56, status: "pending" },
-    { id: 11, domain: "suspicious-link.co", date: "2025-09-11", risk: 68, status: "in-progress" },
-    { id: 12, domain: "virusdownload.com", date: "2025-09-12", risk: 91, status: "resolved", verdict: "malicious" },
+    { id: 1, domain: "malicious-site.com", date: "2025-09-01", riskScore: 92, status: "pending" },
+    { id: 2, domain: "phishy.co", date: "2025-09-02", riskScore: 55, status: "in-progress", investigator: "Agent Smith" },
+    { id: 3, domain: "spammy.net", date: "2025-09-03", riskScore: 12, status: "resolved", verdict: "benign" },
+    { id: 4, domain: "fakebank-login.com", date: "2025-09-04", riskScore: 97, status: "pending" },
+    { id: 5, domain: "tracking-adsite.net", date: "2025-09-05", riskScore: 43, status: "in-progress", investigator: "Agent Roe" },
+    { id: 6, domain: "copycat-bank.org", date: "2025-09-06", riskScore: 88, status: "resolved", verdict: "malicious" },
+    { id: 7, domain: "freecrypto-giveaway.io", date: "2025-09-07", riskScore: 99, status: "pending" },
+    { id: 8, domain: "socialmedia-fake.net", date: "2025-09-08", riskScore: 81, status: "in-progress", investigator: "Agent K" },
+    { id: 9, domain: "unsecure-portal.co", date: "2025-09-09", riskScore: 72, status: "resolved", verdict: "malicious" },
+    { id: 10, domain: "adwarehub.org", date: "2025-09-10", riskScore: 56, status: "pending" },
+    { id: 11, domain: "suspicious-link.co", date: "2025-09-11", riskScore: 68, status: "in-progress" },
+    { id: 12, domain: "virusdownload.com", date: "2025-09-12", riskScore: 91, status: "resolved", verdict: "malicious" },
   ])
 
   const grouped = {
