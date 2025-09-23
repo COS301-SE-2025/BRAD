@@ -8,10 +8,15 @@ import API from "@/lib/api/axios";
 export default function InProgressReportsPage() {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [reports, setReports] = useState([]);
-  const storedUser =
-    JSON.parse(typeof window !== "undefined" ? localStorage.getItem("user") : null) || {
-      username: "Investigator",
-    };
+  const [storedUser, setStoredUser] = useState({ username: "Investigator", role: "investigator" });
+
+  // Load user safely
+  useEffect(() => {
+    const userData = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+    if (userData) {
+      setStoredUser(JSON.parse(userData));
+    }
+  }, []);
 
   const fetchReports = async () => {
     try {
@@ -19,8 +24,8 @@ export default function InProgressReportsPage() {
       const allReports = res.data || [];
       const inProgress = allReports.filter(
         (r) =>
-          r.reviewedBy &&
-          !r.investigatorDecision &&
+          r.reviewedBy && // claimed
+          !r.investigatorDecision && // no verdict yet
           r.analysisStatus === "in-progress"
       );
       setReports(inProgress);
@@ -53,7 +58,13 @@ export default function InProgressReportsPage() {
           <h2 className="text-2xl font-semibold mb-6">In Progress Reports</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {reports.map((report) => (
-              <ReportFileCard key={report._id} report={report} />
+              <ReportFileCard
+                key={report._id}
+                report={report}
+                view="in-progress"
+                loggedInUser={storedUser}
+                onRefresh={fetchReports}
+              />
             ))}
           </div>
         </div>

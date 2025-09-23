@@ -20,7 +20,9 @@ export default function ReporterDashboard() {
   useEffect(() => {
     const userData = localStorage.getItem("user");
     if (userData) {
-      setStoredUser(JSON.parse(userData));
+      try {
+        setStoredUser(JSON.parse(userData));
+      } catch (e) {}
     }
   }, []);
 
@@ -30,7 +32,7 @@ export default function ReporterDashboard() {
       const res = await API.get("/reports", {
         params: { submittedBy: storedUser._id },
       });
-      setReports(res.data);
+      setReports(res.data || []);
     } catch (err) {
       console.error("Error fetching report history:", err);
       setNotification({
@@ -42,41 +44,36 @@ export default function ReporterDashboard() {
 
   useEffect(() => {
     document.title = "B.R.A.D | Reporter Dashboard";
-    if (storedUser._id) fetchReports(); // only fetch if user exists
+    if (storedUser._id) fetchReports();
+    const interval = setInterval(() => {
+      if (storedUser._id) fetchReports();
+    }, 5000);
+    return () => clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [storedUser]);
 
   const filteredReports = useMemo(() => {
     if (filter === "all") return reports;
-    if (filter === "pending") return reports.filter((r) => !r.investigatorDecision);
+    if (filter === "pending") return reports.filter((r) => !r.investigatorDecision && r.analysisStatus === "pending");
     if (filter === "resolved") return reports.filter((r) => r.investigatorDecision);
-    if (filter === "in-progress") return reports.filter((r) => r.status === "in-progress");
+    if (filter === "in-progress") return reports.filter((r) => r.analysisStatus === "in-progress");
     return reports;
   }, [reports, filter]);
 
   const mapStatusForProgress = (report) => {
     if (!report) return "Pending";
     if (report.investigatorDecision) return "Resolved";
-    if (report.status === "in-progress") return "In Progress";
+    if (report.analysisStatus === "in-progress") return "In Progress";
     return "Pending";
   };
 
   const treemapData = useMemo(() => {
-    const counts = reports.reduce(
-      (acc, r) => {
-        const status = r.investigatorDecision
-          ? "resolved"
-          : r.status === "in-progress"
-          ? "in-progress"
-          : "pending";
-        acc[status] = (acc[status] || 0) + 1;
-        return acc;
-      },
-      {}
-    );
-    return Object.keys(counts).map((status) => ({
-      name: status,
-      value: counts[status],
-    }));
+    const counts = reports.reduce((acc, r) => {
+      const status = r.investigatorDecision ? "resolved" : r.analysisStatus === "in-progress" ? "in-progress" : "pending";
+      acc[status] = (acc[status] || 0) + 1;
+      return acc;
+    }, {});
+    return Object.keys(counts).map((status) => ({ name: status, value: counts[status] }));
   }, [reports]);
 
   return (
@@ -84,9 +81,7 @@ export default function ReporterDashboard() {
       <Sidebar onToggle={setSidebarExpanded} />
 
       <div
-        className={`flex-1 transition-all duration-300 p-8 ${
-          sidebarExpanded ? "ml-56" : "ml-16"
-        }`}
+        className={`flex-1 transition-all duration-300 p-8 ${sidebarExpanded ? "ml-56" : "ml-16"}`}
       >
         <UserGreeting
           username={storedUser.username}
@@ -118,17 +113,14 @@ export default function ReporterDashboard() {
             {filteredReports.length > 0 ? (
               filteredReports.map((report) => (
                 <div key={report._id} className="card p-4">
-                  <ReportFileCard report={report} />
+                  <ReportFileCard report={report} loggedInUser={storedUser} onRefresh={fetchReports} />
                   <ReportProgressBar status={mapStatusForProgress(report)} />
                 </div>
               ))
             ) : (
               <div className="text-center mt-10 col-span-full">
                 <p className="text-lg">You have no reports yet.</p>
-                <a
-                  href="/reporter/report"
-                  className="btn-primary mt-4 inline-block"
-                >
+                <a href="/reporter/report" className="btn-primary mt-4 inline-block">
                   Report Your First Domain
                 </a>
               </div>
@@ -148,23 +140,19 @@ export default function ReporterDashboard() {
                   <strong>Total:</strong> {reports.length}
                 </div>
                 <div>
-                  <strong>Pending:</strong>{" "}
-                  {reports.filter((r) => !r.investigatorDecision).length}
+                  <strong>Pending:</strong> {reports.filter((r) => !r.investigatorDecision && r.analysisStatus === "pending").length}
                 </div>
                 <div>
-                  <strong>In Progress:</strong>{" "}
-                  {reports.filter((r) => r.status === "in-progress").length}
+                  <strong>In Progress:</strong> {reports.filter((r) => r.analysisStatus === "in-progress").length}
                 </div>
                 <div>
-                  <strong>Resolved:</strong>{" "}
-                  {reports.filter((r) => r.investigatorDecision).length}
+                  <strong>Resolved:</strong> {reports.filter((r) => r.investigatorDecision).length}
                 </div>
                 <div>
                   <strong>Average risk:</strong>{" "}
                   {reports.length > 0
                     ? Math.round(
-                        reports.reduce((s, r) => s + (r.analysis?.riskScore || 0), 0) /
-                          reports.length
+                        reports.reduce((s, r) => s + (r.analysis?.riskScore || 0), 0) / reports.length
                       )
                     : 0}
                 </div>
@@ -174,11 +162,7 @@ export default function ReporterDashboard() {
         </div>
 
         {notification && (
-          <Notification
-            type={notification.type}
-            message={notification.message}
-            onClose={() => setNotification(null)}
-          />
+          <Notification type={notification.type} message={notification.message} onClose={() => setNotification(null)} />
         )}
       </div>
     </div>

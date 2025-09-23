@@ -8,16 +8,22 @@ import API from "@/lib/api/axios";
 export default function ResolvedReportsPage() {
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [reports, setReports] = useState([]);
-  const storedUser =
-    JSON.parse(typeof window !== "undefined" ? localStorage.getItem("user") : null) || {
-      username: "Investigator",
-    };
+  const [storedUser, setStoredUser] = useState({ username: "Investigator", role: "investigator" });
+
+  // Load user safely
+  useEffect(() => {
+    const userData = typeof window !== "undefined" ? localStorage.getItem("user") : null;
+    if (userData) {
+      setStoredUser(JSON.parse(userData));
+    }
+  }, []);
 
   const fetchReports = async () => {
     try {
       const res = await API.get("/reports");
       const allReports = res.data || [];
-      const resolved = allReports.filter((r) => r.investigatorDecision);
+      const resolved = allReports.filter(
+        (r) => r.investigatorDecision);
       setReports(resolved);
     } catch (err) {
       console.error("Error fetching reports:", err);
@@ -48,7 +54,13 @@ export default function ResolvedReportsPage() {
           <h2 className="text-2xl font-semibold mb-6">Resolved Reports</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {reports.map((report) => (
-              <ReportFileCard key={report._id} report={report} />
+              <ReportFileCard
+                key={report._id}
+                report={report}
+                view="resolved"
+                loggedInUser={storedUser}
+                onRefresh={fetchReports}
+              />
             ))}
           </div>
         </div>
