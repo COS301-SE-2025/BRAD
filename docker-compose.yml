@@ -7,7 +7,7 @@ services:
     volumes:
       - ./api:/app
       - ./uploads:/usr/src/app/uploads
-      - ./screenshots:/usr/src/app/screenshots
+      - brad_screenshots:/data/screenshots
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`capstone-brad.dns.net.za`) && PathPrefix(`/api`)"
@@ -16,9 +16,23 @@ services:
       - "traefik.http.middlewares.api-stripprefix.stripprefix.prefixes=/api"
       - "traefik.http.routers.api.middlewares=api-stripprefix"
       - "traefik.http.services.api.loadbalancer.server.port=3000"
+
+      # Static files (/static/** -> API, no strip)
+      - "traefik.http.routers.api-static.rule=Host(`capstone-brad.dns.net.za`) && PathPrefix(`/static`)"
+      - "traefik.http.routers.api-static.entrypoints=web,websecure"
+      - "traefik.http.routers.api-static.tls.certresolver=myresolver"
+      - "traefik.http.services.api-static.loadbalancer.server.port=3000"
+
+      # (Optional) Swagger
+      - "traefik.http.routers.api-docs.rule=Host(`capstone-brad.dns.net.za`) && PathPrefix(`/api-docs`)"
+      - "traefik.http.routers.api-docs.entrypoints=web,websecure"
+      - "traefik.http.routers.api-docs.tls.certresolver=myresolver"
+      - "traefik.http.services.api-docs.loadbalancer.server.port=3000"
+
     environment:
       - NODE_ENV=production
       - BODY_LIMIT=20mb
+      - SCREENSHOTS_DIR=/data/screenshots
     depends_on:
       - mongo
       - fastapi-queue
@@ -32,7 +46,6 @@ services:
     container_name: brad-bot
     volumes:
       - ./bot:/app
-      - ./screenshots:/app/screenshots
       - ./logs/bot:/app/logs
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
@@ -54,6 +67,11 @@ services:
   bot-runner:
     build: ./bot-runner
     image: brad-bot-runner:latest
+    environment:
+      - SCREENSHOTS_DIR=/data/screenshots
+      - BOT_ACCESS_KEY=${BOT_ACCESS_KEY}
+    env_file:
+      - .env
     networks:
       - brad_net
 
@@ -144,6 +162,7 @@ services:
 volumes:
   mongo-data:
   redis-data:
+  brad_screenshots:            
 
 networks:
   brad_net:

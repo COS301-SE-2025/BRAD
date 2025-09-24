@@ -8,7 +8,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY ./src ./src
 
-RUN mkdir -p /app/screenshots /app/logs
+RUN mkdir -p /data/screenshots /app/logs
 
 ENV PYTHONUNBUFFERED=1
 ENV PYTHONPATH=/app
