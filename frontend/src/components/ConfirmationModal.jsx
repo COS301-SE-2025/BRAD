@@ -10,24 +10,24 @@ export default function ConfirmationModal({
   message,
   confirmText = "Confirm",
   cancelText = "Cancel",
-  confirmStyle = "bg-blue-600 hover:bg-blue-700",
+  confirmStyle = "btn-primary", // use global btn style
 }) {
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
+      <div className="modal-card w-full max-w-md">
         {/* Title */}
         <h2 className="text-xl font-semibold mb-4">{title}</h2>
 
         {/* Message */}
-        <p className="text-gray-600 mb-6">{message}</p>
+        <p className="modal-message mb-6">{message}</p>
 
         {/* Buttons */}
         <div className="flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 transition"
+            className="btn-cancel"
           >
             {cancelText}
           </button>
@@ -36,7 +36,7 @@ export default function ConfirmationModal({
               onConfirm();
               onClose();
             }}
-            className={`px-4 py-2 rounded-lg text-white transition ${confirmStyle}`}
+            className={confirmStyle}
           >
             {confirmText}
           </button>

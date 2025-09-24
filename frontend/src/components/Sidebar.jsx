@@ -18,25 +18,33 @@ import Logo from "./Logo"
 export default function Sidebar({ onToggle }) {
   const [expanded, setExpanded] = useState(false)
   const pathname = usePathname()
-  const [role, setRole] = useState("reporter") // default fallback
+  const [role, setRole] = useState("general") 
 
-  // Derive role from URL
   useEffect(() => {
+    let detectedRole = "general"
+
     if (pathname.startsWith("/investigator")) {
-      setRole("investigator")
+      detectedRole = "investigator"
     } else if (pathname.startsWith("/reporter")) {
-      setRole("reporter")
+      detectedRole = "general"
     } else if (pathname.startsWith("/admin")) {
-      setRole("admin")
+      detectedRole = "admin"
+    } else if (pathname.startsWith("/user-settings")) {
+      const userData =
+        typeof window !== "undefined" ? localStorage.getItem("user") : null
+      if (userData) {
+        detectedRole = JSON.parse(userData).role || "general"
+      }
     }
+
+    setRole(detectedRole)
   }, [pathname])
 
-  // Notify parent of expanded state
+  // notify parent of expanded state
   useEffect(() => {
     if (onToggle) onToggle(expanded)
   }, [expanded, onToggle])
 
-  // Role-specific menus
   const menus = {
     investigator: [
       { icon: <Home size={20} />, label: "Dashboard", href: "/investigator/dashboard" },
@@ -45,7 +53,7 @@ export default function Sidebar({ onToggle }) {
       { icon: <ClipboardList size={20} />, label: "Resolved", href: "/investigator/resolved" },
       { icon: <HelpCircle size={20} />, label: "Help", href: "/investigator/help" },
     ],
-    reporter: [
+    general: [
       { icon: <Home size={20} />, label: "Dashboard", href: "/reporter/dashboard" },
       { icon: <FilePlus2 size={20} />, label: "Report", href: "/reporter/report" },
       { icon: <HelpCircle size={20} />, label: "Help", href: "/reporter/help" },
@@ -58,7 +66,6 @@ export default function Sidebar({ onToggle }) {
     ],
   }
 
-  // Shared menu items
   const commonItems = [
     { icon: <Settings size={20} />, label: "Settings", href: "/user-settings" },
     { icon: <LogOut size={20} />, label: "Log out", href: "/login" },

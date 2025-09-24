@@ -92,38 +92,6 @@ export default function ReportAnalysisModal({
   const finalRiskScore = analysis.riskScore ?? s.siteRiskScore ?? "N/A";
   const finalRiskLevel = analysis.riskLevel ?? s.siteRiskLevel ?? "N/A";
 
-  // const handleClaim = async () => {
-  //   setIsClaiming(true);
-  //   try {
-  //     await API.post(`/reports/${report._id}/claim`, {
-  //       investigatorId: loggedInUser?._id,
-  //     });
-  //     onRefresh();
-  //     setNotification({ type: "success", message: "Report claimed successfully!" });
-  //     setOpen(false);
-  //   } catch (err) {
-  //     console.error("Claim failed:", err);
-  //     setNotification({ type: "error", message: "Failed to claim report" });
-  //   } finally {
-  //     setIsClaiming(false);
-  //   }
-  // };
-
-  // const handleDecision = async (verdict) => {
-  //   if (!confirm(`Mark report as ${verdict}?`)) return;
-  //   setIsDeciding(true);
-  //   try {
-  //     await API.patch(`/report/${report._id}/decision`, { verdict });
-  //     onRefresh();
-  //     setNotification({ type: "success", message: `Report marked as ${verdict}` });
-  //     setOpen(false);
-  //   } catch (err) {
-  //     console.error("Decision error:", err);
-  //     setNotification({ type: "error", message: "Failed to update decision" });
-  //   } finally {
-  //     setIsDeciding(false);
-  //   }
-  // };
   const handleClaim = () => {
   setPendingVerdict("claim");
   setConfirmOpen(true);
@@ -356,7 +324,7 @@ export default function ReportAnalysisModal({
 
                     {analysis.whoisRaw && (
                       <section>
-                        <button onClick={() => setShowWhois(!showWhois)} className="px-3 py-1 bg-gray-200 rounded">
+                        <button onClick={() => setShowWhois(!showWhois)} className="px-3 py-1  rounded">
                           <FaSearch />{showWhois ? "Hide WHOIS Raw" : "Show WHOIS Raw"}
                         </button>
                         {showWhois && (
@@ -369,7 +337,7 @@ export default function ReportAnalysisModal({
 
                     {analysis.dns && (
                       <section>
-                        <button onClick={() => setShowDns(!showDns)} className="px-3 py-1 bg-gray-200 rounded">
+                        <button onClick={() => setShowDns(!showDns)} className="px-3 py-1 rounded">
                           <FaNetworkWired />{showDns ? "Hide DNS" : "Show DNS"}
                         </button>
                         {showDns && (

@@ -6,7 +6,11 @@ import ThemeToggle from "@/components/ThemeToggle"
 import { updateUser } from "@/lib/api/auth"
 
 export default function UserSettingsPage() {
-  const storedUser = JSON.parse(localStorage.getItem("user")) || {}
+  const [storedUser, setStoredUser] = useState(
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem("user")) || {}
+      : {}
+  )
 
   const [form, setForm] = useState({
     firstname: "",
@@ -38,6 +42,7 @@ export default function UserSettingsPage() {
       setMessage("Please fill in at least one field to update.")
       return
     }
+    // Open password confirmation modal
     setShowPasswordModal(true)
   }
 
@@ -45,11 +50,15 @@ export default function UserSettingsPage() {
     try {
       const payload = { ...form, currentPassword }
       const response = await updateUser(payload)
+
+      // ✅ API returns updated user — store in localStorage (same as old frontend)
+      localStorage.setItem("user", JSON.stringify(response.data))
+      setStoredUser(response.data)
+
       setMessage("Profile updated successfully!")
       setShowPasswordModal(false)
       setCurrentPassword("")
       setForm({ firstname: "", lastname: "", username: "", email: "" })
-      localStorage.setItem("user", JSON.stringify(response.data))
     } catch (err) {
       setMessage(err.response?.data?.message || "Update failed")
     }
@@ -74,7 +83,7 @@ export default function UserSettingsPage() {
         {/* Profile Card */}
         <div className="card p-6 max-w-3xl mx-auto">
           <div className="flex items-center gap-4 mb-6">
-            {storedUser.profileImage ? (
+            {storedUser?.profileImage ? (
               <img
                 src={storedUser.profileImage}
                 alt="Profile"
@@ -85,14 +94,14 @@ export default function UserSettingsPage() {
             )}
             <div>
               <h3 className="text-xl font-semibold">
-                {storedUser.username || "Unknown User"}
+                {storedUser?.username || "Unknown User"}
               </h3>
               <p>
                 <strong>Name:</strong>{" "}
-                {storedUser.firstname || "N/A"} {storedUser.lastname || ""}
+                {storedUser?.firstname || "N/A"} {storedUser?.lastname || ""}
               </p>
               <p>
-                <strong>Email:</strong> {storedUser.email || "N/A"}
+                <strong>Email:</strong> {storedUser?.email || "N/A"}
               </p>
             </div>
           </div>

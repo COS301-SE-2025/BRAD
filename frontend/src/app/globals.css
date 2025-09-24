@@ -259,3 +259,30 @@ select.input:focus {
     max-width: 95%;
   }
 }
+
+/* ===== MODAL STYLING ===== */
+.modal-card {
+  background-color: var(--card);
+  color: var(--text);
+  border-radius: 1rem; /* 2xl */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  padding: 1.5rem;
+}
+
+.modal-message {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* cancel button (neutral) */
+.btn-cancel {
+  @apply px-4 py-2 rounded-lg font-medium transition;
+  background-color: var(--input-bg);
+  color: var(--text);
+}
+
+.btn-cancel:hover {
+  background-color: var(--muted);
+  color: white;
+}
+
