@@ -17,7 +17,8 @@ import {
   FaSpider,          
 } from "react-icons/fa";
 import { MdDangerous, MdSecurity } from "react-icons/md";
-
+import Notification from "./Notification";
+import ConfirmationModal from "./ConfirmationModal";
 import ScrapingInfoViewer from "./ScrapingInfoViewer";
 
 /**
@@ -42,6 +43,9 @@ export default function ReportAnalysisModal({
   const [showWhois, setShowWhois] = useState(false);
   const [showDns, setShowDns] = useState(false);
   const [role, setRole] = useState("reporter");
+  const [notification, setNotification] = useState(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pendingVerdict, setPendingVerdict] = useState(null);
 
   useEffect(() => {
     if (loggedInUser?.role) setRole(loggedInUser.role);
@@ -88,38 +92,82 @@ export default function ReportAnalysisModal({
   const finalRiskScore = analysis.riskScore ?? s.siteRiskScore ?? "N/A";
   const finalRiskLevel = analysis.riskLevel ?? s.siteRiskLevel ?? "N/A";
 
-  const handleClaim = async () => {
-    setIsClaiming(true);
-    try {
-      await API.post(`/reports/${report._id}/claim`, {
-        investigatorId: loggedInUser?._id,
-      });
-      onRefresh();
-      alert("Report claimed");
-      setOpen(false);
-    } catch (err) {
-      console.error("Claim failed:", err);
-      alert("Failed to claim report");
-    } finally {
-      setIsClaiming(false);
+  // const handleClaim = async () => {
+  //   setIsClaiming(true);
+  //   try {
+  //     await API.post(`/reports/${report._id}/claim`, {
+  //       investigatorId: loggedInUser?._id,
+  //     });
+  //     onRefresh();
+  //     setNotification({ type: "success", message: "Report claimed successfully!" });
+  //     setOpen(false);
+  //   } catch (err) {
+  //     console.error("Claim failed:", err);
+  //     setNotification({ type: "error", message: "Failed to claim report" });
+  //   } finally {
+  //     setIsClaiming(false);
+  //   }
+  // };
+
+  // const handleDecision = async (verdict) => {
+  //   if (!confirm(`Mark report as ${verdict}?`)) return;
+  //   setIsDeciding(true);
+  //   try {
+  //     await API.patch(`/report/${report._id}/decision`, { verdict });
+  //     onRefresh();
+  //     setNotification({ type: "success", message: `Report marked as ${verdict}` });
+  //     setOpen(false);
+  //   } catch (err) {
+  //     console.error("Decision error:", err);
+  //     setNotification({ type: "error", message: "Failed to update decision" });
+  //   } finally {
+  //     setIsDeciding(false);
+  //   }
+  // };
+  const handleClaim = () => {
+  setPendingVerdict("claim");
+  setConfirmOpen(true);
+};
+
+  const handleDecision = (verdict) => {
+    setPendingVerdict(verdict);
+    setConfirmOpen(true);
+  };
+
+  const confirmAction = async () => {
+    setConfirmOpen(false);
+
+    if (pendingVerdict === "claim") {
+      setIsClaiming(true);
+      try {
+        await API.post(`/reports/${report._id}/claim`, { investigatorId: loggedInUser?._id });
+        onRefresh();
+        setNotification({ type: "success", title: "Success", message: "Report claimed successfully" });
+        setOpen(false);
+      } catch (err) {
+        console.error(err);
+        setNotification({ type: "error", title: "Error", message: "Failed to claim report" });
+      } finally {
+        setIsClaiming(false);
+        setPendingVerdict(null);
+      }
+    } else {
+      setIsDeciding(true);
+      try {
+        await API.patch(`/report/${report._id}/decision`, { verdict: pendingVerdict });
+        onRefresh();
+        setNotification({ type: "success", title: "Success", message: `Report marked as ${pendingVerdict}` });
+        setOpen(false);
+      } catch (err) {
+        console.error(err);
+        setNotification({ type: "error", title: "Error", message: "Failed to update decision" });
+      } finally {
+        setIsDeciding(false);
+        setPendingVerdict(null);
+      }
     }
   };
 
-  const handleDecision = async (verdict) => {
-    if (!confirm(`Mark report as ${verdict}?`)) return;
-    setIsDeciding(true);
-    try {
-      await API.patch(`/report/${report._id}/decision`, { verdict });
-      onRefresh();
-      alert(`Report marked as ${verdict}`);
-      setOpen(false);
-    } catch (err) {
-      console.error("Decision error:", err);
-      alert("Failed to update decision");
-    } finally {
-      setIsDeciding(false);
-    }
-  };
 
   const EvidenceGrid = () => (
     <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-3">
@@ -161,6 +209,29 @@ export default function ReportAnalysisModal({
             className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg shadow-lg w-full max-w-5xl max-h-[90vh] overflow-y-auto p-6"
             onClick={(e) => e.stopPropagation()}
           >
+            {notification && (
+            <div className="fixed top-4 right-4 z-50">
+              <Notification
+                type={notification.type}
+                title={notification.title}
+                onClose={() => setNotification(null)}
+              >
+                {notification.message}
+              </Notification>
+            </div>
+          )}
+
+          <ConfirmationModal
+            isOpen={confirmOpen}
+            onClose={() => setConfirmOpen(false)}
+            onConfirm={confirmAction}
+            title={pendingVerdict === "claim" ? "Confirm Claim" : "Confirm Decision"}
+            message={pendingVerdict === "claim" ? "Are you sure you want to claim this report?" : `Are you sure you want to mark this report as ${pendingVerdict}?`}
+            confirmText="Yes"
+            cancelText="Cancel"
+            confirmStyle="bg-blue-600 hover:bg-blue-700"
+          />
+
             {/* Header */}
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold flex items-center gap-2">
@@ -209,13 +280,16 @@ export default function ReportAnalysisModal({
                       <EvidenceGrid />
                     </section>
 
-                    <button
-                      onClick={handleClaim}
-                      disabled={isClaiming}
-                      className="px-4 py-2 bg-yellow-500 text-white rounded"
-                    >
-                      {isClaiming ? "Claiming..." : "Claim Report"}
-                    </button>
+                    {/* Only show Claim button for investigators, not admins */}
+                    {role === "investigator" && view === "pending" && (
+                      <button
+                        onClick={handleClaim}
+                        disabled={isClaiming}
+                        className="px-4 py-2 bg-yellow-500 text-white rounded"
+                      >
+                        {isClaiming ? "Claiming..." : "Claim Report"}
+                      </button>
+                    )}
                   </div>
                 )}
 

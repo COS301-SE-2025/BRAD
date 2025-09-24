@@ -5,6 +5,7 @@ import Sidebar from "@/components/Sidebar"
 import UserGreeting from "@/components/UserGreeting"
 import ReportForm from "@/components/ReportForm"
 import ReportStepsCarousel from "@/components/ReportStepsCarousel"
+import Notification from "@/components/Notification";
 
 export default function ReportPage() {
   const storedUser =
@@ -12,6 +13,8 @@ export default function ReportPage() {
 
   // track sidebar expanded state (ReporterSidebar calls onToggle)
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
+
+  const [notification, setNotification] = useState(null);
 
   useEffect(() => {
     document.title = "B.R.A.D | Report URL"
@@ -35,12 +38,23 @@ export default function ReportPage() {
           subtitle="Report a URL and add optional evidence to help our investigators with their analysis."
         />
 
+        {notification && (
+          <Notification
+            type={notification.type}
+            title={notification.title}
+            onClose={() => setNotification(null)}
+          >
+            {notification.message}
+          </Notification>
+        )}
+
+
         {/* Layout: left = form, right = steps (matches dashboard layout) */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           {/* Left column: the report form (spans 2/3 on large screens) */}
           <div className="lg:col-span-2">
             {/* keep the form component full-width — it already provides its card-like styling */}
-            <ReportForm />
+            <ReportForm setNotification={setNotification} />
           </div>
 
           {/* Right column: steps / help carousel */}

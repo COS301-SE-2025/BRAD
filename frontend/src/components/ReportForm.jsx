@@ -1,173 +1,157 @@
-"use client"
-import React, { useState } from "react"
-import {
-  Upload,
-  File,
-  Image as ImageIcon,
-  Link as LinkIcon,
-  X,
-} from "lucide-react"
-import { motion } from "framer-motion"
-import API from "@/lib/api/axios"
-import Notification from "@/components/Notification"
+"use client";
+import React, { useState } from "react";
+import { Upload, File, Image as ImageIcon, Link as LinkIcon, X } from "lucide-react";
+import { motion } from "framer-motion";
+import API from "@/lib/api/axios";
 
-export default function ReportForm() {
-  const [url, setUrl] = useState("")
-  const [files, setFiles] = useState([])
-  const [notification, setNotification] = useState(null)
-  const user = JSON.parse(localStorage.getItem("user"))
-  const MAX_FILES = 5
+export default function ReportForm({ setNotification }) {
+  const [url, setUrl] = useState("");
+  const [files, setFiles] = useState([]);
+  const user = JSON.parse(localStorage.getItem("user"));
+  const MAX_FILES = 5;
 
   const showNotification = (type, message) => {
-    setNotification({ type, message })
-    setTimeout(() => setNotification(null), 4000)
-  }
+    if (setNotification) {
+      setNotification({ type, title: type === "success" ? "Success" : "Error", message });
+      setTimeout(() => setNotification(null), 4000);
+    }
+  };
 
   const handleFileChange = (e) => {
-    const newFiles = Array.from(e.target.files)
-    const combined = [...files, ...newFiles]
+    const newFiles = Array.from(e.target.files);
+    const combined = [...files, ...newFiles];
     if (combined.length > MAX_FILES) {
-      showNotification("error", "You can only attach up to 5 files.")
-      setFiles(combined.slice(0, MAX_FILES))
+      showNotification("error", "You can only attach up to 5 files.");
+      setFiles(combined.slice(0, MAX_FILES));
     } else {
-      setFiles(combined)
+      setFiles(combined);
     }
-  }
+  };
 
   const handleRemoveFile = (index) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index))
-  }
+    setFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleSubmit = async (e) => {
-    e.preventDefault()
-    if (!url) return showNotification("error", "Please enter a domain/URL")
+    e.preventDefault();
+    if (!url) return showNotification("error", "Please enter a domain/URL");
 
-    const formData = new FormData()
-    formData.append("domain", url)
-    formData.append("submittedBy", user?._id)
+    const formData = new FormData();
+    formData.append("domain", url);
+    formData.append("submittedBy", user?._id);
 
     files.forEach((file) => {
-      formData.append("evidence", file)
-    })
+      formData.append("evidence", file);
+    });
 
     try {
       await API.post("/report", formData, {
         headers: { "Content-Type": "multipart/form-data" },
-      })
+      });
 
-      setUrl("")
-      setFiles([])
-      showNotification("success", "Report submitted successfully!")
+      setUrl("");
+      setFiles([]);
+      showNotification("success", "Report submitted successfully!");
     } catch (err) {
       showNotification(
         "error",
         err.response?.data?.message || "Failed to submit report"
-      )
+      );
     }
-  }
+  };
 
   return (
-    <>
-      {notification && (
-        <Notification
-          type={notification.type}
-          message={notification.message}
-          onClose={() => setNotification(null)}
+    <motion.form
+      onSubmit={handleSubmit}
+      className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-8 w-full"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+    >
+      {/* URL Input */}
+      <label className="block text-gray-700 dark:text-gray-200 font-semibold mb-2">
+        Enter URL to report
+      </label>
+      <div className="flex items-center border rounded-lg px-3 py-2 mb-4 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+        <LinkIcon className="h-5 w-5 text-gray-500 mr-2" />
+        <input
+          type="url"
+          placeholder="https://example.com"
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          className="flex-1 bg-transparent outline-none text-gray-800 dark:text-gray-200"
+          required
         />
+      </div>
+
+      {/* File Upload */}
+      <label className="block text-gray-700 dark:text-gray-200 font-semibold mb-2">
+        Attach optional evidence
+      </label>
+      <div
+        className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer dark:border-gray-700 bg-gray-50 dark:bg-gray-900"
+        onDragOver={(e) => e.preventDefault()}
+        onDrop={(e) => {
+          e.preventDefault();
+          const droppedFiles = Array.from(e.dataTransfer.files);
+          const combined = [...files, ...droppedFiles];
+          if (combined.length > MAX_FILES) {
+            showNotification("error", "You can only attach up to 5 files.");
+            setFiles(combined.slice(0, MAX_FILES));
+          } else {
+            setFiles(combined);
+          }
+        }}
+      >
+        <input
+          type="file"
+          multiple
+          onChange={handleFileChange}
+          className="hidden"
+          id="file-upload"
+        />
+        <label htmlFor="file-upload" className="cursor-pointer">
+          <Upload className="mx-auto h-8 w-8 text-gray-500 mb-2" />
+          <span className="text-gray-600 dark:text-gray-400">
+            Drag & drop or click to upload
+          </span>
+        </label>
+      </div>
+
+      {/* File Previews */}
+      {files.length > 0 && (
+        <ul className="mt-4 text-left space-y-2">
+          {files.map((file, idx) => (
+            <li
+              key={idx}
+              className="flex items-center justify-between text-sm text-gray-700 dark:text-gray-300"
+            >
+              <div className="flex items-center">
+                {file.type.startsWith("image/") ? (
+                  <ImageIcon className="h-4 w-4 mr-2" />
+                ) : (
+                  <File className="h-4 w-4 mr-2" />
+                )}
+                {file.name}
+              </div>
+              <button
+                type="button"
+                onClick={() => handleRemoveFile(idx)}
+                className="ml-2 text-red-500 hover:text-red-700"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </li>
+          ))}
+        </ul>
       )}
 
-      <motion.form
-        onSubmit={handleSubmit}
-        className="bg-white dark:bg-gray-800 shadow-lg rounded-2xl p-8 w-full"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
+      {/* Submit Button */}
+      <button
+        type="submit"
+        className="mt-6 w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition"
       >
-        {/* URL Input */}
-        <label className="block text-gray-700 dark:text-gray-200 font-semibold mb-2">
-          Enter URL to report
-        </label>
-        <div className="flex items-center border rounded-lg px-3 py-2 mb-4 dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
-          <LinkIcon className="h-5 w-5 text-gray-500 mr-2" />
-          <input
-            type="url"
-            placeholder="https://example.com"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            className="flex-1 bg-transparent outline-none text-gray-800 dark:text-gray-200"
-            required
-          />
-        </div>
-
-        {/* File Upload */}
-        <label className="block text-gray-700 dark:text-gray-200 font-semibold mb-2">
-          Attach optional evidence
-        </label>
-        <div
-          className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer dark:border-gray-700 bg-gray-50 dark:bg-gray-900"
-          onDragOver={(e) => e.preventDefault()}
-          onDrop={(e) => {
-            e.preventDefault()
-            const droppedFiles = Array.from(e.dataTransfer.files)
-            const combined = [...files, ...droppedFiles]
-            if (combined.length > MAX_FILES) {
-              showNotification("error", "You can only attach up to 5 files.")
-              setFiles(combined.slice(0, MAX_FILES))
-            } else {
-              setFiles(combined)
-            }
-          }}
-        >
-          <input
-            type="file"
-            multiple
-            onChange={handleFileChange}
-            className="hidden"
-            id="file-upload"
-          />
-          <label htmlFor="file-upload" className="cursor-pointer">
-            <Upload className="mx-auto h-8 w-8 text-gray-500 mb-2" />
-            <span className="text-gray-600 dark:text-gray-400">
-              Drag & drop or click to upload
-            </span>
-          </label>
-        </div>
-
-        {/* File Previews */}
-        {files.length > 0 && (
-          <ul className="mt-4 text-left space-y-2">
-            {files.map((file, idx) => (
-              <li
-                key={idx}
-                className="flex items-center justify-between text-sm text-gray-700 dark:text-gray-300"
-              >
-                <div className="flex items-center">
-                  {file.type.startsWith("image/") ? (
-                    <ImageIcon className="h-4 w-4 mr-2" />
-                  ) : (
-                    <File className="h-4 w-4 mr-2" />
-                  )}
-                  {file.name}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => handleRemoveFile(idx)}
-                  className="ml-2 text-red-500 hover:text-red-700"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
-
-        {/* Submit Button */}
-        <button
-          type="submit"
-          className="mt-6 w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition"
-        >
-          Submit Report
-        </button>
-      </motion.form>
-    </>
-  )
+        Submit Report
+      </button>
+    </motion.form>
+  );
 }

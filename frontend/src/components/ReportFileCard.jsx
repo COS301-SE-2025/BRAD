@@ -18,7 +18,9 @@ export default function ReportFileCard({
   view = "pending",
   loggedInUser = null,
   onRefresh = () => {},
+  setNotification,
 }) {
+  setNotification = setNotification || (() => {});
   const [role, setRole] = useState("reporter");
   const pathname = typeof window !== "undefined" ? window.location.pathname : "";
 
@@ -36,16 +38,16 @@ export default function ReportFileCard({
   const claimReport = async (e) => {
     e?.stopPropagation?.();
     if (!loggedInUser && role !== "investigator") {
-      alert("You must be signed in as an investigator to claim this report.");
-      return;
+      return setNotification({ type: "error", message: "You must be signed in as an investigator to claim this report." });
+
     }
     try {
       await API.post(`/reports/${report._id}/claim`, { investigatorId: loggedInUser?._id });
-      alert("Report claimed");
+      setNotification({ type: "success", message: "Report claimed successfully!" });
       onRefresh();
     } catch (err) {
       console.error("Claim error", err);
-      alert(err?.response?.data?.message || "Failed to claim report.");
+      setNotification({ type: "error", message: err?.response?.data?.message || "Failed to claim report." });
     }
   };
 
