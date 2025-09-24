@@ -6,6 +6,7 @@ import Notification from "../../components/Notification";
 import API from "../../lib/api/axios";
 import { useRouter } from "next/navigation";
 import BackButton from "../../components/BackButton";
+import ForgotPasswordModal from "../../components/ForgotPasswordModal";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -14,6 +15,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [notify, setNotify] = useState(null);
   const [error, setError] = useState(null);
+  const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -136,13 +138,18 @@ export default function LoginPage() {
               Remember me
             </label>
 
-            <a
-              href="/reset-password"
+            <button
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
               className="text-sm text-brad-500 underline"
             >
               Forgot password?
-            </a>
+            </button>
           </div>
+
+          {showForgotPassword && (
+            <ForgotPasswordModal onClose={() => setShowForgotPassword(false)} />
+          )}
 
           <div>
             <button
