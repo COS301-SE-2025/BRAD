@@ -1,4 +1,5 @@
-import os, requests, time
+# bot/src/worker.py
+import os, requests
 from datetime import datetime
 from dotenv import load_dotenv
 from urllib.parse import urlparse
@@ -11,6 +12,8 @@ from dramatiq.brokers.redis import RedisBroker
 from src.forensics.report import ForensicReport
 from src.scraper.analysis import perform_scraping
 import docker
+from docker.types import Mount
+from docker.errors import NotFound, APIError
 from src.utils.logger import get_logger, report_id_ctx
 from src.utils.job_logging_middleware import JobLoggingMiddleware
 
@@ -40,7 +43,7 @@ session = requests.Session()
 session.headers.update(headers)
 retry = Retry(
     total=5,
-    backoff_factor=0.6,  # 0.6, 1.2, 2.4, ...
+    backoff_factor=0.6,
     status_forcelist=[429, 500, 502, 503, 504],
     allowed_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
     raise_on_status=False,
@@ -58,7 +61,6 @@ logger.info("Redis broker set successfully.")
 
 
 def sanitize_domain(domain: str) -> str:
-    """Trim zero-width chars, ensure http(s) scheme, and lowercase host."""
     d = (domain or "").strip().replace("\u200b", "").replace("\u2060", "")
     if not d:
         return d
@@ -66,28 +68,21 @@ def sanitize_domain(domain: str) -> str:
     if not parsed.scheme:
         d = "https://" + d
         parsed = urlparse(d)
-    # Lowercase host; keep path/query as-is
     netloc = (parsed.netloc or "").lower()
     return parsed._replace(netloc=netloc).geturl()
 
 
 def serialize(obj):
     if isinstance(obj, dict):
-        return {
-            k: serialize(v)
-            for k, v in obj.items()
-            if v is not None and v != "" and v != [] and v != {}
-        }
+        return {k: serialize(v) for k, v in obj.items() if v not in (None, "", [], {})}
     if isinstance(obj, list):
-        return [serialize(i) for i in obj if i is not None and i != "" and i != []]
+        return [serialize(i) for i in obj if i not in (None, "", [], {})]
     if isinstance(obj, datetime):
         return obj.isoformat()
     return obj
 
 
-def report_analysis(
-    report_id, report_obj: ForensicReport, scraping_info, abuse_flags
-) -> bool:
+def report_analysis(report_id, report_obj: ForensicReport, scraping_info, abuse_flags) -> bool:
     url = f"{API_BASE}/reports/{report_id}/analysis"
     data = {
         "analysis": serialize(report_obj.to_dict()),
@@ -107,16 +102,13 @@ def report_analysis(
             body = resp.text[:500] if "resp" in locals() and resp is not None else ""
         except Exception:
             pass
-        logger.error(
-            f"Failed to PATCH analysis for {report_id}: {e} {(' | body='+body) if body else ''}",
-            exc_info=True,
-        )
+        logger.error(f"Failed to PATCH analysis for {report_id}: {e} {(' | body='+body) if body else ''}", exc_info=True)
         return False
 
 
 @dramatiq.actor(max_retries=3, time_limit=120000)
 def process_report(job):
-    """Dispatches each report job into its own sandboxed bot-runner container."""
+    """Dispatch each report into an isolated, ephemeral runner container."""
     report_id = job.get("report_id")
     domain = job.get("domain")
     if not report_id or not domain:
@@ -136,17 +128,16 @@ def process_report(job):
                 "REPORT_ID": report_id,
                 "API_URL": os.getenv("API_URL"),
                 "BOT_ACCESS_KEY": os.getenv("BOT_ACCESS_KEY"),
+                "SCREENSHOTS_DIR": "/data/screenshots",
+                "UPLOAD_ENDPOINT": f"{os.getenv('API_URL').rstrip('/')}/reports/{report_id}/screenshots",
             },
             network="brad_network",
+            tmpfs={"/data/screenshots": ""},   # ephemeral in-memory FS
             volumes={
-                os.path.abspath("./screenshots"): {
-                    "bind": "/app/screenshots",
-                    "mode": "rw",
-                },
                 os.path.abspath("./logs/bot"): {"bind": "/app/logs", "mode": "rw"},
             },
             detach=True,
-            remove=True,
+            auto_remove=True,                  # runner cleans up itself
         )
 
         logger.info(f"[DISPATCHER] Sandbox {container.id[:12]} started for {domain}")
