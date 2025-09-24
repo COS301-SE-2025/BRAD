@@ -50,10 +50,7 @@ async function bootstrap() {
   });
 
   // Serve /screenshots
-  const screenshotsPath =
-    process.env.SCREENSHOTS_DIR ||
-    // fallback for dev: ../../screenshots next to repo root
-    join(__dirname, '..', '..', 'screenshots');
+  const screenshotsPath = join(__dirname, '..', '..', 'screenshots');
   console.log('Serving screenshots from:', screenshotsPath);
 
   app.use(
