@@ -280,92 +280,116 @@ async getNoOfInvestigators(role:string): Promise<number> {
   }
 
   async getAvgInvestigatorTime(role: string): Promise<string> {
-    if (role !== 'admin') throw new ForbiddenException('Admins only');
-    const reports = await this.reportModel.find(
-      { 'scrapingInfo.summary.endTime': { $ne: null }, 'updatedAt': { $ne: null } },
-      { 'scrapingInfo.summary.endTime': 1, 'updatedAt': 1 }
-      
-    );
+  if (role !== 'admin') throw new ForbiddenException('Admins only');
 
-    if (!reports.length) return '0s';
-    const totalMs = reports.reduce((sum, r) => {
-      const start = new Date(r.scrapingInfo.summary.endTime).getTime();
-      const end = new Date(r.updatedAt).getTime();
-      return sum + (end - start);
-    }, 0);
+  // ✅ Only consider resolved reports (investigatorDecision != null)
+  const reports = await this.reportModel.find(
+    {
+      investigatorDecision: { $ne: null },
+      'scrapingInfo.summary.endTime': { $ne: null },
+      updatedAt: { $ne: null },
+    },
+    { 'scrapingInfo.summary.endTime': 1, updatedAt: 1 }
+  );
 
-    return this.formatDuration(totalMs / reports.length);
-  }
+  if (!reports.length) return '0s';
 
-  async getAvgResolutionTime(role: string): Promise<string> {
-    if (role !== 'admin') throw new ForbiddenException('Admins only');
-    const reports = await this.reportModel.find(
-      { 'createdAt': { $ne: null }, 'updatedAt': { $ne: null } },
-      { 'createdAt': 1, 'updatedAt': 1 }
-    );
+  const totalMs = reports.reduce((sum, r) => {
+    const start = new Date(r.scrapingInfo.summary.endTime).getTime();
+    const end = new Date(r.updatedAt).getTime();
+    return sum + (end - start);
+  }, 0);
 
-    if (!reports.length) return '0s';
-    const totalMs = reports.reduce((sum, r) => {
-      const start = new Date(r.createdAt).getTime();
-      const end = new Date(r.updatedAt).getTime();
-      return sum + (end - start);
-    }, 0);
+  return this.formatDuration(totalMs / reports.length);
+}
 
-    return this.formatDuration(totalMs / reports.length);
-  }
+async getAvgResolutionTime(role: string): Promise<string> {
+  if (role !== 'admin') throw new ForbiddenException('Admins only');
 
-  async getInvestigatorStats(role: string): Promise<any[]> {
-    if (role !== 'admin') throw new ForbiddenException('Admins only');
-    const reports = await this.reportModel.find(
-      { reviewedBy: { $ne: null }, updatedAt: { $ne: null } },
-      { reviewedBy: 1, investigatorDecision: 1, updatedAt: 1, 'scrapingInfo.summary.endTime': 1 }
-    );
+  // ✅ Only consider resolved reports (investigatorDecision != null)
+  const reports = await this.reportModel.find(
+    {
+      investigatorDecision: { $ne: null },
+      createdAt: { $ne: null },
+      updatedAt: { $ne: null },
+    },
+    { createdAt: 1, updatedAt: 1 }
+  );
 
-    if (!reports.length) return [];
+  if (!reports.length) return '0s';
 
-    const grouped: Record<string, any> = {};
-    for (const r of reports) {
-      const inv = r.reviewedBy.toString();
-      if (!grouped[inv]) {
-        grouped[inv] = { resolved: 0, malicious: 0, safe: 0, totalTime: 0 };
-      }
-      grouped[inv].resolved++;
-      if (r.investigatorDecision === 'malicious') grouped[inv].malicious++;
-      if (r.investigatorDecision === 'benign') grouped[inv].safe++;
+  const totalMs = reports.reduce((sum, r) => {
+    const start = new Date(r.createdAt).getTime();
+    const end = new Date(r.updatedAt).getTime();
+    return sum + (end - start);
+  }, 0);
 
-      if (r.scrapingInfo?.summary?.endTime) {
-        const start = new Date(r.scrapingInfo.summary.endTime).getTime();
-        const end = new Date(r.updatedAt).getTime();
-        grouped[inv].totalTime += (end - start);
-      }
+  return this.formatDuration(totalMs / reports.length);
+}
+
+async getInvestigatorStats(role: string): Promise<any[]> {
+  if (role !== 'admin') throw new ForbiddenException('Admins only');
+
+  // ✅ Only consider resolved reports (investigatorDecision != null)
+  const reports = await this.reportModel.find(
+    {
+      investigatorDecision: { $ne: null },
+      reviewedBy: { $ne: null },
+      updatedAt: { $ne: null },
+    },
+    { reviewedBy: 1, investigatorDecision: 1, updatedAt: 1, 'scrapingInfo.summary.endTime': 1 }
+  );
+
+  if (!reports.length) return [];
+
+  const grouped: Record<string, any> = {};
+
+  for (const r of reports) {
+    const inv = r.reviewedBy.toString();
+    if (!grouped[inv]) {
+      grouped[inv] = { resolved: 0, malicious: 0, safe: 0, totalTime: 0 };
     }
 
-    // Resolve usernames
-    const userIds = Object.keys(grouped);
-    const users = await this.userModel.find({ _id: { $in: userIds } }, { username: 1 });
+    grouped[inv].resolved++;
+    if (r.investigatorDecision === 'malicious') grouped[inv].malicious++;
+    if (r.investigatorDecision === 'benign') grouped[inv].safe++;
 
-    return userIds.map((id) => {
-      const stats = grouped[id];
-      const user = users.find((u) => u._id.toString() === id);
-      const maliciousPct = stats.resolved ? Math.round((stats.malicious / stats.resolved) * 100) : 0;
-      const safePct = stats.resolved ? Math.round((stats.safe / stats.resolved) * 100) : 0;
-      return {
-        name: user?.username || 'Unknown',
-        resolved: stats.resolved,
-        malicious: maliciousPct,
-        safe: safePct,
-        avgTime: this.formatDuration(stats.totalTime / stats.resolved),
-      };
-    });
+    if (r.scrapingInfo?.summary?.endTime) {
+      const start = new Date(r.scrapingInfo.summary.endTime).getTime();
+      const end = new Date(r.updatedAt).getTime();
+      grouped[inv].totalTime += (end - start);
+    }
   }
+
+  // Resolve usernames
+  const userIds = Object.keys(grouped);
+  const users = await this.userModel.find({ _id: { $in: userIds } }, { username: 1 });
+
+  return userIds.map((id) => {
+    const stats = grouped[id];
+    const user = users.find((u) => u._id.toString() === id);
+    const maliciousPct = stats.resolved ? Math.round((stats.malicious / stats.resolved) * 100) : 0;
+    const safePct = stats.resolved ? Math.round((stats.safe / stats.resolved) * 100) : 0;
+
+    return {
+      name: user?.username || 'Unknown',
+      resolved: stats.resolved,
+      malicious: maliciousPct,
+      safe: safePct,
+      avgTime: this.formatDuration(stats.totalTime / stats.resolved),
+    };
+  });
+}
 
   private formatDuration(ms: number): string {
     if (!ms) return '0s';
     const seconds = Math.floor(ms / 1000);
     const minutes = Math.floor(seconds / 60);
     const hours = Math.floor(minutes / 60);
+
     if (hours > 0) return `${hours}h ${minutes % 60}m`;
     if (minutes > 0) return `${minutes}m ${seconds % 60}s`;
     return `${seconds}s`;
   }
 }
+

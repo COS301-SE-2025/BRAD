@@ -286,3 +286,9 @@ select.input:focus {
   color: white;
 }
 
+.btn-cancel,
+.btn-primary {
+  min-width: 100px;
+  text-align: center;
+}
+
