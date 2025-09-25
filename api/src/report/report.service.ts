@@ -1,12 +1,13 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
+import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { ForensicService } from '../services/forensic.service';
 import { QueueService } from '../queue/queue.service';
-import { UpdateAnalysisDto } from './dto/update-analysis.dto';
+import { UpdateAnalysisDto, AnalysisStatusUnified } from './dto/update-analysis.dto';
 import { User } from '../schemas/user.schema';
 import * as nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
+
 
 @Injectable()
 export class ReportService {
@@ -122,30 +123,81 @@ export class ReportService {
     return pending[0] ?? null;
   }
 
-  async updateAnalysis(id: string, updateDto: UpdateAnalysisDto): Promise<Report> {
-    const updated = await this.reportModel.findByIdAndUpdate(
-      id,
-      {
-        $set: {
-          analysis: updateDto.analysis,
-          scrapingInfo: updateDto.scrapingInfo,
-          abuseFlags: updateDto.abuseFlags,
-          analyzed: true,
-          analysisStatus: updateDto.analysisStatus || 'done',
-          updatedAt: new Date(),
-        },
-      },
-      { new: true },
-    );
-
-
-
-    if (!updated) {
-      throw new NotFoundException(`Report with id ${id} not found`);
-    }
-
-    return updated;
+async updateAnalysis(id: string, updateDto: UpdateAnalysisDto): Promise<Report> {
+  if (!Types.ObjectId.isValid(id)) {
+    throw new BadRequestException('Invalid report id');
   }
+
+  // Normalize status (default to Done only if not provided)
+  const status: AnalysisStatusUnified =
+    (updateDto.analysisStatus as AnalysisStatusUnified) ?? AnalysisStatusUnified.Done;
+
+  const explicitStatusProvided =
+    Object.prototype.hasOwnProperty.call(updateDto, 'analysisStatus') &&
+    updateDto.analysisStatus !== undefined;
+
+  // Guard: you cannot mark Done with no analysis payload at all
+  const hasAnyPayload =
+    updateDto.analysis !== undefined ||
+    updateDto.scrapingInfo !== undefined ||
+    updateDto.abuseFlags !== undefined;
+
+  if (status === AnalysisStatusUnified.Done && !hasAnyPayload) {
+    throw new BadRequestException('Cannot mark analysis DONE without any analysis data.');
+  }
+
+  // Compute analyzed flag:
+  //  - DONE  -> true
+  //  - ERROR -> false
+  //  - Any other status:
+  //      * if caller explicitly changed status -> false
+  //      * otherwise leave as-is (do not set)
+  let analyzed: boolean | undefined;
+  if (status === AnalysisStatusUnified.Done) {
+    analyzed = true;
+  } else if (status === AnalysisStatusUnified.Error) {
+    analyzed = false;
+  } else if (explicitStatusProvided) {
+    analyzed = false;
+  } // else: undefined => don't touch current value
+
+  // Build $set only with provided fields (avoid null/undefined clobbering)
+  const $set: Record<string, unknown> = { analysisStatus: status };
+  if (typeof analyzed === 'boolean') $set.analyzed = analyzed;
+  if (updateDto.analysis !== undefined) $set.analysis = updateDto.analysis;
+  if (updateDto.scrapingInfo !== undefined) $set.scrapingInfo = updateDto.scrapingInfo;
+  if (updateDto.abuseFlags !== undefined) $set.abuseFlags = updateDto.abuseFlags;
+
+  // Allow callers to clear fields by sending null
+  const $unset: Record<string, ''> = {};
+  if (updateDto.analysis === null) $unset.analysis = '';
+  if (updateDto.scrapingInfo === null) $unset.scrapingInfo = '';
+  if (updateDto.abuseFlags === null) $unset.abuseFlags = '';
+
+  const update: any = {
+    $set,
+    $currentDate: { updatedAt: true }, // atomic server-side timestamp
+  };
+  if (Object.keys($unset).length) update.$unset = $unset;
+
+  const updated = await this.reportModel
+    .findByIdAndUpdate(
+      id,
+      update,
+      {
+        new: true,
+        runValidators: true,
+        context: 'query', // ensures validators that rely on this.getUpdate() behave
+      },
+    )
+    .exec();
+
+  if (!updated) {
+    throw new NotFoundException(`Report ${id} not found`);
+  }
+
+  return updated;
+}
 
 
   async updateDecisionAndReviewer(id: string, verdict: string, reviewedById: string) {

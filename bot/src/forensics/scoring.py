@@ -1,75 +1,132 @@
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, Optional
 from ..utils.logger import get_logger
 
 logger = get_logger(__name__)
 
-RISK_THRESHOLDS = {
-    "low": 0,
-    "medium": 4,
-    "high": 7
-}
+# Risk band thresholds (0–10 scale)
+RISK_THRESHOLDS = {"low": 0, "medium": 4, "high": 7}
 
-SUSPICIOUS_HOST_KEYWORDS = ['aws', 'ovh', 'contabo', 'cloudflare', 'azure', 'google']
+# Trim super-common infra to avoid constant false positives.
+SUSPICIOUS_HOST_KEYWORDS = ['contabo', 'ovh']  # intentionally excludes aws/cloudflare/azure/google
 THREAT_DOMAINS = ['malware-example.com', 'phishing-site.net']
 THREAT_IPS = ['123.123.123.123', '66.66.66.66']
 RISKY_COUNTRIES = ['RU', 'CN', 'KP', 'IR']
 
+# Known safe/training domains that should slightly deflate the score.
+ALLOWLIST_DOMAINS = {'books.toscrape.com', 'toscrape.com', 'example.com'}
+
+
+def _num(val: Any, default: float) -> float:
+    """
+    Best-effort numeric coercion.
+    - Returns default on None/invalid.
+    - Avoids treating booleans as 1/0.
+    """
+    if isinstance(val, bool):
+        return default
+    if isinstance(val, (int, float)):
+        return float(val)
+    try:
+        return float(str(val).strip())
+    except Exception:
+        return default
+
+
 def calculate_risk_score_with_reasons(stats: Dict[str, Any], forensics: Dict[str, Any]) -> Tuple[float, Dict[str, str]]:
+    """
+    Calculate a 0–10 risk score with explanatory reasons.
+    Robust to None/strings for numeric fields (e.g., ssl_days_remaining).
+    """
     logger.info("[Scoring] Calculating risk score with reasons...")
-    reasons = {}
+    reasons: Dict[str, str] = {}
     score = 0.0
 
-    domain_age = stats.get("domain_age_days", 9999)
-    if domain_age < 30:
-        reasons["new_domain"] = f"Domain is {domain_age} days old (< 30)"
+    domain = (forensics.get("domain") or "").strip().lower()
+    ip = (forensics.get("ip") or "").strip()
+
+    # 1) Domain age
+    raw_age = stats.get("domain_age_days")
+    if raw_age is None:
+        domain_age: Optional[float] = None
+    else:
+        age = _num(raw_age, float("nan"))
+        domain_age = age if age == age and age >= 0 else None  # NaN check
+
+    if domain_age is None:
+        reasons["new_domain"] = "Domain age unknown — not penalizing"
+    elif domain_age < 30:
+        reasons["new_domain"] = f"Domain is {int(domain_age)} days old (< 30)"
         score += 0.3
-        logger.debug(f"[Scoring] New domain: {domain_age} days → +0.3")
     else:
-        reasons["new_domain"] = f"Domain is mature ({domain_age} days)"
-        logger.debug(f"[Scoring] Mature domain: {domain_age} days → +0.0")
+        reasons["new_domain"] = f"Domain is mature ({int(domain_age)} days)"
 
-    ssl_remaining = stats.get("ssl_days_remaining", -1)
+    # 2) SSL health
+    ssl_remaining = _num(stats.get("ssl_days_remaining"), -1)
     if ssl_remaining <= 0:
-        reasons["ssl_expired"] = f"SSL expired or invalid ({ssl_remaining} days)"
+        reasons["ssl_expired"] = f"SSL expired or invalid ({int(ssl_remaining)} days)"
         score += 0.2
-        logger.debug(f"[Scoring] SSL expired → +0.2")
+        logger.debug("[Scoring] SSL expired → +0.2")
+    elif ssl_remaining <= 14:
+        reasons["ssl_expired"] = f"SSL expiring soon ({int(ssl_remaining)} days)"
+        score += 0.05
+        logger.debug("[Scoring] SSL expiring soon → +0.05")
     else:
-        reasons["ssl_expired"] = f"SSL valid ({ssl_remaining} days remaining)"
-        logger.debug(f"[Scoring] SSL valid → +0.0")
+        reasons["ssl_expired"] = f"SSL valid ({int(ssl_remaining)} days remaining)"
 
-    dns = stats.get("dns", {})
-    if not dns.get("has_spf", False):
-        reasons["spf_missing"] = "SPF record is missing"
-        score += 0.15
-        logger.debug("[Scoring] SPF missing → +0.15")
+    # 3) DNS posture
+    dns = stats.get("dns", {}) or {}
+    mx_count = int(_num(dns.get("mx_count"), 0))
+    ns_count = int(_num(dns.get("ns_count"), 0))
+    has_spf = bool(dns.get("has_spf", False))
+    has_dmarc = bool(dns.get("has_dmarc", False))
+
+    if mx_count > 0:
+        if not has_spf:
+            reasons["spf_missing"] = "SPF record is missing"
+            score += 0.10
+            logger.debug("[Scoring] SPF missing (+MX) → +0.10")
+        else:
+            reasons["spf_missing"] = "SPF record found"
+
+        if not has_dmarc:
+            reasons["dmarc_missing"] = "DMARC record is missing"
+            score += 0.10
+            logger.debug("[Scoring] DMARC missing (+MX) → +0.10")
+        else:
+            reasons["dmarc_missing"] = "DMARC record found"
     else:
-        reasons["spf_missing"] = "SPF record found"
+        reasons["spf_missing"] = "No MX — not penalizing SPF"
+        reasons["dmarc_missing"] = "No MX — not penalizing DMARC"
 
-    if not dns.get("has_dmarc", False):
-        reasons["dmarc_missing"] = "DMARC record is missing"
-        score += 0.15
-        logger.debug("[Scoring] DMARC missing → +0.15")
+    # NS health: penalize too few; very high can be odd.
+    if ns_count < 2:
+        reasons["ns_health"] = f"{ns_count} NS record(s) — single point of failure"
+        score += 0.10
+        logger.debug(f"[Scoring] Low NS count ({ns_count}) → +0.10")
+    elif ns_count > 8:
+        reasons["ns_health"] = f"{ns_count} NS records — unusually high"
+        score += 0.05
+        logger.debug(f"[Scoring] High NS count ({ns_count}) → +0.05")
     else:
-        reasons["dmarc_missing"] = "DMARC record found"
+        reasons["ns_health"] = f"{ns_count} NS record(s) (normal)"
 
-    ns_count = dns.get("ns_count", 0)
-    if ns_count > 2:
-        reasons["shared_hosting"] = f"{ns_count} NS records suggest shared hosting"
-        score += 0.1
-        logger.debug(f"[Scoring] Shared hosting detected ({ns_count} NS) → +0.1")
+    # 4) Reverse IP hostname heuristics (gated to reduce noise)
+    raw = forensics.get("reverseIp")
+    rev = (raw or "").strip()         # original case
+    rev_l = rev.lower()
+    if rev_l in {"", "unknown", "n/a", "none"}:
+        reasons["reverse_ip_suspicious"] = "Reverse DNS unavailable — no penalty"
+        logger.debug("[Scoring] Reverse DNS unavailable; no penalty applied")
     else:
-        reasons["shared_hosting"] = f"{ns_count} NS record(s) (OK)"
+        if any(k in rev_l for k in SUSPICIOUS_HOST_KEYWORDS):
+            reasons["reverse_ip_suspicious"] = f"Reverse DNS hostname ({rev}) contains suspicious keywords"
+            score += 0.1
+            logger.debug(f"[Scoring] Reverse DNS suspicious ({rev}) → +0.1")
+        else:
+            reasons["reverse_ip_suspicious"] = f"Reverse DNS ({rev}) is clean"
+            logger.debug(f"[Scoring] Reverse DNS clean ({rev})")
 
-    reverse_ip = forensics.get("reverseIp", "").lower()
-    if any(k in reverse_ip for k in SUSPICIOUS_HOST_KEYWORDS):
-        reasons["reverse_ip_suspicious"] = f"Reverse IP hostname ({reverse_ip}) contains suspicious keywords"
-        score += 0.1
-        logger.debug(f"[Scoring] Reverse IP suspicious ({reverse_ip}) → +0.1")
-    else:
-        reasons["reverse_ip_suspicious"] = f"Reverse IP ({reverse_ip}) is clean"
-
-    domain = forensics.get("domain", "")
-    ip = forensics.get("ip", "")
+    # 5) Threat intel hits (heavy signals)
     if domain in THREAT_DOMAINS:
         reasons["threat_domain_match"] = "Domain found in known threat list"
         score += 0.5
@@ -79,19 +136,28 @@ def calculate_risk_score_with_reasons(stats: Dict[str, Any], forensics: Dict[str
         score += 0.5
         logger.warning(f"[Scoring] Threat IP match: {ip} → +0.5")
 
-    geo = forensics.get("geo", {})
-    if geo.get("country") in RISKY_COUNTRIES:
-        reasons["geo_risk"] = f"Domain hosted in risky country: {geo.get('country')}"
-        score += 0.3
-        logger.warning(f"[Scoring] Risky hosting country {geo.get('country')} → +0.3")
+    # 6) Geo risk (gated)
+    country = (forensics.get("geo", {}) or {}).get("country")
+    if country in RISKY_COUNTRIES and ((domain_age is not None and domain_age < 90) or ssl_remaining <= 0):
+        reasons["geo_risk"] = f"Hosted in higher-risk country: {country}"
+        score += 0.10
+        logger.warning(f"[Scoring] Geo risk {country} (+gate) → +0.10")
     else:
-        reasons["geo_risk"] = f"Country {geo.get('country', 'Unknown')} (OK)"
+        reasons["geo_risk"] = f"Country {country or 'Unknown'} (OK)"
 
+    # 7) Allowlist bias (training / sandbox domains) — apply ONCE
+    if domain in ALLOWLIST_DOMAINS:
+        prev = score
+        score = max(0.0, score - 0.12)
+        reasons["allowlist_bias"] = "Training/sandbox domain — slight forgiveness applied"
+        logger.debug(f"[Scoring] Allowlist {domain}: {prev:.2f} → {score:.2f}")
+
+    # Normalize to 0–10, two decimals
     total_score = round(min(score * 10, 10.0), 2)
     logger.info(f"[Scoring] Final score: {total_score} ({risk_label(total_score)})")
     logger.debug(f"[Scoring] Reasons: {reasons}")
-
     return total_score, reasons
+
 
 def risk_label(score: float) -> str:
     if score >= RISK_THRESHOLDS["high"]:

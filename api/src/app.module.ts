@@ -11,6 +11,8 @@ import { AdminModule } from './admin/admin.module';
 import { StatisticsModule } from './statistics/statistics.module';
 import { HttpModule } from '@nestjs/axios';
 import { QueueModule } from './queue/queue.module'; // your FastAPI wrapper
+import { DomainSimilarityService } from './domain-similarity/domain-similarity.service';
+import { DomainSimilarityModule } from './domain-similarity/domain-similarity.module';
 
 
 @Module({
@@ -55,9 +57,10 @@ import { QueueModule } from './queue/queue.module'; // your FastAPI wrapper
     AuthModule,
     AdminModule,
     StatisticsModule,
+    DomainSimilarityModule,
   ],
 
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, DomainSimilarityService],
 })
 export class AppModule {}

@@ -1,121 +1,113 @@
-import React, { useState } from 'react';
-import '../styles/ReportModal.css';
-import { FaListAlt, FaLink, FaCode, FaImage, FaExclamationTriangle, FaInfoCircle } from 'react-icons/fa';
+"use client";
 
-const ScrapingInfoViewer = ({ scrapingInfo }) => {
-  const [activeTab, setActiveTab] = useState('structured');
-  const [showScreenshotModal, setShowScreenshotModal] = useState(false);
-  const [activeScreenshot, setActiveScreenshot] = useState("");
+import { useMemo, useState } from "react";
+import { FaListAlt, FaExchangeAlt, FaLink, FaImage, FaInfoCircle } from "react-icons/fa";
 
-  if (!scrapingInfo) return <p className="no-analysis">No scraping data available.</p>;
+/**
+ * Lightweight scraping info viewer:
+ * - shows summary grid if available
+ * - provides simple tabs: Structured | HTTP | Flagged | Screenshots
+ *
+ * This is a trimmed port of the old ScrapingInfoViewer to provide the useful info.
+ */
+
+export default function ScrapingInfoViewer({ scrapingInfo }) {
+  const [activeTab, setActiveTab] = useState("structured");
+  if (!scrapingInfo) return <p className="text-sm text-gray-500">No scraping data available.</p>;
+
+  const sum = scrapingInfo.summary || {};
+  const pages = Array.isArray(scrapingInfo.pages) && scrapingInfo.pages.length ? scrapingInfo.pages : [scrapingInfo];
 
   const tabs = [
-    { id: 'structured', label: 'Structured Info', icon: <FaListAlt /> },
-    { id: 'crawled', label: 'Crawled Links', icon: <FaLink /> },
-    { id: 'raw', label: 'Raw HTML', icon: <FaCode /> },
-    { id: 'screenshot', label: 'Screenshot', icon: <FaImage /> }
+    { id: "structured", label: "Structured Info", icon: <FaListAlt /> },
+    { id: "http", label: "HTTP Summary", icon: <FaExchangeAlt /> },
+    { id: "flagged", label: "Flagged", icon: <FaLink /> },
+    { id: "screenshots", label: "Screenshots", icon: <FaImage /> },
   ];
 
-  const renderStructured = () => {
-    const { headings = [], links = [], forms = [], redFlags = {} } = scrapingInfo.structuredInfo || {};
-    return (
-      <div className="scraping-section">
-        <p><strong>Headings:</strong> {headings.join(', ') || 'None'}</p>
-        <p><strong>Links:</strong> {links.length}</p>
-        <p><strong>Forms:</strong> {forms.length}</p>
-        {redFlags.suspiciousJS?.length > 0 ? (
-          <ul>{redFlags.suspiciousJS.map((code, i) => <li key={i}><code>{code}</code></li>)}</ul>
-        ) : <p>None</p>}
-        {redFlags.obfuscatedScripts && <p className="scraping-flag-warning"><FaExclamationTriangle /> Obfuscated Scripts Detected</p>}
-        {redFlags.redirectChain?.length > 0 && (
-          <div>
-            <p><strong>Redirect Chain:</strong></p>
-            <ul>{redFlags.redirectChain.map((url, i) => <li key={i}>{url}</li>)}</ul>
-          </div>
-        )}
-        {redFlags.usesMetaRefresh && <p className="scraping-flag-info"><FaInfoCircle /> Meta Refresh Detected</p>}
-        {redFlags.suspiciousInlineEvents?.length > 0 && (
-          <div>
-            <p><strong>Suspicious Inline Events:</strong></p>
-            <ul>{redFlags.suspiciousInlineEvents.map((evt, i) => <li key={i}><code>{evt}</code></li>)}</ul>
-          </div>
-        )}
+  const renderStructured = () => (
+    <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-md">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+        <div><strong>Pages crawled:</strong> {sum.pagesCrawled ?? "—"}</div>
+        <div><strong>Flagged:</strong> {sum.pagesFlagged ?? 0}</div>
+        <div><strong>Requests sampled:</strong> {sum.requestsSampled ?? "—"}</div>
+        <div><strong>Site risk:</strong> {sum.siteRiskLevel ?? "—"} ({sum.siteRiskScore ?? "—"})</div>
+        <div><strong>Total req:</strong> {sum.requestsTotal ?? "—"}</div>
+        <div><strong>Errors:</strong> {sum.errorsTotal ?? 0}</div>
       </div>
-    );
-  };
-
-  const renderCrawledLinks = () => (
-    <div className="scraping-section">
-      <ul>{scrapingInfo.crawledLinks?.map((link, i) => (
-        <li key={i}><a href={link} target="_blank" rel="noopener noreferrer">{link}</a></li>
-      ))}</ul>
     </div>
   );
 
-  const renderRawHtml = () => (
-    <div className="scraping-section scraping-html-section">
-      <pre><code>{scrapingInfo.htmlRaw || 'No HTML available.'}</code></pre>
-    </div>
-  );
-
-  const renderScreenshot = () => {
-    const baseUrl = import.meta.env.VITE_BACKEND_URL || "http://localhost:3000";
-    const path = `/static/${scrapingInfo.screenshotPath}`;
-    const imageUrl = `${baseUrl}${path}`;
-
-    return (
-      <>
-        <div className="scraping-section">
-          {scrapingInfo.screenshotPath ? (
-            <img
-              src={imageUrl}
-              alt="Screenshot"
-              className="scraping-screenshot"
-              onClick={() => { setActiveScreenshot(imageUrl); setShowScreenshotModal(true); }}
-            />
-          ) : <p>No screenshot available.</p>}
-        </div>
-        {showScreenshotModal && activeScreenshot && (
-          <div className="modal-overlay" onClick={() => setShowScreenshotModal(false)}>
-            <div className="modal-content" onClick={e => e.stopPropagation()}>
-              <h4>Screenshot Preview</h4>
-              <img src={activeScreenshot} alt="Screenshot Full" />
-              <button className="close-button" onClick={() => setShowScreenshotModal(false)}>Close</button>
+  const renderHTTP = () => (
+    <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-md">
+      <div className="text-sm">
+        <strong>HTTP summary</strong>
+        <div className="mt-2">
+          {pages.map((p, i) => (
+            <div key={i} className="mb-2">
+              <div className="font-medium truncate">{p.url || p.finalUrl || p.startUrl}</div>
+              <div className="text-xs text-gray-600">Status: {p.httpStatus ?? "—"} · Resp size: {p.responseSize ?? "—"}</div>
             </div>
-          </div>
-        )}
-      </>
-    );
-  };
+          ))}
+        </div>
+      </div>
+    </div>
+  );
 
-  const renderActiveTab = () => {
-    switch (activeTab) {
-      case 'structured': return renderStructured();
-      case 'crawled': return renderCrawledLinks();
-      case 'raw': return renderRawHtml();
-      case 'screenshot': return renderScreenshot();
-      default: return null;
-    }
-  };
+  const renderFlagged = () => (
+    <div className="p-3 bg-gray-100 dark:bg-gray-800 rounded-md">
+      <div className="text-sm">
+        <strong>Flagged pages</strong>
+        <ul className="list-disc ml-6 mt-2">
+          {pages.filter(p => p.flags && (p.flags.malwareDetected || p.flags.obfuscatedScripts || (p.flags.keywordMatches || 0) > 0)).length === 0 && <li>None</li>}
+          {pages.map((p, i) => {
+            const f = p.flags || {};
+            if (!f.malwareDetected && !f.obfuscatedScripts && !(f.keywordMatches || 0)) return null;
+            return (
+              <li key={i}>
+                {p.url || p.finalUrl || p.startUrl} — {f.malwareDetected ? "malware " : ""}{f.obfuscatedScripts ? "obfuscated " : ""}{(f.keywordMatches || 0) ? `${f.keywordMatches} kw` : ""}
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    </div>
+  );
+
+  const renderScreenshots = () => (
+    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+      {pages.flatMap(p => p.screenshots || []).length === 0 && <div className="text-sm text-gray-500">No screenshots</div>}
+      {pages.flatMap(p => p.screenshots || []).map((s, i) => (
+        <img key={i} src={ s.startsWith("/") ? `/api${s}` : s } alt={`ss-${i}`} className="w-full h-28 object-cover rounded" />
+      ))}
+    </div>
+  );
 
   return (
-    <div className="scraping-info-viewer">
-      <h2><FaListAlt /> Scraping & Crawling Data</h2>
-      {scrapingInfo.summary && <div className="scraping-summary"><FaInfoCircle /> {scrapingInfo.summary}</div>}
-      <div className="scraping-tabs">
-        {tabs.map(tab => (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2">
+        <FaInfoCircle />
+        <div className="text-sm font-medium">Scraping & Crawling Data</div>
+      </div>
+
+      <div className="flex gap-2 overflow-x-auto">
+        {tabs.map(t => (
           <button
-            key={tab.id}
-            className={`scraping-tab-btn ${activeTab === tab.id ? 'active' : ''}`}
-            onClick={() => setActiveTab(tab.id)}
+            key={t.id}
+            onClick={() => setActiveTab(t.id)}
+            className={`px-3 py-1 rounded ${activeTab === t.id ? "bg-[var(--primary)] text-white" : "bg-gray-100 dark:bg-gray-800"}`}
           >
-            {tab.icon} {tab.label}
+            <span className="inline-flex items-center gap-2">{t.icon}<span className="text-sm">{t.label}</span></span>
           </button>
         ))}
       </div>
-      {renderActiveTab()}
+
+      <div>
+        {activeTab === "structured" && renderStructured()}
+        {activeTab === "http" && renderHTTP()}
+        {activeTab === "flagged" && renderFlagged()}
+        {activeTab === "screenshots" && renderScreenshots()}
+      </div>
     </div>
   );
-};
-
-export default ScrapingInfoViewer;
+}

@@ -1,0 +1,60 @@
+name: BRAD CI/CD Pipeline
+
+on:
+  pull_request:
+    branches:
+      - main
+      - dev
+      - pipeline
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up .env file
+        run: |
+          echo "${{ secrets.ENV_FILE }}" > .env
+
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build and start services
+        run: docker compose up -d --build
+
+      - name: Stop services
+        if: always()
+        run: docker compose down
+#   test:
+#     runs-on: ubuntu-latest
+#     needs: build # only runs if build succeeds
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v3
+
+#       - name: Set up Node.js
+#         uses: actions/setup-node@v3
+#         with:
+#           node-version: 18
+
+#       # ---------- Frontend ----------
+#       - name: Install frontend dependencies
+#         working-directory: frontend
+#         run: npm install
+
+#       - name: Run frontend tests
+#         working-directory: frontend
+#         run: npm test
+
+#       # ---------- Backend (API) ----------
+#       - name: Install backend dependencies
+#         working-directory: api
+#         run: npm install
+
+#       - name: Run backend e2e tests
+#         working-directory: api
+#         run: NODE_ENV=test npm run test:e2e
+# #

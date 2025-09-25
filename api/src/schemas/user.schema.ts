@@ -67,6 +67,12 @@ export class User {
 
   @Prop({ default: false })
 mustChangePassword:boolean;
+
+@Prop()
+failedLoginAttempts?: number;
+
+@Prop({default: null})
+lockUntil?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -110,7 +110,8 @@ export class AdminService {
         pass: this.configService.get<string>('EMAIL_PASS'),
       },
     });
- const resetLink = `http://localhost:5173/change-password?token=${token}`;
+//  const resetLink = `http://localhost:5173/change-password?token=${token}`;
+ const resetLink = `${process.env.DOMAIN_NAME}/change-password?token=${token}`;
 
  const mailOptions = {
     to: user.email,
