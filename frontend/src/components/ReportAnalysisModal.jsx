@@ -89,8 +89,20 @@ export default function ReportAnalysisModal({
     return reasons;
   }, [scrapingInfo]);
 
-  const finalRiskScore = analysis.riskScore ?? s.siteRiskScore ?? "N/A";
-  const finalRiskLevel = analysis.riskLevel ?? s.siteRiskLevel ?? "N/A";
+  const ForensicScoreRaw = Number(analysis?.riskScore);
+  const siteRiskScore = Number(s?.siteRiskScore);
+
+  const finalRiskScore = ForensicScoreRaw + siteRiskScore;
+
+  const toLevel = (score) =>
+    score >= 70 ? "High" : score >= 40 ? "Medium" : "Low";
+  const forensicScoreRaw = Number(analysis?.riskScore);
+  const siteScoreRaw = Number(s?.siteRiskScore);
+
+  // Level from score if present, otherwise fall back to provided levels
+  const fallbackLevel = finalRiskScore?.riskLevel;
+  const finalRiskLevel =
+    finalRiskScore !== null ? toLevel(finalRiskScore) : fallbackLevel;
 
   const handleClaim = () => {
   setPendingVerdict("claim");

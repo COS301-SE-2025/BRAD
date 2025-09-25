@@ -3,7 +3,7 @@ import ProtectedLayout from "@/components/ProtectedLayout"
 
 export default function ReporterLayout({ children }) {
   return (
-    <ProtectedLayout allowedRoles={["reporter"]}> {/* reporters are "general" */}
+    <ProtectedLayout allowedRoles={["general"]}> {/* reporters are "general" */}
       {children}
     </ProtectedLayout>
   )

@@ -8,51 +8,91 @@ import ReportsBarChart from "@/components/ReportsBarChart"
 import TopDomains from "@/components/TopDomains"
 import StatCard from "@/components/StatCard"
 import InvestigatorStats from "@/components/InvestigatorStats"
-import { useState } from "react"
+import { useEffect, useState } from "react"
+
+import {
+  getTotalReports,
+  getMaliciousReports,
+  getSafeReports,
+  getRepeatedDomains,
+  getPendingReportsCount,
+  getInProgressReportsCount,
+  getResolvedReportsCount,
+  getReportsByYear,
+  getReportsByWeek,
+  getReportsByDay,
+  getAvgBotAnalysisTime,
+  getAvgInvestigatorTime,
+  getAvgResolutionTime,
+  getInvestigatorStats,
+} from "@/lib/api/stats"
 
 export default function AdminDashboard() {
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
+  const [statCards, setStatCards] = useState([])
+  const [treemapData, setTreemapData] = useState([])
+  const [distributionData, setDistributionData] = useState([])
+  const [barChartData, setBarChartData] = useState([])
+  const [topDomains, setTopDomains] = useState([])
+  const [investigatorStats, setInvestigatorStats] = useState([])
 
-  // 🔹 Mock data
-  const treemapData = [
-    { name: "Pending", value: 40 },
-    { name: "In Progress", value: 25 },
-    { name: "Resolved", value: 70 },
-  ]
+  useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const [
+          total, malicious, safe, domains,
+          pending, inProgress, resolved, reportsByYear,
+          avgBot, avgInvestigator, avgResolution,
+          invStats
+        ] = await Promise.all([
+          getTotalReports(),
+          getMaliciousReports(),
+          getSafeReports(),
+          getRepeatedDomains(),
+          getPendingReportsCount(),
+          getInProgressReportsCount(),
+          getResolvedReportsCount(),
+          getReportsByYear(),
+          getAvgBotAnalysisTime(),
+          getAvgInvestigatorTime(),
+          getAvgResolutionTime(),
+          getInvestigatorStats(),
+        ])
 
-  const distributionData = [
-    { name: "Malicious", value: 55 },
-    { name: "Safe", value: 45 },
-  ]
+        setStatCards([
+          { title: "Total Reports", value: total },
+          { title: "Avg Bot Analysis Time", value: avgBot },
+          { title: "Avg Investigator Analysis Time", value: avgInvestigator },
+          { title: "Avg Resolution Time", value: avgResolution },
+        ])
 
-  const barChartData = [
-    { name: "Jan", reports: 30 },
-    { name: "Feb", reports: 45 },
-    { name: "Mar", reports: 60 },
-    { name: "Apr", reports: 50 },
-    { name: "May", reports: 70 },
-  ]
+        setTreemapData([
+          { name: "Pending", value: pending },
+          { name: "In Progress", value: inProgress },
+          { name: "Resolved", value: resolved },
+        ])
 
-  const topDomains = [
-    { domain: "malicious-site.com", count: 45 },
-    { domain: "phishing-link.net", count: 32 },
-    { domain: "unsafe-download.org", count: 20 },
-    { domain: "fake-login.io", count: 15 },
-  ]
+        setDistributionData([
+          { name: "Malicious", value: malicious },
+          { name: "Safe", value: safe },
+        ])
 
-  const statCards = [
-    { title: "Total Reports", value: "235", color: "text-blue-500" },
-    { title: "Avg Bot Analysis Time", value: "3s", color: "text-green-500" },
-    { title: "Avg Investigator Analysis Time", value: "12m", color: "text-yellow-500" },
-    { title: "Avg Resolution Time", value: "1h 30m", color: "text-red-500" },
-  ]
+        // setBarChartData(
+        //   reportsByYear.map((d, i) => ({ name: `Month ${d.month}`, reports: d.count }))
+        // )
 
-  const investigatorStats = [
-    { name: "Investigator A", resolved: 50, malicious: 60, safe: 40, avgTime: "10m" },
-    { name: "Investigator B", resolved: 35, malicious: 40, safe: 60, avgTime: "14m" },
-    { name: "Investigator C", resolved: 20, malicious: 50, safe: 50, avgTime: "11m" },
-  ]
+        
 
+        setTopDomains(domains)
+        setInvestigatorStats(invStats)
+      } catch (err) {
+        console.error("Error fetching admin dashboard stats:", err)
+      }
+    }
+
+    fetchStats()
+  }, [])
+  
   return (
     <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
       <Sidebar onToggle={setSidebarExpanded} />

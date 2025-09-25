@@ -8,7 +8,7 @@ export default function InvestigatorStats({ investigators }) {
         <thead>
           <tr className="border-b">
             <th className="text-left py-2">Name</th>
-            <th className="text-left py-2">Resolved</th>
+            <th className="text-left py-2">Claimed</th>
             <th className="text-left py-2">Malicious %</th>
             <th className="text-left py-2">Safe %</th>
             <th className="text-left py-2">Avg Analysis Time</th>

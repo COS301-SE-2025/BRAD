@@ -50,3 +50,23 @@ export const getReportsByDay = async () => {
   const res = await API.get('/statistics/reports-by-day');
   return res.data;
 };
+
+export const getAvgBotAnalysisTime = async () => {
+  const res = await API.get('/statistics/avg-bot-analysis-time');
+  return res.data;
+};
+
+export const getAvgInvestigatorTime = async () => {
+  const res = await API.get('/statistics/avg-investigator-time');
+  return res.data;
+};
+
+export const getAvgResolutionTime = async () => {
+  const res = await API.get('/statistics/avg-resolution-time');
+  return res.data;
+};
+
+export const getInvestigatorStats = async () => {
+  const res = await API.get('/statistics/investigator-stats');
+  return res.data;
+};

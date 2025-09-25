@@ -7,6 +7,33 @@ import ReportAnalysisModal from "./ReportAnalysisModal";
 import API from "@/lib/api/axios";
 
 /**
+ * Helper to safely compute risk score + level + color
+ */
+function getRiskInfo(analysis, scrapingSummary) {
+  const forensic = Number(analysis?.riskScore ?? 0);
+  const site = Number(scrapingSummary?.siteRiskScore ?? 0);
+
+  const score = forensic + site;
+
+  if (isNaN(score)) {
+    return { score: null, level: "Unknown", color: "text-gray-400" };
+  }
+
+  let level = "Low";
+  let color = "text-green-500";
+
+  if (score >= 70) {
+    level = "High";
+    color = "text-red-500";
+  } else if (score >= 40) {
+    level = "Medium";
+    color = "text-orange-500";
+  }
+
+  return { score, level, color };
+}
+
+/**
  * Props:
  *  - report
  *  - view: optional view string (used for accessibility)
@@ -24,6 +51,10 @@ export default function ReportFileCard({
   const [role, setRole] = useState("reporter");
   const pathname = typeof window !== "undefined" ? window.location.pathname : "";
 
+  const analysis = report.analysis || {};
+  const scrapingInfo = report.scrapingInfo || {};
+  const s = scrapingInfo.summary || {};
+
   // derive role: prefer loggedInUser.role, fallback to route path
   useEffect(() => {
     if (loggedInUser?.role) setRole(loggedInUser.role);
@@ -32,22 +63,35 @@ export default function ReportFileCard({
     else if (pathname.startsWith("/reporter")) setRole("reporter");
   }, [loggedInUser, pathname]);
 
-  // helper risk score (some backends put risk at top-level)
-  const riskScore = report.riskScore ?? report.analysis?.riskScore ?? "N/A";
+  // Centralized risk score logic
+  const { score: finalRiskScore, level: finalRiskLevel, color: riskColor } =
+    getRiskInfo(analysis, s);
 
   const claimReport = async (e) => {
     e?.stopPropagation?.();
     if (!loggedInUser && role !== "investigator") {
-      return setNotification({ type: "error", message: "You must be signed in as an investigator to claim this report." });
-
+      return setNotification({
+        type: "error",
+        message:
+          "You must be signed in as an investigator to claim this report.",
+      });
     }
     try {
-      await API.post(`/reports/${report._id}/claim`, { investigatorId: loggedInUser?._id });
-      setNotification({ type: "success", message: "Report claimed successfully!" });
+      await API.post(`/reports/${report._id}/claim`, {
+        investigatorId: loggedInUser?._id,
+      });
+      setNotification({
+        type: "success",
+        message: "Report claimed successfully!",
+      });
       onRefresh();
     } catch (err) {
       console.error("Claim error", err);
-      setNotification({ type: "error", message: err?.response?.data?.message || "Failed to claim report." });
+      setNotification({
+        type: "error",
+        message:
+          err?.response?.data?.message || "Failed to claim report.",
+      });
     }
   };
 
@@ -58,19 +102,23 @@ export default function ReportFileCard({
       </div>
 
       <div className="mt-2 space-y-3">
-        <h3 className="text-lg font-semibold text-[var(--text)] truncate">{report.domain}</h3>
+        <h3 className="text-lg font-semibold text-[var(--text)] truncate">
+          {report.domain}
+        </h3>
 
         <div className="flex items-center text-sm text-[var(--muted)] gap-2">
           <FaCalendarAlt className="text-brad-500 flex-shrink-0" />
-          <span className="truncate block w-full">{new Date(report.createdAt).toLocaleString()}</span>
+          <span className="truncate block w-full">
+            {new Date(report.createdAt).toLocaleString()}
+          </span>
         </div>
 
         <div className="flex items-center text-sm gap-2">
-          <FaShieldAlt
-            className={Number(riskScore) > 70 ? "text-red-500 flex-shrink-0" : "text-green-500 flex-shrink-0"}
-          />
+          <FaShieldAlt className={`${riskColor} flex-shrink-0`} />
           <span className="truncate block w-full">
-            Risk Score: <b>{riskScore}</b>
+            Risk Score:{" "}
+            <b>{finalRiskScore !== null ? finalRiskScore : "N/A"}</b> (
+            {finalRiskLevel})
           </span>
         </div>
 
@@ -78,7 +126,10 @@ export default function ReportFileCard({
           <div className="flex items-center text-sm gap-2">
             <FaUser className="text-brad-500 flex-shrink-0" />
             <span className="truncate block w-full">
-              Investigator: {report.reviewedBy?.username || report.investigator || "Unknown"}
+              Investigator:{" "}
+              {report.reviewedBy?.username ||
+                report.investigator ||
+                "Unknown"}
             </span>
           </div>
         )}
@@ -90,7 +141,9 @@ export default function ReportFileCard({
             ) : (
               <MdCheckCircle className="text-green-500 flex-shrink-0" />
             )}
-            <span className="truncate block w-full">Verdict: {report.investigatorDecision}</span>
+            <span className="truncate block w-full">
+              Verdict: {report.investigatorDecision}
+            </span>
           </div>
         )}
 
