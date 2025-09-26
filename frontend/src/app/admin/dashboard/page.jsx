@@ -33,6 +33,7 @@ export default function AdminDashboard() {
   const [treemapData, setTreemapData] = useState([])
   const [distributionData, setDistributionData] = useState([])
   const [barChartData, setBarChartData] = useState([])
+  const [timeFrame, setTimeFrame] = useState("Monthly")
   const [topDomains, setTopDomains] = useState([])
   const [investigatorStats, setInvestigatorStats] = useState([])
 
@@ -41,7 +42,7 @@ export default function AdminDashboard() {
       try {
         const [
           total, malicious, safe, domains,
-          pending, inProgress, resolved, reportsByYear,
+          pending, inProgress, resolved,
           avgBot, avgInvestigator, avgResolution,
           invStats
         ] = await Promise.all([
@@ -52,7 +53,6 @@ export default function AdminDashboard() {
           getPendingReportsCount(),
           getInProgressReportsCount(),
           getResolvedReportsCount(),
-          getReportsByYear(),
           getAvgBotAnalysisTime(),
           getAvgInvestigatorTime(),
           getAvgResolutionTime(),
@@ -60,31 +60,25 @@ export default function AdminDashboard() {
         ])
 
         setStatCards([
-          { title: "Total Reports", value: total },
-          { title: "Avg Bot Analysis Time", value: avgBot },
-          { title: "Avg Investigator Analysis Time", value: avgInvestigator },
-          { title: "Avg Resolution Time", value: avgResolution },
+          { title: "Total Reports", value: total || 0 },
+          { title: "Avg Bot Analysis Time", value: avgBot || "N/A" },
+          { title: "Avg Investigator Analysis Time", value: avgInvestigator || "N/A" },
+          { title: "Avg Resolution Time", value: avgResolution || "N/A" },
         ])
 
         setTreemapData([
-          { name: "Pending", value: pending },
-          { name: "In Progress", value: inProgress },
-          { name: "Resolved", value: resolved },
+          { name: "Pending", value: pending || 0 },
+          { name: "In Progress", value: inProgress || 0 },
+          { name: "Resolved", value: resolved || 0 },
         ])
 
         setDistributionData([
-          { name: "Malicious", value: malicious },
-          { name: "Safe", value: safe },
+          { name: "Malicious", value: malicious || 0 },
+          { name: "Safe", value: safe || 0 },
         ])
 
-        // setBarChartData(
-        //   reportsByYear.map((d, i) => ({ name: `Month ${d.month}`, reports: d.count }))
-        // )
-
-        
-
-        setTopDomains(domains)
-        setInvestigatorStats(invStats)
+        setTopDomains(domains || [])
+        setInvestigatorStats(invStats || [])
       } catch (err) {
         console.error("Error fetching admin dashboard stats:", err)
       }
@@ -92,7 +86,44 @@ export default function AdminDashboard() {
 
     fetchStats()
   }, [])
-  
+
+  // === Fetch Reports over Time for Bar Chart ===
+  useEffect(() => {
+    const fetchBarData = async () => {
+      try {
+        let data
+        if (timeFrame === "Weekly") data = await getReportsByWeek()
+        else if (timeFrame === "Daily") data = await getReportsByDay()
+        else data = await getReportsByYear()
+
+        let formatted
+        if (timeFrame === "Monthly") {
+          const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
+          formatted = data.map((d) => ({
+            label: months[d.month - 1],
+            cases: d.count,
+          }))
+        } else if (timeFrame === "Weekly") {
+          formatted = data.map((d) => ({
+            label: `Week ${d.week}`,
+            cases: d.count,
+          }))
+        } else {
+          formatted = data.map((d) => ({
+            label: `${d.day}`,
+            cases: d.count,
+          }))
+        }
+
+        setBarChartData(formatted)
+      } catch (err) {
+        console.error("Error fetching reports over time:", err)
+      }
+    }
+
+    fetchBarData()
+  }, [timeFrame])
+
   return (
     <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
       <Sidebar onToggle={setSidebarExpanded} />
@@ -102,7 +133,6 @@ export default function AdminDashboard() {
           sidebarExpanded ? "ml-56" : "ml-16"
         }`}
       >
-        {/* Greeting (full width + sticky top) */}
         <UserGreeting
           username="Admin"
           title="Welcome back"
@@ -129,15 +159,17 @@ export default function AdminDashboard() {
         </div>
 
         <div className="mt-6 px-6">
-          <ReportsBarChart data={barChartData} />
+          <ReportsBarChart
+            data={barChartData}
+            timeFrame={timeFrame}
+            onTimeFrameChange={setTimeFrame}
+          />
         </div>
 
-        {/* Investigator Stats */}
         <div className="mt-6 px-6">
           <InvestigatorStats investigators={investigatorStats} />
         </div>
 
-        {/* Top Domains */}
         <div className="mt-6 px-6">
           <TopDomains domains={topDomains} />
         </div>
