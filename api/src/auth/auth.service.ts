@@ -1,11 +1,4 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  ConflictException,
-  InternalServerErrorException,
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, InternalServerErrorException,BadRequestException,NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
@@ -18,12 +11,9 @@ import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { Activity,ActivityDocument } from '../activity/activity.schema'; 
-
 @Injectable()
 export class AuthService {
-
-   private readonly MAX_LOGIN_ATTEMPTS = 5;
+     private readonly MAX_LOGIN_ATTEMPTS = 5;
   private readonly LOCKOUT_DURATION = 15 * 60 * 1000;
 
   constructor(
