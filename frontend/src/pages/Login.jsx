@@ -12,6 +12,8 @@ const LoginPage = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [isLocked, setIsLocked] = useState(false); 
+  const [lockoutMessage, setLockoutMessage] = useState(""); 
   const [showForgotPassword, setShowForgotPassword] = useState(false);
 
   const [displayedLines, setDisplayedLines] = useState([]);
@@ -31,7 +33,6 @@ const LoginPage = () => {
     }
 
     try {
-      // const response = await API.post('http://localhost:3000/auth/login', {
       const response = await API.post("/auth/login", {
         identifier: username,
         password,
@@ -64,7 +65,14 @@ const LoginPage = () => {
       }
     } catch (err) {
       if (err.response && err.response.data?.message) {
-        setError(err.response.data.message);
+        const message = err.response.data.message;
+        setError(message);
+
+        // Check for lockout-specific errors
+        if (message.includes("Account is locked") || message.includes("Account locked due to too many failed login attempts")) {
+          setIsLocked(true);
+          setLockoutMessage(message);
+        }
       } else {
         setError("Login failed. Please try again.");
       }
@@ -119,7 +127,10 @@ const LoginPage = () => {
             onChange={(e) => {
               setUsername(e.target.value);
               setError("");
+              setIsLocked(false); 
+              setLockoutMessage("");
             }}
+            disabled={isLocked} 
           />
           <input
             type="password"
@@ -128,16 +139,38 @@ const LoginPage = () => {
             onChange={(e) => {
               setPassword(e.target.value);
               setError("");
+              setIsLocked(false); 
+              setLockoutMessage("");
             }}
+            disabled={isLocked} 
           />
-          <button type="submit">Login</button>
-          {error && <div className="error">{error}</div>}
+          <button type="submit" disabled={isLocked}>
+            {isLocked ? "Account Locked" : "Login"}
+          </button>
+          {error && (
+            <div className="error">
+              {lockoutMessage || error}
+              {isLocked && (
+                <p>
+                  Check your email for a password reset link or try again later.
+                  <br />
+                  <button
+                    className="link-button"
+                    onClick={() => setShowForgotPassword(true)}
+                  >
+                    Request another reset link
+                  </button>
+                </p>
+              )}
+            </div>
+          )}
         </form>
 
         <div className="auth-links">
           <button
             className="forgotPass-button"
             onClick={() => setShowForgotPassword(true)}
+            disabled={isLocked} // Disable during lockout
           >
             Forgot Password?
           </button>
@@ -146,6 +179,7 @@ const LoginPage = () => {
             <button
               className="link-button"
               onClick={() => navigate("/register")}
+              disabled={isLocked} // Disable during lockout
             >
               Register here
             </button>
