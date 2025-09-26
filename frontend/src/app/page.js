@@ -1,14 +1,68 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Logo from "@/components/Logo";
 import ThemeToggle from "@/components/ThemeToggle";
 import StatCard from "@/components/StatCard";
 import ReportDistributionChart from "@/components/ReportDistributionChart";
 import ReportStepsCarousel from "@/components/ReportStepsCarousel";
-import { Timer, Search, Globe, FileText } from "lucide-react"; 
+import { Timer, Search, Globe, FileText } from "lucide-react";
+
+import {
+  getAvgBotAnalysisTime,
+  getAvgInvestigatorTime,
+  getAvgResolutionTime,
+  getTotalReports,
+  getMaliciousReports,
+  getSafeReports,
+} from "@/lib/api/stats";
 
 export default function LandingPage() {
+  const [stats, setStats] = useState({
+    avgBot: "N/A",
+    avgInvestigator: "N/A",
+    avgResolution: "N/A",
+    totalReports: 0,
+    malicious: 0,
+    safe: 0,
+  });
+
+  useEffect(() => {
+    const fetchLandingStats = async () => {
+      try {
+        const [
+          avgBot,
+          avgInvestigator,
+          avgResolution,
+          total,
+          malicious,
+          safe,
+        ] = await Promise.all([
+          getAvgBotAnalysisTime(),
+          getAvgInvestigatorTime(),
+          getAvgResolutionTime(),
+          getTotalReports(),
+          getMaliciousReports(),
+          getSafeReports(),
+        ]);
+
+        setStats({
+          avgBot: avgBot || "N/A",
+          avgInvestigator: avgInvestigator || "N/A",
+          avgResolution: avgResolution || "N/A",
+          totalReports: total || 0,
+          malicious: malicious || 0,
+          safe: safe || 0,
+        });
+      } catch (err) {
+        console.error("Error fetching landing stats:", err);
+      }
+    };
+
+    fetchLandingStats();
+  }, []);
+
   return (
     <div className="flex flex-col min-h-screen landing-bg text-[var(--text)]">
       {/* Navbar */}
@@ -63,10 +117,30 @@ export default function LandingPage() {
           Performance Insights
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-          <StatCard title="Bot Avg. Time" value="0.8s" color="text-blue-600" icon={Timer} />
-          <StatCard title="Investigator Avg. Time" value="3.2m" color="text-green-600" icon={Search} />
-          <StatCard title="Overall Avg. Time" value="1.5m" color="text-purple-600" icon={Globe} />
-          <StatCard title="Reports Submitted" value="12,450" color="text-orange-600" icon={FileText} />
+          <StatCard
+            title="Bot Avg. Time"
+            value={stats.avgBot}
+            color="text-blue-600"
+            icon={Timer}
+          />
+          <StatCard
+            title="Investigator Avg. Time"
+            value={stats.avgInvestigator}
+            color="text-green-600"
+            icon={Search}
+          />
+          <StatCard
+            title="Overall Avg. Time"
+            value={stats.avgResolution}
+            color="text-purple-600"
+            icon={Globe}
+          />
+          <StatCard
+            title="Reports Submitted"
+            value={stats.totalReports.toLocaleString()}
+            color="text-orange-600"
+            icon={FileText}
+          />
         </div>
 
         {/* Distribution Chart */}
@@ -74,8 +148,8 @@ export default function LandingPage() {
           <div className="w-full max-w-md">
             <ReportDistributionChart
               data={[
-                { name: "Malicious", value: 3200 },
-                { name: "Safe", value: 9250 },
+                { name: "Malicious", value: stats.malicious },
+                { name: "Safe", value: stats.safe },
               ]}
             />
           </div>
