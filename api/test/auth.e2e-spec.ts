@@ -10,10 +10,52 @@ import { connectInMemoryDB, disconnectInMemoryDB, clearDatabase, mongoServer } f
 import { User } from 'src/schemas/user.schema';
 import { Model } from 'mongoose';
 import { getModelToken } from '@nestjs/mongoose';
-import * as bcrypt from 'bcrypt'; 
+import * as bcrypt from 'bcrypt';
+ 
 
 jest.setTimeout(60000); // increase timeout just in case
 let userModel: Model<User>;
+
+export const loginAndGetToken = async (
+  app: INestApplication,
+  email: string,
+  password: string,
+): Promise<string> => {
+  const res = await request(app.getHttpServer())
+    .post('/auth/login')
+    .send({ identifier: email, password });
+
+  return res.body.token;
+};
+
+
+export interface CreateUserOptions {
+  firstname?: string;
+  lastname?: string;
+  username?: string;
+  email: string;
+  password?: string;
+  role?: 'general' | 'admin' | 'investigator';
+}
+
+export const createTestUser = async (
+  userModel: Model<User>,
+  options: CreateUserOptions,
+) => {
+  const hashedPassword = await bcrypt.hash(options.password || 'Password123!', 10);
+
+  const user = new userModel({
+    firstname: options.firstname || 'Test',
+    lastname: options.lastname || 'User',
+    username: options.username || `user${Date.now()}`,
+    email: options.email,
+    password: hashedPassword,
+    role: options.role || 'general',
+  });
+
+  await user.save();
+  return user;
+};
 
 describe('User Module (e2e)', () => {
   let app: INestApplication;
