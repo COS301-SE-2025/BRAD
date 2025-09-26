@@ -80,5 +80,45 @@ describe('AuthService (Integration)', () => {
     });
   });
 
- 
+  describe('login', () => {
+    it('should login successfully with email', async () => {
+      const registerDto: RegisterDto = {
+        firstname: 'Mike',
+        lastname: 'Smith',
+        username: 'mike',
+        email: 'mike@example.com',
+        password: 'Password123',
+      };
+
+      await service.register(registerDto);
+
+      const dto: LoginDto = {
+        identifier: 'mike@example.com',
+        password: 'Password123',
+      };
+
+      const result = await service.login(dto);
+      expect(result).toHaveProperty('token');
+      expect(result.user.email).toBe('mike@example.com');
+    });
+
+    it('should fail with wrong password', async () => {
+      const registerDto: RegisterDto = {
+        firstname: 'Anna',
+        lastname: 'Taylor',
+        username: 'anna',
+        email: 'anna@example.com',
+        password: 'Password123',
+      };
+
+      await service.register(registerDto);
+
+      const dto: LoginDto = {
+        identifier: 'anna@example.com',
+        password: 'wrongpass',
+      };
+
+      await expect(service.login(dto)).rejects.toThrow(UnauthorizedException);
+    });
+  });
 });
