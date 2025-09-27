@@ -112,9 +112,15 @@ export default function ReporterDashboard() {
           <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {filteredReports.length > 0 ? (
               filteredReports.map((report) => (
-                <div key={report._id} className="card p-4">
-                  <ReportFileCard report={report} loggedInUser={storedUser} onRefresh={fetchReports} />
-                  <ReportProgressBar status={mapStatusForProgress(report)} />
+                <div key={report._id} className="card p-4 flex flex-col justify-between">
+                  <ReportFileCard
+                    report={report}
+                    loggedInUser={storedUser}
+                    onRefresh={fetchReports}
+                  />
+                  <div className="mt-4">
+                    <ReportProgressBar status={mapStatusForProgress(report)} />
+                  </div>
                 </div>
               ))
             ) : (
@@ -135,7 +141,7 @@ export default function ReporterDashboard() {
 
             <div className="card p-4">
               <h4 className="font-medium mb-2">Summary</h4>
-              <div className="text-sm text-[var(--muted)] space-y-2">
+              <div className="text-sm text-[var] space-y-2">
                 <div>
                   <strong>Total:</strong> {reports.length}
                 </div>

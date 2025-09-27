@@ -1,37 +1,35 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import Sidebar from "@/components/Sidebar"
-import UserGreeting from "@/components/UserGreeting"
-import ReportForm from "@/components/ReportForm"
-import ReportStepsCarousel from "@/components/ReportStepsCarousel"
+import { useEffect, useState } from "react";
+import Sidebar from "@/components/Sidebar";
+import UserGreeting from "@/components/UserGreeting";
+import ReportForm from "@/components/ReportForm";
+import ReportStepsCards from "@/components/ReportStepsCards";
 import Notification from "@/components/Notification";
 
 export default function ReportPage() {
   const storedUser =
-    JSON.parse(localStorage.getItem("user")) || { username: "Reporter" }
+    JSON.parse(localStorage.getItem("user")) || { username: "Reporter" };
 
-  // track sidebar expanded state (ReporterSidebar calls onToggle)
-  const [sidebarExpanded, setSidebarExpanded] = useState(false)
-
+  const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [notification, setNotification] = useState(null);
 
   useEffect(() => {
-    document.title = "B.R.A.D | Report URL"
-  }, [])
+    document.title = "B.R.A.D | Report URL";
+  }, []);
 
   return (
     <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
-      {/* Sidebar - will notify parent via onToggle when hovered */}
+      {/* Sidebar */}
       <Sidebar onToggle={setSidebarExpanded} />
 
-      {/* Main content - shifts right depending on sidebar state */}
+      {/* Main content */}
       <div
         className={`flex-1 transition-all duration-300 p-8 ${
           sidebarExpanded ? "ml-56" : "ml-16"
         }`}
       >
-        {/* Sticky, full-width greeting (same pattern as dashboard) */}
+        {/* Greeting */}
         <UserGreeting
           username={storedUser.username}
           title="Hello"
@@ -48,21 +46,16 @@ export default function ReportPage() {
           </Notification>
         )}
 
+        {/* Report form spanning full width */}
+        <div className="mt-6 w-full">
+          <ReportForm setNotification={setNotification} />
+        </div>
 
-        {/* Layout: left = form, right = steps (matches dashboard layout) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-          {/* Left column: the report form (spans 2/3 on large screens) */}
-          <div className="lg:col-span-2">
-            {/* keep the form component full-width — it already provides its card-like styling */}
-            <ReportForm setNotification={setNotification} />
-          </div>
-
-          {/* Right column: steps / help carousel */}
-          <aside className="lg:col-span-1">
-            <ReportStepsCarousel />
-          </aside>
+        {/* Steps cards below the form */}
+        <div className="mt-8">
+          <ReportStepsCards />
         </div>
       </div>
     </div>
-  )
+  );
 }
