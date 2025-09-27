@@ -14,8 +14,8 @@ COPY tailwind.config.js postcss.config.js jsconfig.json ./
 COPY . .
 
 # Pass API URL as an environment variable at build time
-ARG NEXT_PUBLIC_API_URL
-ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+# ARG NEXT_PUBLIC_API_URL
+# ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 
 RUN npm run build
 
