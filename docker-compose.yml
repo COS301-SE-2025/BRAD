@@ -49,6 +49,8 @@ services:
       - .env
     networks:
       - brad_net
+    labels:
+      - "traefik.enable=false"
 
   # No container_name or volume: This will only be ran dynamically and not with docker compose
   bot-runner:
@@ -56,6 +58,8 @@ services:
     image: brad-bot-runner:latest
     networks:
       - brad_net
+    labels:
+      - "traefik.enable=false"
 
   fastapi-queue:
     build: ./fastapi-queue
@@ -151,7 +155,7 @@ services:
 volumes:
   mongo-data:
   redis-data:
-  brad_screenshots:            # Named volume for screenshots
+  brad_screenshots: # Named volume for screenshots
 
 networks:
   brad_net:

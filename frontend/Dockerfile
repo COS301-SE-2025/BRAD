@@ -13,6 +13,10 @@ COPY tailwind.config.js postcss.config.js jsconfig.json ./
 # Copy everything else
 COPY . .
 
+# Pass API URL as an environment variable at build time
+ARG NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+
 RUN npm run build
 
 # Run frontend on port 5173 (not 3000!)
