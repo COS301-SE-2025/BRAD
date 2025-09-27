@@ -6,7 +6,7 @@
 :root {
   --bg: #ffffff; 
   --card: #a0cdfa55; /* light blue with ~50% opacity */
-  --card-nested: #ffffff97;;  /* lighter background for nested cards */
+  --card-nested: #ffffff97;  /* lighter background for nested cards */
   --input-bg: #f5faff; /* very light blue, almost white */
   --text: #0b1220;
   --muted: #6b7280;
@@ -262,7 +262,7 @@ select.input:focus {
 
 /* ===== MODAL STYLING ===== */
 .modal-card {
-  background-color: var(--card);
+  background-color: #ffffff97; 
   color: var(--text);
   border-radius: 1rem; /* 2xl */
   box-shadow: 0 10px 30px rgba(0,0,0,0.25);
@@ -270,7 +270,7 @@ select.input:focus {
 }
 
 .modal-message {
-  color: var(--muted);
+  color: var(--text);
   line-height: 1.5;
 }
 
@@ -291,4 +291,18 @@ select.input:focus {
   min-width: 100px;
   text-align: center;
 }
+
+.report-progress-bar {
+  position: relative; 
+  z-index: 0;
+}
+
+/* ===== MODAL OVERLAY ===== */
+.modal-overlay {
+  @apply fixed inset-0 z-50 flex items-center justify-center;
+  background-color: rgba(0, 0, 0, 0.45); /* semi-dark background */
+  backdrop-filter: blur(6px); /* blur effect */
+  -webkit-backdrop-filter: blur(6px); /* Safari support */
+}
+
 

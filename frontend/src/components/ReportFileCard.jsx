@@ -89,19 +89,20 @@ export default function ReportFileCard({
       console.error("Claim error", err);
       setNotification({
         type: "error",
-        message:
-          err?.response?.data?.message || "Failed to claim report.",
+        message: err?.response?.data?.message || "Failed to claim report.",
       });
     }
   };
 
   return (
-    <div className="relative bg-[var(--card)] rounded-lg shadow-md p-4 border border-gray-200 dark:border-gray-700">
-      <div className="absolute -top-3 left-4 bg-[var(--primary)] text-white px-3 py-1 rounded-t-md text-xs font-semibold">
+    <div className="relative rounded-lg shadow-md border border-gray-200 dark:border-gray-700 overflow-hidden">
+      {/* File-style header */}
+      <div className="bg-blue-500 text-white px-4 py-2 text-sm font-bold flex items-center">
         Report
       </div>
 
-      <div className="mt-2 space-y-3">
+      {/* File body */}
+      <div className="p-4 space-y-3 bg-[var(--card)]">
         <h3 className="text-lg font-semibold text-[var(--text)] truncate">
           {report.domain}
         </h3>
@@ -147,6 +148,7 @@ export default function ReportFileCard({
           </div>
         )}
 
+        {/* Actions */}
         <div className="mt-4 flex gap-2">
           <ReportAnalysisModal
             report={report}
@@ -160,7 +162,6 @@ export default function ReportFileCard({
             }
           />
 
-          {/* Claim shown only to investigators for pending, unclaimed reports */}
           {role === "investigator" &&
             !report.reviewedBy &&
             !report.investigatorDecision &&

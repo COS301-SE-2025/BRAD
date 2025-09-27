@@ -185,6 +185,7 @@ export default function ReportAnalysisModal({
       <div onClick={() => setOpen(true)}>{trigger}</div>
       {open && (
         <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 py-10 px-4">
+          <div className="modal-overlay items-start justify-center py-10 px-4">
           <div
             className="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 rounded-lg shadow-lg w-full max-w-5xl max-h-[90vh] overflow-y-auto p-6"
             onClick={(e) => e.stopPropagation()}
@@ -249,7 +250,7 @@ export default function ReportAnalysisModal({
                         <InfoCard icon={<FaMapMarkerAlt />} label="IP" value={analysis.ip} />
                         <InfoCard icon={<FaBuilding />} label="Registrar" value={analysis.registrar} />
                         <InfoCard icon={<FaCheckCircle />} label="SSL Valid" value={analysis.sslValid ? "Yes" : "No"} />
-                        <InfoCard icon={<FaCalendarAlt />} label="SSL Expiry" value={analysis.sslExpires} />
+                        <InfoCard icon={<FaCalendarAlt />} label="SSL Expiry" value={new Date(analysis.sslExpires).toLocaleString()} />
                       </div>
                     </section>
 
@@ -279,8 +280,8 @@ export default function ReportAnalysisModal({
                     <InfoCard icon={<FaUser />} label="Investigator" value={report.reviewedBy?.username} />
                     <InfoCard icon={<FaChartLine />} label="Final Risk Score" value={finalRiskScore} />
                     <InfoCard icon={<MdSecurity />} label="Final Risk Level" value={finalRiskLevel} />
-                    {s.startTime && <InfoCard icon={<FaClock />} label="Scan Start" value={s.startTime} />}
-                    {s.endTime && <InfoCard icon={<FaClock />} label="Scan End" value={s.endTime} />}
+                    {s.startTime && <InfoCard icon={<FaClock />} label="Scan Start" value={new Date(s.startTime).toLocaleString()} />}
+                    {s.endTime && <InfoCard icon={<FaClock />} label="Scan End" value={new Date(s.endTime).toLocaleString()}/>}
                     {s.durationMs && <InfoCard icon={<FaClock />} label="Duration (ms)" value={s.durationMs} />}
 
                     <section>
@@ -292,17 +293,17 @@ export default function ReportAnalysisModal({
                         <InfoCard icon={<FaBuilding />} label="Registrar" value={analysis.registrar} />
                         <InfoCard icon={<FaUser />} label="WHOIS Owner" value={analysis.whoisOwner} />
                         <InfoCard icon={<FaCheckCircle />} label="SSL Valid" value={analysis.sslValid ? "Yes" : "No"} />
-                        <InfoCard icon={<FaCalendarAlt />} label="SSL Expiry" value={analysis.sslExpires} />
+                        <InfoCard icon={<FaCalendarAlt />} label="SSL Expiry" value={new Date(analysis.sslExpires).toLocaleString()} />
                         <InfoCard icon={<FaMapMarkerAlt />} label="Reverse IP" value={analysis.reverseIp} />
                         <InfoCard icon={<FaMapMarkerAlt />} label="Country" value={analysis.geo?.country} />
                         <InfoCard icon={<FaBuilding />} label="ASN/Org" value={analysis.geo?.asn} />
                         <InfoCard icon={<FaCalendarAlt />} label="Domain Created" value={analysis.stats?.domain_created} />
-                        <InfoCard icon={<FaClock />} label="Domain Age" value={analysis.stats?.domain_age_days} />
+                        <InfoCard icon={<FaClock />} label="Domain Age(days)" value={analysis.stats?.domain_age_days} />
                         <InfoCard icon={<FaClock />} label="SSL Days Remaining" value={analysis.stats?.ssl_days_remaining} />
                         <InfoCard icon={<FaClock />} label="NS Count" value={analysis.stats?.dns?.ns_count} />
                         <InfoCard icon={<FaClock />} label="MX Count" value={analysis.stats?.dns?.mx_count} />
-                        <InfoCard icon={<FaCalendarAlt />} label="Analysis Timestamp" value={analysis.timestamp} />
-                      </div>
+                        <InfoCard icon={<FaCalendarAlt />} label="Analysis Timestamp" value={new Date(analysis.timestamp).toLocaleString()} />
+                      </div> 
                     </section>
 
                     <section>
@@ -392,6 +393,7 @@ export default function ReportAnalysisModal({
               </>
             )}
           </div>
+        </div>
         </div>
       )}
     </>
