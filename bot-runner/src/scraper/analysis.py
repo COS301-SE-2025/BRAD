@@ -1,22 +1,29 @@
+# bot-runner/src/scraper/analysis.py
 from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin, urlparse
 import os, time, hashlib, threading, requests
 from urllib import robotparser
-from collections import Counter
 import re
 from statistics import mean
-
 from datetime import datetime
+
 from .network_tracker import NetworkTracker
 from src.utils.logger import get_logger
-
+from src.utils.proxy import playwright_proxy, requests_proxies  # proxy helpers
 
 logger = get_logger(__name__)
 
 DEFAULT_UA = "BRADBot/1.0 (+https://example.invalid/bot) Playwright"
 REQUESTS_SAMPLE_LIMIT = 1000
 ALLOWED_SCHEMES = {"http", "https"}
+
+# ----- Global requests session (proxy + headers) -----
+PROXIES = requests_proxies()
+SESSION = requests.Session()
+if PROXIES:
+    SESSION.proxies.update(PROXIES)
+SESSION.headers.setdefault("User-Agent", DEFAULT_UA)
 
 # --- scoring helpers / constants ---
 BENIGN_TRAINING_DOMAINS = {
@@ -53,15 +60,14 @@ def _dedupe_requests_log(log):
     seen, out = set(), []
     for r in log:
         key = (r.get("url"), r.get("method"), r.get("status"), r.get("resourceType"))
-        if key in seen: 
+        if key in seen:
             continue
         seen.add(key)
         out.append(r)
     return out
 
 def _mixed_content_counts(page_scheme: str, responses: list) -> int:
-    """Count HTTP subresource loads on an HTTPS page."""
-    if page_scheme != "https": 
+    if page_scheme != "https":
         return 0
     c = 0
     for r in responses:
@@ -69,25 +75,32 @@ def _mixed_content_counts(page_scheme: str, responses: list) -> int:
             if r.get("protocol") == "http":
                 c += 1
         except Exception:
-           pass
+            pass
     return c
 
 def _origin(url: str) -> str:
     p = urlparse(url)
     return f"{p.scheme}://{p.netloc}"
 
+# --- robots via shared session (proxy-aware)
 def _load_robots(origin: str, user_agent: str, timeout=8) -> robotparser.RobotFileParser:
     rp = robotparser.RobotFileParser()
     robots_url = urljoin(origin, "/robots.txt")
-    try:
-        r = requests.get(robots_url, timeout=timeout, headers={"User-Agent": user_agent})
-        if r.status_code >= 400:
-            logger.info(f"[Robots] {robots_url} not available (status {r.status_code}); allow-all.")
-            rp.parse("")
-        else:
-            rp.parse(r.text.splitlines())
-    except Exception as e:
-        logger.warning(f"[Robots] Failed to fetch robots.txt: {e}; allow-all.")
+    # light retry to cope with proxy slowness
+    last_exc = None
+    for _ in range(2):
+        try:
+            r = SESSION.get(robots_url, timeout=timeout, headers={"User-Agent": user_agent})
+            if r.status_code >= 400:
+                logger.info(f"[Robots] {robots_url} not available (status {r.status_code}); allow-all.")
+                rp.parse("")
+            else:
+                rp.parse(r.text.splitlines())
+            break
+        except Exception as e:
+            last_exc = e
+    if rp.default_entry is None and last_exc:
+        logger.warning(f"[Robots] Failed to fetch robots.txt: {last_exc}; allow-all.")
         rp.parse("")
     rp.set_url(robots_url)
     return rp
@@ -107,10 +120,6 @@ def _hash_html(html: str) -> str:
 SUSPICIOUS_KEYWORDS = [
     "login","password","verify","reset","wallet","seed","mnemonic","2fa",
     "bank","update account","confirm","urgent","limited time","prize"
-]
-JS_OBFUSCATION_HINTS = [
-    "atob(","btoa(","fromCharCode","charCodeAt","unescape(","eval(","Function(",
-    "while(true)","setTimeout(","setInterval(","document.write(","window.location="
 ]
 
 def _score_keywords(text: str) -> int:
@@ -152,11 +161,10 @@ def perform_scraping(
     delay_seconds: float = 1.5,
     obey_robots: bool = True,
     user_agent: str = DEFAULT_UA,
-    calculate_risk_score=None,  # inject if you want; else fallback
+    calculate_risk_score=None,
+    proxy_config=None,          # Playwright proxy dict or None
+    req_proxies=None,           # requests proxies dict or None
 ):
-    """
-    Returns (scraping_info, abuse_flags)
-    """
     if calculate_risk_score is None:
         def calculate_risk_score(page_ctx, agg_ctx):
             f = page_ctx.get("flags", {})
@@ -169,19 +177,15 @@ def perform_scraping(
             score = 5
             reasons = []
 
-            if f.get("malwareDetected"):
-                score += 70; reasons.append("Malware indicator")
-            if f.get("obfuscatedScripts"):
-                score += 25; reasons.append("Obfuscated JS detected")
+            if f.get("malwareDetected"): score += 70; reasons.append("Malware indicator")
+            if f.get("obfuscatedScripts"): score += 25; reasons.append("Obfuscated JS detected")
 
             js_count = len(f.get("suspiciousJS", []))
             if js_count:
                 bump = min(15, js_count * 5)
                 score += bump; reasons.append(f"{js_count} suspicious JS snippet(s) (+{bump})")
-            if f.get("usesMetaRefresh"):
-                score += 15; reasons.append("Meta refresh")
-            if redirect_len > 1:
-                score += 10; reasons.append(f"Redirect chain length={redirect_len}")
+            if f.get("usesMetaRefresh"): score += 15; reasons.append("Meta refresh")
+            if redirect_len > 1: score += 10; reasons.append(f"Redirect chain length={redirect_len}")
 
             km = int(f.get("keywordMatches", 0))
             if km:
@@ -197,8 +201,7 @@ def perform_scraping(
                     reasons.append("CSP upgrade-insecure-requests mitigates mixed content")
             if err_cnt:
                 bump = min(10, err_cnt * 2)
-                score += bump
-                reasons.append(f"{err_cnt} error response(s) (+{bump})")
+                score += bump; reasons.append(f"{err_cnt} error response(s) (+{bump})")
 
             score = _clamp(score, 5, 100)
             if host in BENIGN_TRAINING_DOMAINS:
@@ -210,24 +213,39 @@ def perform_scraping(
     screenshot_dir = os.getenv("SCREENSHOTS_DIR", "/data/screenshots")
     os.makedirs(screenshot_dir, exist_ok=True)
 
+    # Defaults from env if caller didn't pass them; sync requests session proxies BEFORE first call
+    if proxy_config is None:
+        proxy_config = playwright_proxy()
+    if req_proxies:
+        SESSION.proxies.clear()
+        SESSION.proxies.update(req_proxies)
+    else:
+        SESSION.proxies.clear()
+
+    # Debug: one-time proxy prints
+    if req_proxies:
+        logger.info(f"[Proxy] requests via {req_proxies.get('https') or req_proxies.get('http')}")
+    if proxy_config:
+        logger.info(f"[Proxy] playwright via {proxy_config.get('server')}")
+
     origin = _origin(start_url)
     logger.info(f"[Crawl Start] {start_url} (origin={origin}) | Report={report_id}")
 
-    rp = _load_robots(origin, user_agent) if obey_robots else None
+    rp = _load_robots(origin, user_agent, timeout=8) if obey_robots else None
 
     pages_out, screenshots_all, all_requests_sample = [], [], []
     global_redirects, visited_urls, visited_hashes = {}, set(), set()
     frontier = [(start_url, 0)]
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        context = browser.new_context(user_agent=user_agent)
+        cfg = dict(proxy_config) if proxy_config else None
+        if cfg is not None:
+            # prevent any proxy bypass attempts
+            cfg.setdefault("bypass", "")
+
+        browser = p.chromium.launch(headless=True, proxy=cfg)
+        context = browser.new_context(user_agent=user_agent)  # no proxy here; it's at launch
         page = context.new_page()
-
-        req_lock = threading.Lock()
-        # Per-page buffers
-        current_buffers = {"reqs": [], "resps": [], "tracker": NetworkTracker()}
-
 
         req_lock = threading.Lock()
         current_buffers = {"reqs": [], "resps": [], "tracker": NetworkTracker()}
@@ -236,7 +254,6 @@ def perform_scraping(
             nonlocal all_requests_sample, current_buffers
             entry = {"url": req.url, "method": req.method, "resourceType": req.resource_type}
             with req_lock:
-                # tracker
                 tr = current_buffers["tracker"]
                 tr.mark_start()
                 tr.requests_total += 1
@@ -245,7 +262,6 @@ def perform_scraping(
                         tr.http_on_https_attempts += 1
                 except Exception:
                     pass
-                # sampling
                 if len(all_requests_sample) < REQUESTS_SAMPLE_LIMIT:
                     all_requests_sample.append(entry)
                     current_buffers["reqs"].append(entry)
@@ -263,7 +279,6 @@ def perform_scraping(
             except Exception:
                 entry = {"url": resp.url, "status": resp.status}
             with req_lock:
-                # tracker
                 tr = current_buffers["tracker"]
                 tr.responses_total += 1
                 try:
@@ -273,7 +288,6 @@ def perform_scraping(
                 except Exception:
                     pass
                 tr.mark_end()
-                # sampling
                 if len(all_requests_sample) < REQUESTS_SAMPLE_LIMIT:
                     all_requests_sample.append(entry)
                 current_buffers["resps"].append(entry)
@@ -300,13 +314,13 @@ def perform_scraping(
                     continue
 
                 visited_urls.add(url)
-                # reset per-page buffers
                 current_buffers["reqs"] = []
                 current_buffers["resps"] = []
                 current_buffers["tracker"] = NetworkTracker()
 
                 try:
-                    resp = page.goto(url, wait_until="domcontentloaded", timeout=15000)
+                    # Proxies add latency; give a little headroom
+                    resp = page.goto(url, wait_until="domcontentloaded", timeout=30000)
                     page.wait_for_timeout(800)
                 except Exception as e:
                     logger.warning(f"[Nav Error] {url}: {e}")
@@ -321,8 +335,7 @@ def perform_scraping(
                 chain = list(reversed(chain)) + [final_url]
                 global_redirects[url] = chain
 
-                
-                # Document CSP (mitigation signal)
+                # Document CSP
                 doc_csp = ""
                 try:
                     if resp:
@@ -332,7 +345,6 @@ def perform_scraping(
                     pass
                 doc_csp_upgrade = "upgrade-insecure-requests" in doc_csp.lower()
 
-                # Per-page network summary
                 page_responses = list(current_buffers["resps"])
                 http_on_https = _mixed_content_counts(urlparse(final_url).scheme or "", page_responses)
                 error_count = sum(1 for r in page_responses if isinstance(r.get("status"), int) and 400 <= r["status"] < 600)
@@ -347,7 +359,7 @@ def perform_scraping(
 
                 ts = int(time.time())
                 fname = f"{report_id}_{len(pages_out)+1}_{ts}.png"
-                screenshot_rel = f"screenshots/{report_id}/{fname}"  # served at /static/<this>
+                screenshot_rel = f"screenshots/{report_id}/{fname}"
                 screenshot_abs = os.path.join(screenshot_dir, fname)
                 try:
                     page.screenshot(path=screenshot_abs, full_page=True)
@@ -367,7 +379,7 @@ def perform_scraping(
                 visited_hashes.add(html_hash)
 
                 soup = BeautifulSoup(html_raw, "html.parser")
-                title = soup.title.string.strip() if soup.title and soup.title.string else "No title"
+                title = soup.title and soup.title.string.strip() if soup.title and soup.title.string else "No title"
 
                 headings, links, forms = _extract_structured(soup, final_url)
                 susp_inline, susp_js, obfus, meta_refresh = _inspect_page_for_flags(soup)
@@ -386,7 +398,7 @@ def perform_scraping(
                     "docCspHasUpgradeInsecureRequests": doc_csp_upgrade,
                 }
 
-                redirect_chain_len = len(chain)  # 1 means no real redirect
+                redirect_chain_len = len(chain)
                 hostname = urlparse(final_url).hostname or ""
                 page_risk, reasons = calculate_risk_score(
                     {
@@ -427,12 +439,10 @@ def perform_scraping(
         finally:
             try: context.close()
             except Exception: pass
-            browser.close()
+            try: browser.close()
+            except Exception: pass
 
-    pages_flagged = [
-        p["url"] for p in pages_out
-        if p["riskScore"] >= 40 or p["flags"].get("malwareDetected", False)
-    ]
+    pages_flagged = [p["url"] for p in pages_out if p["riskScore"] >= 40 or p["flags"].get("malwareDetected", False)]
 
     if pages_out:
         scores = sorted((p["riskScore"] for p in pages_out), reverse=True)
@@ -444,7 +454,6 @@ def perform_scraping(
         site_risk_level = _risk_level(site_risk_score)
     else:
         site_risk_score, site_risk_level = 5, "Low"
-
 
     def _safe_dt(s):
         try:
@@ -470,7 +479,6 @@ def perform_scraping(
     scan_duration_ms = (int((scan_end - scan_start).total_seconds() * 1000)
                         if scan_start and scan_end else None)
 
-
     all_requests_sample = _dedupe_requests_log(all_requests_sample[:REQUESTS_SAMPLE_LIMIT])
     scraping_info = {
         "scan": {
@@ -488,8 +496,8 @@ def perform_scraping(
             "requestsSampled": len(all_requests_sample),
             "siteRiskScore": site_risk_score,
             "siteRiskLevel": site_risk_level,
-            "startTime": scan_start.isoformat().replace("+00:00", "Z") if scan_start else None,
-            "endTime": scan_end.isoformat().replace("+00:00", "Z") if scan_end else None,
+            "startTime": (scan_start.isoformat().replace("+00:00", "Z") if scan_start else None),
+            "endTime": (scan_end.isoformat().replace("+00:00", "Z") if scan_end else None),
             "durationMs": scan_duration_ms,
             "requestsTotal": req_total,
             "responsesTotal": resp_total,
