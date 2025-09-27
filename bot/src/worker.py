@@ -27,6 +27,7 @@ REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD") or None
 MAX_RETRIES = int(os.getenv("MAX_RETRIES", 3))
 
+
 if not AUTH_KEY:
     logger.critical("BOT_ACCESS_KEY missing from .env — bot cannot start.")
     raise RuntimeError("BOT_ACCESS_KEY missing")
@@ -130,14 +131,25 @@ def process_report(job):
                 "BOT_ACCESS_KEY": os.getenv("BOT_ACCESS_KEY"),
                 "SCREENSHOTS_DIR": "/data/screenshots",
                 "UPLOAD_ENDPOINT": f"{os.getenv('API_URL').rstrip('/')}/reports/{report_id}/screenshots",
+
+                # >>> PROXY SERVER <<<
+                "PROXY_URL": os.getenv("PROXY_URL", ""),
+                "PROXY_USERNAME": os.getenv("PROXY_USERNAME", ""),
+                "PROXY_PASSWORD": os.getenv("PROXY_PASSWORD", ""),
+                "PW_CONTEXTS_PER_IP": os.getenv("PW_CONTEXTS_PER_IP", "2"),
+                " NO_PROXY": os.getenv("NO_PROXY"),
+
+                 # Semaphore / Redis
+                "REDIS_HOST": os.getenv("REDIS_HOST", "brad-redis"),
+                "REDIS_PORT": str(os.getenv("REDIS_PORT", 6379)),
+                "REDIS_PASSWORD": os.getenv("REDIS_PASSWORD", ""),
             },
+            labels={"traefik.enable": "false"}, # disable Traefik for this container
             network="brad_network",
-            tmpfs={"/data/screenshots": ""},   # ephemeral in-memory FS
-            volumes={
-                os.path.abspath("./logs/bot"): {"bind": "/app/logs", "mode": "rw"},
-            },
+            tmpfs={"/data/screenshots": ""},
+            volumes={ os.path.abspath("./logs/bot"): {"bind": "/app/logs", "mode": "rw"} },
             detach=True,
-            auto_remove=True,                  # runner cleans up itself
+            auto_remove=True,
         )
 
         logger.info(f"[DISPATCHER] Sandbox {container.id[:12]} started for {domain}")
