@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication } from '@nestjs/common';
 import * as request from 'supertest';
-import { AppModule } from '../src/app.module';
+import { AppModule } from '../../src/app.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { QueueService } from 'src/queue/queue.service';
 import * as nodemailer from 'nodemailer';
-import { connectInMemoryDB, disconnectInMemoryDB, clearDatabase, mongoServer } from './setup-test-db';
+import { connectInMemoryDB, disconnectInMemoryDB, clearDatabase, mongoServer } from '../setup-test-db';
 import { User } from 'src/schemas/user.schema';
 import { Model } from 'mongoose';
 import { getModelToken } from '@nestjs/mongoose';
