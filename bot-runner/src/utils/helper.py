@@ -1,4 +1,6 @@
-import os, requests, time
+import os
+import time
+import requests
 from datetime import datetime
 from dotenv import load_dotenv
 from urllib.parse import urlparse
@@ -35,19 +37,36 @@ if not API_URL:
 API_BASE = API_URL.rstrip("/")
 headers = {"Authorization": f"Bot {AUTH_KEY}"}
 
-# Durable HTTP session with retries/backoff for transient API errors.
+# ---- Generic session (unused for API writes; keep if you need elsewhere)
 session = requests.Session()
 session.headers.update(headers)
-retry = Retry(
+_retry = Retry(
     total=5,
-    backoff_factor=0.6,  # 0.6, 1.2, 2.4, ...
+    backoff_factor=0.6,
     status_forcelist=[429, 500, 502, 503, 504],
     allowed_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
     raise_on_status=False,
 )
-adapter = HTTPAdapter(max_retries=retry)
-session.mount("https://", adapter)
-session.mount("http://", adapter)
+_adapter = HTTPAdapter(max_retries=_retry)
+session.mount("https://", _adapter)
+session.mount("http://", _adapter)
+
+# ---- API session: never use proxy; always include auth header
+API_SESSION = requests.Session()
+API_SESSION.trust_env = False           # ignore HTTP(S)_PROXY env vars
+API_SESSION.proxies.clear()             # force direct to internal API
+API_SESSION.headers.update({
+    "Authorization": f"Bot {AUTH_KEY}",
+    "Content-Type": "application/json",
+})
+_api_retry = Retry(
+    total=5,
+    backoff_factor=0.5,
+    status_forcelist=[429, 500, 502, 503, 504],
+    allowed_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
+)
+API_SESSION.mount("http://", HTTPAdapter(max_retries=_api_retry))
+API_SESSION.mount("https://", HTTPAdapter(max_retries=_api_retry))
 
 # ── Redis Broker ──
 logger.info(f"Connecting to Redis broker at {REDIS_HOST}:{REDIS_PORT}...")
@@ -66,18 +85,14 @@ def sanitize_domain(domain: str) -> str:
     if not parsed.scheme:
         d = "https://" + d
         parsed = urlparse(d)
-    # Lowercase host; keep path/query as-is
     netloc = (parsed.netloc or "").lower()
     return parsed._replace(netloc=netloc).geturl()
 
 
 def serialize(obj):
     if isinstance(obj, dict):
-        return {
-            k: serialize(v)
-            for k, v in obj.items()
-            if v is not None and v != "" and v != [] and v != {}
-        }
+        return {k: serialize(v) for k, v in obj.items()
+                if v is not None and v != "" and v != [] and v != {}}
     if isinstance(obj, list):
         return [serialize(i) for i in obj if i is not None and i != "" and i != []]
     if isinstance(obj, datetime):
@@ -85,30 +100,27 @@ def serialize(obj):
     return obj
 
 
-def report_analysis(
-    report_id, report_obj: ForensicReport, scraping_info, abuse_flags
-) -> bool:
-    url = f"{API_BASE}/reports/{report_id}/analysis"
-    data = {
-        "analysis": serialize(report_obj.to_dict()),
+def report_analysis(report_id, report_obj: ForensicReport, scraping_info, abuse_flags) -> bool:
+    """
+    Send analysis results to the API using the proxy-free API_SESSION.
+    """
+    if not API_URL or not AUTH_KEY:
+        logger.error("[API] Missing API_URL or BOT_ACCESS_KEY; skipping update.")
+        return False
+
+    url = f"{API_URL}/reports/{report_id}/analysis"
+    body = {
+        "analysis": serialize(report_obj.to_dict()),   # ensure dict, not object
         "scrapingInfo": serialize(scraping_info),
         "abuseFlags": serialize(abuse_flags),
         "analysisStatus": "pending",
     }
+
     try:
-        logger.debug(f"PATCH {url} — sending analysis results...")
-        resp = session.patch(url, json=data, timeout=30)
+        resp = API_SESSION.patch(url, json=body, timeout=20)  # json= sets header
         resp.raise_for_status()
-        logger.info(f"Report {report_id} updated successfully in API.")
+        logger.info(f"[API] Report {report_id} analysis updated.")
         return True
     except Exception as e:
-        body = ""
-        try:
-            body = resp.text[:500] if "resp" in locals() and resp is not None else ""
-        except Exception:
-            pass
-        logger.error(
-            f"Failed to PATCH analysis for {report_id}: {e} {(' | body='+body) if body else ''}",
-            exc_info=True,
-        )
+        logger.error(f"[API] Update failed for {report_id}: {e}", exc_info=True)
         return False
