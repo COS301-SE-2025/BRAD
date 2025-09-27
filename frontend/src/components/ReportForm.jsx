@@ -1,12 +1,13 @@
 "use client";
 import React, { useState } from "react";
-import { Upload, File, Image as ImageIcon, Link as LinkIcon, X } from "lucide-react";
+import { Upload, File, Image as ImageIcon, Link as LinkIcon, X, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import API from "@/lib/api/axios";
 
 export default function ReportForm({ setNotification }) {
   const [url, setUrl] = useState("");
   const [files, setFiles] = useState([]);
+  const [loading, setLoading] = useState(false);
   const user = JSON.parse(localStorage.getItem("user"));
   const MAX_FILES = 5;
 
@@ -18,6 +19,7 @@ export default function ReportForm({ setNotification }) {
   };
 
   const handleFileChange = (e) => {
+    if (loading) return; // prevent changes while loading
     const newFiles = Array.from(e.target.files);
     const combined = [...files, ...newFiles];
     if (combined.length > MAX_FILES) {
@@ -29,6 +31,7 @@ export default function ReportForm({ setNotification }) {
   };
 
   const handleRemoveFile = (index) => {
+    if (loading) return; // prevent removing files while loading
     setFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
@@ -36,6 +39,7 @@ export default function ReportForm({ setNotification }) {
     e.preventDefault();
     if (!url) return showNotification("error", "Please enter a domain/URL");
 
+    setLoading(true);
     const formData = new FormData();
     formData.append("domain", url);
     formData.append("submittedBy", user?._id);
@@ -57,6 +61,8 @@ export default function ReportForm({ setNotification }) {
         "error",
         err.response?.data?.message || "Failed to submit report"
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,6 +86,7 @@ export default function ReportForm({ setNotification }) {
           onChange={(e) => setUrl(e.target.value)}
           className="flex-1 bg-transparent outline-none text-gray-800 dark:text-gray-200"
           required
+          disabled={loading} // disabled while loading
         />
       </div>
 
@@ -88,9 +95,12 @@ export default function ReportForm({ setNotification }) {
         Attach optional evidence
       </label>
       <div
-        className="border-2 border-dashed rounded-lg p-6 text-center cursor-pointer dark:border-gray-700 bg-gray-50 dark:bg-gray-900"
+        className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer dark:border-gray-700 bg-gray-50 dark:bg-gray-900 ${
+          loading ? "opacity-50 cursor-not-allowed" : ""
+        }`}
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
+          if (loading) return;
           e.preventDefault();
           const droppedFiles = Array.from(e.dataTransfer.files);
           const combined = [...files, ...droppedFiles];
@@ -108,6 +118,7 @@ export default function ReportForm({ setNotification }) {
           onChange={handleFileChange}
           className="hidden"
           id="file-upload"
+          disabled={loading} // prevent selecting new files
         />
         <label htmlFor="file-upload" className="cursor-pointer">
           <Upload className="mx-auto h-8 w-8 text-gray-500 mb-2" />
@@ -137,6 +148,7 @@ export default function ReportForm({ setNotification }) {
                 type="button"
                 onClick={() => handleRemoveFile(idx)}
                 className="ml-2 text-red-500 hover:text-red-700"
+                disabled={loading} // cannot remove files while loading
               >
                 <X className="h-4 w-4" />
               </button>
@@ -145,12 +157,16 @@ export default function ReportForm({ setNotification }) {
         </ul>
       )}
 
-      {/* Submit Button */}
+      {/* Submit Button with Loading */}
       <button
         type="submit"
-        className="mt-6 w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition"
+        className="mt-6 w-full py-2 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-md transition flex items-center justify-center"
+        disabled={loading}
       >
-        Submit Report
+        {loading ? (
+          <Loader2 className="animate-spin h-5 w-5 mr-2" />
+        ) : null}
+        {loading ? "Reporting..." : "Submit Report"}
       </button>
     </motion.form>
   );
