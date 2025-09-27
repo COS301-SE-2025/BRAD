@@ -7,8 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "test": "jest --watch",
+    "test": "jest --silent",
     "test:ci": "jest"
+    
   },
   "dependencies": {
     "autoprefixer": "^10.4.21",
