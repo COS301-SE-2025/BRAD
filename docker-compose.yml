@@ -93,8 +93,8 @@ services:
       - "traefik.http.routers.frontend.tls.certresolver=myresolver"
       - "traefik.http.services.frontend.loadbalancer.server.port=5173"
     environment:
-      #   - NODE_ENV=development
-      - NODE_ENV=production
+      - NODE_ENV=development
+      # - NODE_ENV=production
       - VITE_API_BASE_API=
     depends_on:
       - api

@@ -1,15 +1,17 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import '../styles/BackButton.css';
+"use client"
 
-const BackButton = () => {
-  const navigate = useNavigate();
+import { useRouter } from "next/navigation"
+import { FaArrowLeft } from "react-icons/fa"
+
+export default function BackButton() {
+  const router = useRouter()
 
   return (
-    <button className="back-button" onClick={() => navigate(-1)}>
-      &#8592;
+    <button
+      onClick={() => router.back()}
+      className="inline-flex items-center text-brad-500 hover:underline mb-4"
+    >
+      <FaArrowLeft className="mr-2" /> Back
     </button>
-  );
-};
-
-export default BackButton;
+  )
+}

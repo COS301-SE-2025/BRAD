@@ -79,5 +79,5 @@ async function bootstrap() {
 
   await app.listen(3000);
 }
-
+console.log('FASTAPI_URL:', process.env.FASTAPI_URL);
 bootstrap();

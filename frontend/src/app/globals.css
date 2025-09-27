@@ -1,0 +1,288 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* your design tokens */
+:root {
+  --bg: #ffffff; 
+  --card: #a0cdfa55; /* light blue with ~50% opacity */
+  --card-nested: #ffffff97;;  /* lighter background for nested cards */
+  --input-bg: #f5faff; /* very light blue, almost white */
+  --text: #0b1220;
+  --muted: #6b7280;
+  --primary: #1b82ff;
+  --landing-bg: linear-gradient(to bottom right, #ffffff, #dceeff, #90e0ef); /* light mode gradient */
+
+  /* FAQ colors */
+  --faq-user-bg: rgba(173, 216, 230, 0.25);
+  --faq-user-text: #0b1220;
+  --faq-brad-bg: rgba(1, 18, 24, 0.25);
+  --faq-brad-text: #e6eef9;
+}
+
+.dark {
+  --bg: #262f43;
+  --card: #0b1a2bcc; /* dark blue with ~80% opacity */
+  --card-nested: #262f43;; /* darker shade for nested cards */
+  --text: #e6eef9;
+  --input-bg: #1e2a44; /* slightly lighter than dark background */
+  --muted: #9aa6c0;
+  --primary: #4aa6ff;
+  --landing-bg: linear-gradient(to bottom right, #000814, #001f3f, #0077b6); /* dark mode gradient */
+
+
+  /* FAQ colors */
+  --faq-user-bg: rgba(70, 130, 180, 0.35); /* slightly darker user bubble */
+  --faq-user-text: #e6eef9;
+  --faq-brad-bg: rgba(20, 30, 50, 0.6); /* darker BRAD bubble */
+  --faq-brad-text: #ffffff;
+}
+
+/* Utility for landing background */
+.landing-bg {
+  background: var(--landing-bg);
+}
+
+/* ===== COMPONENT HELPERS ===== */
+.card {
+  background-color: var(--card);
+  border-radius: 0.75rem;
+  box-shadow: 0 6px 20px rgba(2,6,23,0.06);
+  padding: 1rem;
+}
+
+/* nested card variant */
+.card .card {
+  background-color: var(--card-nested);
+}
+
+/* inputs */
+.input {
+  @apply block w-full rounded-md px-3 py-2 text-sm placeholder:opacity-60;
+  background-color: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--muted);
+}
+
+/* focus state for inputs */
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(27, 130, 255, 0.3); /* subtle primary glow */
+}
+
+/* dropdowns stay the same but explicitly reuse same classes */
+select.input {
+  @apply block w-full rounded-md px-3 py-2 text-sm;
+  background-color: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--muted);
+  appearance: none;
+  padding-right: 2rem; /* space for dropdown arrow */
+}
+
+select.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(27, 130, 255, 0.3);
+}
+
+/* buttons */
+.btn-primary {
+  background-color: var(--primary);
+  color: white;
+  @apply px-4 py-2 rounded-md font-medium;
+}
+
+.btn-sm {
+  @apply px-3 py-1 rounded-md text-sm font-medium;
+  background-color: var(--primary);
+  color: white;
+}
+
+/* danger (remove) button with red trash icon support */
+.btn-danger {
+  background-color: #ef4444;
+  color: white;
+  @apply px-3 py-1 rounded-md flex items-center gap-2;
+}
+
+/* container */
+.container {
+  max-width: 1100px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+/* ===== HELP PAGE STYLING ===== */
+.help-page {
+  font-family: 'Segoe UI', sans-serif;
+  padding: 0;
+  min-height: 100vh;
+  color: var(--text);
+  background-color: var(--bg);
+}
+
+.help-header {
+  padding: 2rem;
+  text-align: center;
+  color: var(--text);
+}
+
+.help-header h1 {
+  margin-bottom: 1rem;
+  font-size: 2.5rem;
+}
+
+.help-header input {
+  width: 50%;
+  max-width: 600px;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--muted);
+  border-radius: 8px;
+  font-size: 1rem;
+  background-color: var(--card);
+  color: var(--text);
+}
+
+/* contact section */
+.contact-section {
+  margin-top: 1rem;
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.contact-item {
+  font-size: 0.95rem;
+  color: var(--text);
+}
+
+.contact-item a {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.contact-item a:hover {
+  text-decoration: underline;
+}
+
+.help-description {
+  padding: 2rem;
+  text-align: center;
+}
+
+.help-description p {
+  max-width: 800px;
+  margin: 0 auto;
+  color: var(--text);
+}
+
+/* ===== FAQ CHAT STYLE ===== */
+.faq-chat {
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.faq-exchange {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+/* User message */
+.faq-user {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  justify-content: flex-start;
+}
+
+.faq-question {
+  padding: 1rem;
+  border-radius: 16px;
+  max-width: 60%;
+  font-size: 1rem;
+  line-height: 1.4;
+  background-color: var(--faq-user-bg);
+  color: var(--faq-user-text);
+  word-break: break-word;
+}
+
+/* BRAD bot message */
+.faq-brad {
+  display: flex;
+  align-items: flex-end;
+  gap: 1rem;
+  justify-content: flex-end;
+}
+
+.faq-answer {
+  padding: 1rem;
+  border-radius: 16px;
+  max-width: 60%;
+  font-size: 1rem;
+  line-height: 1.4;
+  background-color: var(--faq-brad-bg);
+  color: var(--faq-brad-text);
+  word-break: break-word;
+}
+
+/* Avatar size */
+.faq-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+/* ===== RESPONSIVE ADJUSTMENTS ===== */
+@media (max-width: 768px) {
+  .faq-question,
+  .faq-answer {
+    max-width: 80%;
+  }
+
+  .help-header input {
+    width: 80%;
+  }
+}
+
+@media (max-width: 480px) {
+  .faq-question,
+  .faq-answer {
+    max-width: 95%;
+  }
+}
+
+/* ===== MODAL STYLING ===== */
+.modal-card {
+  background-color: var(--card);
+  color: var(--text);
+  border-radius: 1rem; /* 2xl */
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  padding: 1.5rem;
+}
+
+.modal-message {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+/* cancel button (neutral) */
+.btn-cancel {
+  @apply px-4 py-2 rounded-lg font-medium transition;
+  background-color: var(--input-bg);
+  color: var(--text);
+}
+
+.btn-cancel:hover {
+  background-color: var(--muted);
+  color: white;
+}
+
