@@ -7,7 +7,7 @@ services:
     volumes:
       - ./api:/app
       - ./uploads:/usr/src/app/uploads
-      - ./screenshots:/usr/src/app/screenshots
+      - brad_screenshots:/data/screenshots
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`capstone-brad.dns.net.za`) && PathPrefix(`/api`)"
@@ -19,6 +19,7 @@ services:
     environment:
       - NODE_ENV=production
       - BODY_LIMIT=20mb
+      - SCREENSHOTS_DIR=/data/screenshots
     depends_on:
       - mongo
       - fastapi-queue
@@ -32,8 +33,8 @@ services:
     container_name: brad-bot
     volumes:
       - ./bot:/app
-      - ./screenshots:/app/screenshots
       - ./logs/bot:/app/logs
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - redis
       - api
@@ -43,8 +44,16 @@ services:
       - LOG_DIR=/app/logs
       - LOG_FILE_MAX_BYTES=5242880
       - LOG_BACKUP_COUNT=5
+      - DOCKER_HOST=unix://var/run/docker.sock
     env_file:
       - .env
+    networks:
+      - brad_net
+
+  # No container_name or volume: This will only be ran dynamically and not with docker compose
+  bot-runner:
+    build: ./bot-runner
+    image: brad-bot-runner:latest
     networks:
       - brad_net
 
@@ -142,6 +151,7 @@ services:
 volumes:
   mongo-data:
   redis-data:
+  brad_screenshots:            # Named volume for screenshots
 
 networks:
   brad_net:
