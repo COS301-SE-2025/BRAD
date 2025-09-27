@@ -8,11 +8,11 @@ export default function TopDomains({ domains }) {
             key={i}
             className="flex justify-between items-center border-b last:border-0 pb-1"
           >
-            <span>{d.domain}</span>
+            <span className="truncate max-w-[70%] break-words">{d.domain}</span>
             <span className="font-bold text-brad-500">{d.count}</span>
           </li>
         ))}
       </ul>
     </div>
-  )
+  );
 }
