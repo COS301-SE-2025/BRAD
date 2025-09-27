@@ -63,7 +63,11 @@ services:
       - brad_net
 
   frontend:
-    build: ./frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     container_name: brad-frontend
     ports:
       - "5173:5173"
@@ -77,6 +81,9 @@ services:
       - NODE_ENV=development
       # - NODE_ENV=production
       - VITE_API_BASE_API=
+      # - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    # env_file:
+    # - .env
     depends_on:
       - api
     networks:

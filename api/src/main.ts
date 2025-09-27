@@ -14,7 +14,9 @@ async function bootstrap() {
 
   // --- Body limits & compression (before routes) ---
   app.use(json({ limit: process.env.BODY_LIMIT || '20mb' }));
-  app.use(urlencoded({ extended: true, limit: process.env.BODY_LIMIT || '20mb' }));
+  app.use(
+    urlencoded({ extended: true, limit: process.env.BODY_LIMIT || '20mb' }),
+  );
   app.use(compression());
 
   const config = new DocumentBuilder()
@@ -45,7 +47,7 @@ async function bootstrap() {
   SwaggerModule.setup('api-docs', app, document);
 
   app.enableCors({
-    origin: ['http://localhost:5173', 'http://capstone-brad.dns.net.za'],
+    origin: ['http://localhost:5173', 'https://capstone-brad.dns.net.za'],
     credentials: true,
   });
 
