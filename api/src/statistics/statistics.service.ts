@@ -8,15 +8,9 @@ export class StatisticsService {
 
     constructor(@InjectModel('Report') private reportModel: Model<any>, @InjectModel('User') private userModel: Model<any>) {}
 
-    async getTotalReports(userid:string, role:string):Promise<number>{
-        if(role==='admin' || role==='investigator') {
-        return this.reportModel.countDocuments();
+    async getTotalReports(): Promise<number> {
+      return this.reportModel.countDocuments();
     }
-    if(role==='general') {
-        return this.reportModel.countDocuments({ userId: userid });
-    }
-throw new ForbiddenException('Role not permitted to view statistics');
-}
 
 async getPendingReportsCount(userid: string, role: string): Promise<number> {
   if (role === 'admin' || role === 'investigator') {
@@ -88,17 +82,13 @@ async getDomainsReportedMoreThanOnce(): Promise<{ domain: string; count: number 
 
 
   async getReportsMarkedAsMalicious(role:string): Promise<number> {
-    if(role !== 'admin' && role !== 'investigator') {
-      throw new ForbiddenException('Role not permitted to view statistics');
-    }
     return this.reportModel.countDocuments({ investigatorDecision: 'malicious' });
   }
+
   async getReportsMarkedAsSafe(role:string): Promise<number> {
-    if(role !== 'admin' && role !== 'investigator') {
-      throw new ForbiddenException('Role not permitted to view statistics');
-    }
     return this.reportModel.countDocuments({ investigatorDecision: 'benign' });
   }
+
 async getReportsByYear(role: string): Promise<{ month: number; count: number }[]> {
   if (role !== 'admin' && role !== 'investigator') {
     throw new ForbiddenException('Role not permitted to view statistics');
@@ -262,8 +252,7 @@ async getNoOfInvestigators(role:string): Promise<number> {
     return this.userModel.countDocuments({ role: 'general' });
   }
 
-  async getAvgBotAnalysisTime(role: string): Promise<string> {
-    if (role !== 'admin') throw new ForbiddenException('Admins only');
+  async getAvgBotAnalysisTime(): Promise<string> {
     const reports = await this.reportModel.find(
       { 'scrapingInfo.summary.startTime': { $ne: null }, 'scrapingInfo.summary.endTime': { $ne: null } },
       { 'scrapingInfo.summary.startTime': 1, 'scrapingInfo.summary.endTime': 1 }
@@ -279,58 +268,52 @@ async getNoOfInvestigators(role:string): Promise<number> {
     return this.formatDuration(totalMs / reports.length);
   }
 
-  async getAvgInvestigatorTime(role: string): Promise<string> {
-  if (role !== 'admin') throw new ForbiddenException('Admins only');
 
-  // ✅ Only consider resolved reports (investigatorDecision != null)
-  const reports = await this.reportModel.find(
-    {
-      investigatorDecision: { $ne: null },
-      'scrapingInfo.summary.endTime': { $ne: null },
-      updatedAt: { $ne: null },
-    },
-    { 'scrapingInfo.summary.endTime': 1, updatedAt: 1 }
-  );
+async getAvgInvestigatorTime(): Promise<string> {
+    const reports = await this.reportModel.find(
+      {
+        investigatorDecision: { $ne: null },
+        'scrapingInfo.summary.endTime': { $ne: null },
+        updatedAt: { $ne: null },
+      },
+      { 'scrapingInfo.summary.endTime': 1, updatedAt: 1 }
+    );
 
-  if (!reports.length) return '0s';
+    if (!reports.length) return '0s';
 
-  const totalMs = reports.reduce((sum, r) => {
-    const start = new Date(r.scrapingInfo.summary.endTime).getTime();
-    const end = new Date(r.updatedAt).getTime();
-    return sum + (end - start);
-  }, 0);
+    const totalMs = reports.reduce((sum, r) => {
+      const start = new Date(r.scrapingInfo.summary.endTime).getTime();
+      const end = new Date(r.updatedAt).getTime();
+      return sum + (end - start);
+    }, 0);
 
-  return this.formatDuration(totalMs / reports.length);
-}
+    return this.formatDuration(totalMs / reports.length);
+  }
 
-async getAvgResolutionTime(role: string): Promise<string> {
-  if (role !== 'admin') throw new ForbiddenException('Admins only');
+  async getAvgResolutionTime(): Promise<string> {
+    const reports = await this.reportModel.find(
+      {
+        investigatorDecision: { $ne: null },
+        createdAt: { $ne: null },
+        updatedAt: { $ne: null },
+      },
+      { createdAt: 1, updatedAt: 1 }
+    );
 
-  // ✅ Only consider resolved reports (investigatorDecision != null)
-  const reports = await this.reportModel.find(
-    {
-      investigatorDecision: { $ne: null },
-      createdAt: { $ne: null },
-      updatedAt: { $ne: null },
-    },
-    { createdAt: 1, updatedAt: 1 }
-  );
+    if (!reports.length) return '0s';
 
-  if (!reports.length) return '0s';
+    const totalMs = reports.reduce((sum, r) => {
+      const start = new Date(r.createdAt).getTime();
+      const end = new Date(r.updatedAt).getTime();
+      return sum + (end - start);
+    }, 0);
 
-  const totalMs = reports.reduce((sum, r) => {
-    const start = new Date(r.createdAt).getTime();
-    const end = new Date(r.updatedAt).getTime();
-    return sum + (end - start);
-  }, 0);
-
-  return this.formatDuration(totalMs / reports.length);
-}
+    return this.formatDuration(totalMs / reports.length);
+  }
 
 async getInvestigatorStats(role: string): Promise<any[]> {
-  if (role !== 'admin') throw new ForbiddenException('Admins only');
+  // if (role !== 'admin') throw new ForbiddenException('Admins only');
 
-  // ✅ Only consider resolved reports (investigatorDecision != null)
   const reports = await this.reportModel.find(
     {
       investigatorDecision: { $ne: null },

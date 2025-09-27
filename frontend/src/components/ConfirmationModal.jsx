@@ -10,13 +10,14 @@ export default function ConfirmationModal({
   message,
   confirmText = "Confirm",
   cancelText = "Cancel",
-  confirmStyle = "bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700", // updated
+  confirmStyle = "bg-blue-600 text-white rounded px-4 py-2 hover:bg-blue-700", 
 }) {
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-      <div className="modal-card w-full max-w-md bg-white p-6 rounded shadow-lg">
+      <div className="modal-overlay">
+      <div className="modal-card w-full max-w-md p-6 rounded shadow-lg">
         {/* Title */}
         <h2 className="text-xl font-semibold mb-4">{title}</h2>
 
@@ -41,6 +42,7 @@ export default function ConfirmationModal({
           {confirmText}
         </button>
         </div>
+      </div>
       </div>
     </div>
   );
