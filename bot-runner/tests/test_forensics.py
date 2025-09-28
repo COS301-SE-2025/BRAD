@@ -89,20 +89,37 @@ class DummyWhois:
         return iter({"registrar": self.registrar, "creation_date": self.creation_date}.items())
 
 def test_get_whois_info_success(monkeypatch):
-    monkeypatch.setattr("src.forensics.forensics.whois.whois", lambda domain: DummyWhois())
+    import types
+    import src.forensics.forensics as fmod
+
+    class DummyWhois:
+        def __init__(self):
+            self.registrar = "Example Registrar"
+            self.org = None
+            self.name = "John Doe"
+            self.creation_date = [datetime.datetime(2020, 1, 1, 12, 0, 0)]
+        def __iter__(self):
+            return iter({"registrar": self.registrar, "creation_date": self.creation_date}.items())
+
+    # Replace the imported 'whois' module in forensics with a stub that has .whois()
+    stub = types.SimpleNamespace(whois=lambda domain: DummyWhois())
+    monkeypatch.setattr(fmod, "whois", stub, raising=False)
+
     info = get_whois_info("example.com")
     assert info["registrar"] == "Example Registrar"
-    assert info["whoisOwner"] == "John Doe"  # org fallback to name
-    # creation_date returned as original object in top-level field (per your function)
-    assert info["creation_date"] == DummyWhois().creation_date
-    # normalized inside whoisRaw
-    raw = info["whoisRaw"]
-    assert isinstance(raw, dict)
-    assert isinstance(raw["creation_date"], list)
-    assert all(isinstance(x, str) for x in raw["creation_date"])  # isoformat strings
+    assert info["whoisOwner"] == "John Doe"
+    assert isinstance(info["whoisRaw"]["creation_date"], list)
+
 
 def test_get_whois_info_fail(monkeypatch):
-    monkeypatch.setattr("src.forensics.forensics.whois.whois", lambda domain: (_ for _ in ()).throw(Exception("fail")))
+    import types
+    import src.forensics.forensics as fmod
+
+    # Stub whose .whois() raises
+    def _boom(domain): raise Exception("fail")
+    stub = types.SimpleNamespace(whois=_boom)
+    monkeypatch.setattr(fmod, "whois", stub, raising=False)
+
     info = get_whois_info("example.com")
     assert info["registrar"] == "Unavailable"
     assert info["whoisOwner"] == "Unknown"

@@ -10,7 +10,7 @@ from src.scraper.analysis import perform_scraping
 from src.utils.logger import get_logger
 from src.utils.helper import report_analysis, sanitize_domain  # reuse helpers
 from src.utils.sem import acquire, release
-from src.utils.proxy import requests_proxies  
+from src.utils.proxy import requests_proxies
 
 logger = get_logger(__name__)
 
@@ -73,7 +73,6 @@ def upload_screenshots(upload_url: str, auth_key: str, shots_dir: str) -> None:
         except Exception as e:
             logger.warning(f"[RUNNER] Upload failed for {fname}: {e}")
 
-
 def main():
     report_id = os.getenv("REPORT_ID")
     domain = os.getenv("TARGET_URL")
@@ -85,6 +84,7 @@ def main():
     if not report_id or not domain:
         logger.error("Missing REPORT_ID or TARGET_URL env vars")
         sys.exit(1)
+        return  # important for tests where sys.exit is monkeypatched
 
     t0 = time.perf_counter()
     logger.info(f"[RUNNER] Starting analysis for {domain} (Report ID: {report_id})")
@@ -107,13 +107,11 @@ def main():
                 delay_seconds=1.5,
                 obey_robots=True,
                 user_agent="BRADBot/1.0 (+https://example.invalid/bot) Playwright",
-                # proxy is auto-read from env in analysis.py
             )
 
         scraping_info, abuse_flags = run_with_limit(_do_scrape)
 
         # 3) Send results back to API
-        #    NOTE: helper.report_analysis expects a dict for analysis_data
         ok = report_analysis(report_id, forensic, scraping_info, abuse_flags)
         if ok:
             logger.info(f"[RUNNER] Analysis results sent for {report_id}")
@@ -126,10 +124,12 @@ def main():
         elapsed_ms = int((time.perf_counter() - t0) * 1000)
         logger.info(f"[RUNNER] Report {report_id} completed in {elapsed_ms}ms")
         sys.exit(0)
+        return  # important for tests where sys.exit is monkeypatched
 
     except Exception as e:
         logger.error(f"[RUNNER] Analysis failed: {e}", exc_info=True)
         sys.exit(2)
+        return  # important for tests where sys.exit is monkeypatched
 
 if __name__ == "__main__":
     main()
