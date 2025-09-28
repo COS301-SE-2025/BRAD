@@ -18,9 +18,6 @@ Before installing BRAD, ensure you have the following software installed:
 | Node.js        | ≥ 20.0  | [Install Node.js](https://nodejs.org/en/download/)                           |
 | npm            | ≥ 9.0   | Installed with Node.js                                                       |
 | Text Editor    | Any     | Recommended: [VS Code](https://code.visualstudio.com/download)               |
-| React          | ≥ 18.0  | Installed via npm (already part of this repo)                                |
-| Next.js        | ≥ 14.0  | Installed via npm (already part of this repo)                                |
-| TailwindCSS    | ≥ 3.0   | Installed via npm (already part of this repo)                                |
 
 > **Note:** For Windows users, enable WSL 2 if running Linux containers. For macOS, ensure Docker Desktop has proper permissions.
 
