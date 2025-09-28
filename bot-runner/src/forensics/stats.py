@@ -1,3 +1,4 @@
+# src/forensics/stats.py
 from datetime import datetime, timezone
 from dateutil import parser
 from typing import Dict, Any, Optional
@@ -22,6 +23,7 @@ def compute_domain_age_days(whois_raw) -> Optional[int]:
     except Exception:
         return None
 
+
 def calculate_stats(forensics: Dict[str, Any]) -> Dict[str, Any]:
     logger.info("[Stats] Calculating statistics from forensic data...")
     stats: Dict[str, Any] = {}
@@ -31,7 +33,7 @@ def calculate_stats(forensics: Dict[str, Any]) -> Dict[str, Any]:
     age_days = compute_domain_age_days(whois_raw)
     stats["domain_age_days"] = age_days
 
-    # Also try to surface a normalized created date (if parseable)
+    # Normalized created date (ISO, UTC)
     domain_created: Optional[str] = None
     try:
         cd = whois_raw.get("creation_date")
@@ -79,22 +81,17 @@ def calculate_stats(forensics: Dict[str, Any]) -> Dict[str, Any]:
     ns_count = len(dns_info.get("NS", []) or [])
 
     # SPF detection (root TXT)
-    has_spf = any("v=spf1" in t.lower() for t in txt_records)
+    has_spf = any("v=spf1" in (t or "").lower() for t in txt_records)
 
-    # DMARC detection – from explicit DMARC list if present; otherwise look for DMARC TXT patterns
-    has_dmarc = any("v=dmarc1" in t.lower() for t in dmarc_records) or \
-                any("v=dmarc1" in t.lower() for t in txt_records)
+    # DMARC detection – explicit DMARC array OR TXT fallback
+    has_dmarc = any("v=dmarc1" in (t or "").lower() for t in dmarc_records) or \
+                any("v=dmarc1" in (t or "").lower() for t in txt_records)
 
-    # If there’s no MX, mark SPF/DMARC as N/A so the scorer can skip penalties
-    spf_effective = has_spf if mx_count > 0 else None
-    dmarc_effective = has_dmarc if mx_count > 0 else None
-
-    dmarc_records = dns_info.get("DMARC", [])
     stats["dns"] = {
-        "mx_count": len(dns_info.get("MX", [])),
-        "ns_count": len(dns_info.get("NS", [])),
-        "has_spf": any("v=spf1" in (txt or "").lower() for txt in txt_records),
-        "has_dmarc": any("v=dmarc1" in (txt or "").lower() for txt in dmarc_records),
+        "mx_count": mx_count,
+        "ns_count": ns_count,
+        "has_spf": has_spf,
+        "has_dmarc": has_dmarc,
     }
 
     logger.debug(f"[Stats] DNS stats: {stats['dns']}")
