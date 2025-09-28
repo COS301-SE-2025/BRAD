@@ -1,11 +1,4 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  ConflictException,
-  InternalServerErrorException,
-  BadRequestException,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, InternalServerErrorException,BadRequestException,NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
@@ -20,6 +13,9 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 @Injectable()
 export class AuthService {
+     private readonly MAX_LOGIN_ATTEMPTS = 5;
+  private readonly LOCKOUT_DURATION = 15 * 60 * 1000;
+
   constructor(
     @InjectModel(User.name) private userModel: Model<User>,
     private configService: ConfigService,
@@ -49,6 +45,7 @@ export class AuthService {
       email,
       password: hashedPassword,
       role: 'general',
+      failedLoginAttempts: 0, 
     });
 
     try {
@@ -72,11 +69,43 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Check if account is locked
+    if (user.lockUntil && user.lockUntil > new Date()) {
+      throw new UnauthorizedException(
+        `Account is locked. Try again after ${Math.ceil(
+          (user.lockUntil.getTime() - Date.now()) / 60000,
+        )} minutes.`,
+      );
+    }
+
     const isMatch = await bcrypt.compare(dto.password, user.password);
 
     if (!isMatch) {
+      // Increment failed login attempts
+      user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+
+      // Check if max attempts reached
+      if (user.failedLoginAttempts >= this.MAX_LOGIN_ATTEMPTS) {
+        user.lockUntil = new Date(Date.now() + this.LOCKOUT_DURATION);
+        await user.save();
+
+        // Send account lockout notification email
+        await this.sendLockoutNotification(user);
+
+        throw new UnauthorizedException(
+          `Account locked due to too many failed login attempts. Try again after ${Math.ceil(
+            this.LOCKOUT_DURATION / 60000,
+          )} minutes. A notification email has been sent.`,
+        );
+      }
+
+      await user.save();
       throw new UnauthorizedException('Invalid credentials');
     }
+
+    // Reset failed attempts and lockout on successful login
+    user.failedLoginAttempts = 0;
+    user.lockUntil = undefined;
 
     if (user.mustChangePassword) {
       throw new UnauthorizedException(
@@ -98,10 +127,40 @@ export class AuthService {
 
     const { password, ...userData } = user.toObject();
 
+    await user.save(); // Save the reset of failed attempts and lockUntil
+
     return {
       token,
       user: userData,
     };
+  }
+
+  async sendLockoutNotification(user: User): Promise<void> {
+ 
+    // Create transporter
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: this.configService.get<string>('EMAIL_USER'),
+        pass: this.configService.get<string>('EMAIL_PASS'),
+      },
+    });
+
+    const mailOptions = {
+      to: user.email,
+      from: this.configService.get<string>('EMAIL_USER'),
+      subject: 'Account Locked Due to Failed Login Attempts',
+      text: `Dear ${user.firstname},\n\nYour account has been locked due to ${this.MAX_LOGIN_ATTEMPTS} failed login attempts.\n\nYou can try logging in again after ${Math.ceil(
+        this.LOCKOUT_DURATION / 60000,
+      )} minutes.\n\nIf you believe this is an error and you did not attempt to log in, please contact our support team immediately.\n\nBest regards,\nHelloWorldink! Team`,
+    };
+
+    try {
+      await transporter.sendMail(mailOptions);
+    } catch (err) {
+      console.error('Error sending lockout notification email:', err);
+    
+    }
   }
 
   async forgotPassword(email: string): Promise<{ message: string }> {

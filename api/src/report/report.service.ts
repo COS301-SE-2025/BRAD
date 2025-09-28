@@ -298,4 +298,12 @@ async releaseReport(reportId: string, investigatorId: string) {
 
     return report;
   }
+
+async addScreenshot(id: string, relPath: string) {
+  return this.reportModel.findByIdAndUpdate(
+    id,
+    { $push: { screenshots: relPath } },
+    { new: true }
+  );
+}
 }
