@@ -129,14 +129,14 @@ export default function AdminDashboard() {
     }, []);
 
   return (
-  < div className="flex min-h-screen w-full max-w-screen overflow-x-hidden bg-[var(--bg)] text-[var(--text)]">
+  <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
       <Sidebar onToggle={setSidebarExpanded} />
 
       <main
-        className={`transition-all duration-300 w-full ${
-          sidebarExpanded ? "ml-56" : "ml-16"
-        }`}
-      >
+      className={`flex-1 bg-[var(--bg)] text-[var(--text)] transition-all duration-300 min-h-screen ${
+        sidebarExpanded ? "ml-56" : "ml-16"
+      }`}
+    >
         <UserGreeting
           username="Admin"
           title="Welcome back"

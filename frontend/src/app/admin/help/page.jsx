@@ -63,7 +63,7 @@ export default function HelpPage() {
               <div className="contact-item">
                 📄{" "}
                 <a
-                  href="/B.R.A.D-User_Manual.pdf"
+                  href="/B.R.A.D-User-Manual.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
