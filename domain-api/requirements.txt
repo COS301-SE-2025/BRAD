@@ -3,4 +3,3 @@ uvicorn
 pandas
 scikit-learn
 joblib
-python-Levenshtein

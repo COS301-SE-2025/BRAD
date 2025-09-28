@@ -1,11 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import axios from 'axios'; // Ensure axios is installed in package.json
 import * as stringSimilarity from 'string-similarity';
 import * as punycode from 'punycode/';
+import { AiResult,SimilarityResponse } from './domain-similarity.types';
 
-// Optional: if you don't want punycode dependency you can drop its use.
-// (Node historically included `punycode`—using the npm package is safer.)
+
 
 @Injectable()
 export class DomainSimilarityService {
@@ -15,33 +16,55 @@ export class DomainSimilarityService {
    * Public entry - compares `domain` against known domains and returns
    * sorted results with feature breakdowns and a combined finalScore in [0,1].
    */
-  async checkAgainstSubmittedReports(domain: string) {
-    const reports = await this.reportModel.find({}, { domain: 1 }).lean();
-    const knownDomains = reports
-      .map((r) => (r.domain || '').toString().trim().toLowerCase())
-      .filter(Boolean);
+async checkAgainstSubmittedReports(domain: string): Promise<SimilarityResponse[]> {
+  const reports = await this.reportModel.find({}, { domain: 1 }).lean();
+  const knownDomains = reports
+    .map((r) => (r.domain || '').toString().trim().toLowerCase())
+    .filter(Boolean);
 
-    const cleanDomain = this.normalizeDomain(domain);
+  const cleanDomain = this.normalizeDomain(domain);
+  // Normalize and deduplicate compare_to domains
+  const compareTo = [...new Set(knownDomains.map(d => {
+    // Remove protocol and path
+    return d.replace(/^https?:\/\//, '').replace(/\/.*$/, '');
+  }))].filter(d => d !== cleanDomain);
 
-    const results = knownDomains
-      .filter((d) => d !== cleanDomain) // filter out self
-      .map((d) => {
-        const lexical = this.lexicalSimilarity(cleanDomain, d);
-        const pattern = this.patternAnalysis(cleanDomain, d);
-        const finalScore = this.combineScores(lexical, pattern);
-
-        return {
-          domain: d,
-          finalScore,
-          lexical,
-          pattern,
-        };
-      });
-
-    // sort highest score first
-    return results.sort((a, b) => b.finalScore - a.finalScore);
+  let aiResults: AiResult[] = [];
+  try {
+    const response = await axios.post(`${process.env.DOMAIN_API_URL}/check`, {
+      domain: cleanDomain,
+      compare_to: compareTo,
+    });
+    aiResults = Array.isArray(response.data) ? response.data : [];
+    if (!Array.isArray(response.data)) {
+      console.warn('Domain API returned non-array response:', response.data);
+    }
+  } catch (error) {
+    console.error('Error calling domain-api:', error.response?.data || error.message);
+    // Fallback to heuristic if AI fails
+    aiResults = compareTo.map((d) => {
+      const lexical = this.lexicalSimilarity(cleanDomain, d);
+      const pattern = this.patternAnalysis(cleanDomain, d);
+      const finalScore = this.combineScores(lexical, pattern);
+      return {
+        domain: d,
+        suspicious_score: finalScore,
+        ...lexical,
+        ...pattern,
+      };
+    });
   }
 
+  // Enrich with local heuristics
+  const results = aiResults.map((res) => ({
+    domain: res.domain,
+    finalScore: res.suspicious_score,
+    lexical: res,
+    pattern: this.patternAnalysis(cleanDomain, res.domain),
+  }));
+
+  return results.sort((a, b) => b.finalScore - a.finalScore);
+}
   /* ----------------------------- Normalization --------------------------- */
 
   private normalizeDomain(raw: string) {
