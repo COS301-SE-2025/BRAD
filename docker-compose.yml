@@ -99,10 +99,11 @@ services:
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      ./frontend
+      # context: ./frontend
+      # dockerfile: Dockerfile
+      # args:
+      #   NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     container_name: brad-frontend
     ports:
       - "5173:5173"
@@ -177,7 +178,7 @@ services:
 volumes:
   mongo-data:
   redis-data:
-  brad_screenshots:            # Named volume for screenshots
+  brad_screenshots: # Named volume for screenshots
 
 networks:
   brad_net:

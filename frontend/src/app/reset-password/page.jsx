@@ -45,6 +45,10 @@ function ResetPasswordInner() {
     }
   };
 
+  useEffect(() => {
+        document.title = 'B.R.A.D | Reset-Password';
+      }, []);
+
   return (
     <div className="max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md mt-10">
       <h2 className="text-xl font-semibold mb-4">Reset Your Password</h2>
