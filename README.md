@@ -67,6 +67,7 @@ This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)**
 - [Deployment-model](/docs/pdf/Deployment-model.pdf)
 - [GitHub-contributions](/docs/pdf/GitHub-contributions.pdf)
 - [SRS-document](/docs/pdf/SRS_Document.pdf)
+- [testing-policy-document](/docs/pdf/testing_policy.pdf)
 <!-- - [](/docs/pdf) -->
 
 ## Demo Videos
