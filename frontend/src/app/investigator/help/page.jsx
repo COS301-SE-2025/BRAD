@@ -26,6 +26,10 @@ export default function HelpPage() {
     }
   }, [pathname])
 
+  useEffect(() => {
+      document.title = "B.R.A.D | Help Page"
+    }, [])
+
   return (
     <main className="help-page">
       <div className="container">

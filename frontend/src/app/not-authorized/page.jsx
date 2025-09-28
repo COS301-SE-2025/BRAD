@@ -2,10 +2,15 @@
 
 import { useRouter } from "next/navigation"
 import Image from "next/image"
-import { FiLock } from "react-icons/fi" // lock icon
+import React, { useState, useEffect } from "react";
+import { FiLock } from "react-icons/fi" 
 
 export default function NotAuthorized() {
   const router = useRouter()
+
+  useEffect(() => {
+        document.title = "B.R.A.D | Not_Authorized"
+      }, [])
 
   return (
     <div className="not-authorized-page flex flex-col items-center justify-center min-h-screen text-center p-4">

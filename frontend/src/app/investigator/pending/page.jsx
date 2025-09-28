@@ -38,6 +38,10 @@ export default function PendingReportsPage() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+      document.title = "B.R.A.D | Investigator Pending Reports"
+    }, [])
+
   return (
     <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
       <Sidebar onToggle={setSidebarExpanded} />

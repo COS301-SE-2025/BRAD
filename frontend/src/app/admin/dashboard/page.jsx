@@ -124,8 +124,12 @@ export default function AdminDashboard() {
     fetchBarData()
   }, [timeFrame])
 
+  useEffect(() => {
+      document.title = 'B.R.A.D | Admin Dashboard';
+    }, []);
+
   return (
-    <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
+  < div className="flex min-h-screen w-full max-w-screen overflow-x-hidden bg-[var(--bg)] text-[var(--text)]">
       <Sidebar onToggle={setSidebarExpanded} />
 
       <main

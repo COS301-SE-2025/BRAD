@@ -9,11 +9,6 @@ export default function HelpPage() {
   const [searchTerm, setSearchTerm] = useState("")
   const pathname = usePathname()
   const [role, setRole] = useState("reporter") // default
-  
-  // useEffect(() => {
-  //   const storedUser = JSON.parse(localStorage.getItem("user"))
-  //   if (storedUser?.role) setRole(storedUser.role)
-  // }, [])
 
   // Derive role from URL
   useEffect(() => {
@@ -25,6 +20,10 @@ export default function HelpPage() {
       setRole("admin")
     }
   }, [pathname])
+
+  useEffect(() => {
+        document.title = 'B.R.A.D | Help Page';
+      }, []);
 
   return (
     <main className="help-page">
