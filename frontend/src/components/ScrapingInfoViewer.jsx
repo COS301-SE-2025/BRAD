@@ -74,14 +74,43 @@ export default function ScrapingInfoViewer({ scrapingInfo }) {
     </div>
   );
 
-  const renderScreenshots = () => (
-    <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-      {pages.flatMap(p => p.screenshots || []).length === 0 && <div className="text-sm text-gray-500">No screenshots</div>}
-      {pages.flatMap(p => p.screenshots || []).map((s, i) => (
-        <img key={i} src={ s.startsWith("/") ? `/api${s}` : s } alt={`ss-${i}`} className="w-full h-28 object-cover rounded" />
-      ))}
-    </div>
-  );
+  // robust URL normalizer (handles http(s), /static/..., and "screenshots/...")
+  const toImageUrl = (p) => {
+    if (!p) return "";
+    if (/^https?:\/\//i.test(p)) return p;       // full URL
+    if (p.startsWith("/api/")) return p;          // already proxied
+
+    const cleaned = p.replace(/^\/+/, "");        // strip leading "/"
+
+    if (p.startsWith("/static/")) return `/api${p}`;               // "/static/..." -> "/api/static/..."
+    if (cleaned.startsWith("static/")) return `/api/${cleaned}`;   // "static/..."  -> "/api/static/..."
+    if (cleaned.startsWith("screenshots/")) return `/api/static/${cleaned}`; // "screenshots/..." -> "/api/static/screenshots/..."
+
+    return `/api/static/screenshots/${cleaned}`;  // bare filename fallback
+  };
+
+  const renderScreenshots = () => {
+    const raw = Array.isArray(scrapingInfo?.screenshots) ? scrapingInfo.screenshots : [];
+    const shots = [...new Set(raw.map(toImageUrl).filter(Boolean))];
+
+    if (shots.length === 0) return <div className="text-sm text-gray-500">No screenshots</div>;
+
+    return (
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+        {shots.map((src) => (
+          <img
+            key={src}
+            src={src}
+            alt="screenshot"
+            className="w-full h-36 object-contain rounded bg-neutral-100"
+            loading="lazy"
+            decoding="async"
+            onError={() => console.warn("IMG ERR:", src)}
+          />
+        ))}
+      </div>
+    );
+  };
 
   return (
     <div className="space-y-3">
