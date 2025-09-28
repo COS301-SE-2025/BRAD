@@ -170,3 +170,58 @@ def test_main_missing_env_exits_1(monkeypatch):
     monkeypatch.setattr("src.runner.sys.exit", lambda c=0: code.update(c=c))
     mod.main()
     assert code["c"] == 1
+
+
+# ---------- integration test: main() end-to-end ----------
+
+def test_main_integration(monkeypatch, tmp_path):
+    # Set up environment variables
+    env = {
+        "REPORT_ID": "RID-INT",
+        "TARGET_URL": "https://integration.test",
+        "API_URL": "http://api:3000",
+        "BOT_ACCESS_KEY": "int-key",
+        "SCREENSHOTS_DIR": str(tmp_path),
+        "UPLOAD_ENDPOINT": "http://api:3000/reports/RID-INT/screenshots",
+        "PW_CONTEXTS_PER_IP": "1",
+    }
+    mod = _reload_runner(env)
+
+    # Patch dependencies to avoid real network/redis/filesystem
+    monkeypatch.setattr("src.runner.acquire", lambda key, limit, ttl: "tok-int")
+    monkeypatch.setattr("src.runner.release", lambda key, tok: None)
+
+    class DummyReport:
+        def __init__(self, d): self.domain = d
+        def run(self): pass
+        def to_dict(self): return {"domain": "integration.test", "riskScore": 0.5}
+    monkeypatch.setattr("src.runner.ForensicReport", DummyReport)
+
+    monkeypatch.setattr("src.runner.perform_scraping", lambda *a, **k: ({"pages": ["home"]}, {"flags": {"ok": True}}))
+
+    report_results = {}
+    def fake_report(report_id, report_obj, scraping, flags):
+        report_results["args"] = (report_id, report_obj, scraping, flags)
+        return True
+    monkeypatch.setattr("src.runner.report_analysis", fake_report)
+
+    upload_results = {}
+    def fake_upload(url, key, dir_):
+        upload_results["args"] = (url, key, dir_)
+    monkeypatch.setattr("src.runner.upload_screenshots", fake_upload)
+
+    exit_code = {"code": None}
+    monkeypatch.setattr("src.runner.sys.exit", lambda code=0: exit_code.update(code=code))
+
+    # Run main
+    mod.main()
+
+    # Assertions
+    assert exit_code["code"] == 0
+    assert report_results["args"][0] == "RID-INT"
+    assert report_results["args"][2] == {"pages": ["home"]}
+    assert report_results["args"][3] == {"flags": {"ok": True}}
+    assert upload_results["args"][0].endswith("/reports/RID-INT/screenshots")
+    assert upload_results["args"][1] == "int-key"
+    assert upload_results["args"][2] == str(tmp_path)
+

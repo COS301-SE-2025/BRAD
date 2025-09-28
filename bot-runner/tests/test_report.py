@@ -132,3 +132,20 @@ def test_forensic_report_logging_calls(monkeypatch):
     assert any("Risk level for" in m for m in dummy.infos)
     # And some debug lines happened during the pipeline
     assert len(dummy.debugs) >= 2
+
+    
+def test_forensic_report_integration(monkeypatch):
+    # This test does not stub dependencies, so it will use real implementations.
+    # It checks that the pipeline runs end-to-end without crashing and produces expected keys.
+    r = ForensicReport("github.com")
+    r.run()
+    out = r.to_dict()
+    # Check that output dict has expected keys
+    assert "domain" in out
+    assert "ip" in out
+    assert "sslValid" in out
+    assert "stats" in out
+    assert "riskScore" in out
+    assert "riskReasons" in out
+    assert "riskLevel" in out
+

@@ -19,19 +19,17 @@ def test_initial_summary_is_empty():
 
 
 def test_mark_start_only_sets_first_once(monkeypatch):
-    # Fake datetime with a controllable utcnow sequence
-    class FakeDT:
-        calls = 0
+    calls = {"n": 0}
 
-        @classmethod
-        def utcnow(cls):
-            cls.calls += 1
-            # Return distinct ISO strings each call; the exact values don't matter
-            return types.SimpleNamespace(
-                isoformat=lambda: f"2025-01-01T00:00:0{cls.calls}"
-            )
+    def fake_now():
+        calls["n"] += 1
+        # minimal object with isoformat + subtract support
+        return types.SimpleNamespace(
+            isoformat=lambda *a, **k: f"2025-01-01T00:00:0{calls['n']}+00:00",
+            __sub__=lambda other: types.SimpleNamespace(total_seconds=lambda: 0),
+        )
 
-    monkeypatch.setattr(NT, "datetime", FakeDT)
+    monkeypatch.setattr(NT, "now_utc", fake_now)
 
     t = NT.NetworkTracker()
     t.mark_start()
@@ -39,51 +37,36 @@ def test_mark_start_only_sets_first_once(monkeypatch):
     t.mark_start()  # should NOT overwrite
     second_summary = t.to_summary()["startTime"]
 
-    assert first_summary == "2025-01-01T00:00:01Z"
-    assert second_summary == first_summary  # idempotent
-    # utcnow was called once by mark_start, and once by to_summary for end? (no end yet)
-    # We don't assert call counts further; just ensure start is stable.
+    assert first_summary == "2025-01-01T00:00:01+00:00".replace("+00:00", "Z")
+    assert second_summary == first_summary
+
 
 
 def test_mark_end_and_duration_ms(monkeypatch):
-    # Provide fixed start and end to produce a deterministic duration
-    class FixedDT:
-        _vals = []
-
-        @classmethod
-        def utcnow(cls):
-            # Pop sequential values: start, end
-            return cls._vals.pop(0)
-
-    # Build objects that mimic datetime with isoformat() and subtraction
-    class _FakeMoment:
-        def __init__(self, iso, seconds=0):
+    class _Moment:
+        def __init__(self, iso, seconds):
             self._iso = iso
-            self._seconds = seconds
-
-        def isoformat(self):
-            return self._iso
-
+            self._s = seconds
+        def isoformat(self, *a, **k): return self._iso
         def __sub__(self, other):
-            # Return an object with total_seconds()
-            diff = self._seconds - other._seconds
-            return types.SimpleNamespace(total_seconds=lambda: diff)
+            return types.SimpleNamespace(total_seconds=lambda: self._s - other._s)
 
-    start = _FakeMoment("2025-01-01T12:00:00", seconds=0)
-    end = _FakeMoment("2025-01-01T12:00:01", seconds=1)  # +1s → 1000 ms
+    seq = [
+        _Moment("2025-01-01T12:00:00+00:00", 0),
+        _Moment("2025-01-01T12:00:01+00:00", 1),
+    ]
 
-    FixedDT._vals = [start, end]
-
-    monkeypatch.setattr(NT, "datetime", FixedDT)
+    monkeypatch.setattr(NT, "now_utc", lambda: seq.pop(0))
 
     t = NT.NetworkTracker()
-    t.mark_start()  # consumes start
-    t.mark_end()    # consumes end
+    t.mark_start()
+    t.mark_end()
 
     summ = t.to_summary()
     assert summ["startTime"] == "2025-01-01T12:00:00Z"
     assert summ["endTime"] == "2025-01-01T12:00:01Z"
     assert summ["durationMs"] == 1000
+
 
 
 def test_counters_reflected_in_summary():
