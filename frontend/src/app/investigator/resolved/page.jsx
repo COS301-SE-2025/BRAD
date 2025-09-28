@@ -11,7 +11,7 @@ export default function ResolvedReportsPage() {
   const [reports, setReports] = useState([]);
   const [storedUser, setStoredUser] = useState({ username: "Investigator", role: "investigator" });
   const [notification, setNotification] = useState(null);
-
+  const [similarityResults, setSimilarityResults] = useState({}); 
   useEffect(() => {
     const userData = typeof window !== "undefined" ? localStorage.getItem("user") : null;
     if (userData) setStoredUser(JSON.parse(userData));
@@ -26,6 +26,18 @@ export default function ResolvedReportsPage() {
     } catch (err) {
       setNotification({ type: "error", title: "Error", message: "Failed to fetch reports." });
       console.error("Error fetching reports:", err);
+    }
+  };
+
+    // Fetch similarity data for a specific report
+const fetchSimilarity = async (reportId, domain) => {
+    try {
+      const res = await API.post("/domain-similarity/check", { domain });
+      setSimilarityResults((prev) => ({ ...prev, [reportId]: res.data }));
+      setNotification({ type: "success", title: "Success", message: "Similarity check completed." });
+    } catch (err) {
+      setNotification({ type: "error", title: "Error", message: "Failed to check similarity." });
+      console.error("Error fetching similarity:", err);
     }
   };
 
@@ -70,6 +82,8 @@ export default function ResolvedReportsPage() {
                 loggedInUser={storedUser}
                 onRefresh={fetchReports}
                 setNotification={setNotification}
+                fetchSimilarity={(reportId, domain) => fetchSimilarity(reportId, domain)} // Pass callback
+                similarityResults={similarityResults[report._id] || []} // Pass results
               />
             ))}
           </div>
