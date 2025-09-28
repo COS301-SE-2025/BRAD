@@ -1,8 +1,9 @@
-// @/components/SimilarityPopup.jsx
 "use client";
-import React from "react";
+import React, { useState } from "react";
 
 const SimilarityPopup = ({ isOpen, onClose, similarityResults, report }) => {
+  const [searchTerm, setSearchTerm] = useState("");
+
   if (!isOpen) return null;
 
   const handleBackdropClick = (e) => {
@@ -11,33 +12,70 @@ const SimilarityPopup = ({ isOpen, onClose, similarityResults, report }) => {
     }
   };
 
-  // Filter out self-comparisons
-  const filteredResults = similarityResults.filter((result) => result.domain !== report.domain);
+  // Filter out self-comparisons first
+  const cleanedResults = similarityResults.filter(
+    (result) => result.domain !== report.domain
+  );
+
+  // Then filter by search term
+  const filteredResults = cleanedResults.filter((result) =>
+    result.domain.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
-    <div
-      className="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-100"
-      onClick={handleBackdropClick}
-    >
-      <div className="bg-white p-6 rounded-xl shadow-2xl w-full max-w-lg transform transition-all duration-300 ease-in-out scale-100 hover:scale-[1.02]">
-        <div className="relative">
-          <h2 className="text-2xl font-bold text-gray-800 mb-6">Similarity Results</h2>
+    <div className="modal-overlay" onClick={handleBackdropClick}>
+      <div
+        className="modal-card w-full max-w-3xl max-h-[90vh] overflow-y-auto bg-white dark:bg-gray-900 relative"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold">Similarity Results</h2>
           <button
             onClick={onClose}
-            className="absolute top-2 right-2 text-gray-600 hover:text-red-500 text-2xl font-bold focus:outline-none"
+            className="rounded-full w-8 h-8 flex items-center justify-center text-gray-500 hover:text-gray-900 hover:bg-gray-200 dark:hover:bg-gray-700 transition"
             aria-label="Close"
           >
-            ×
+            ✕
           </button>
         </div>
+
+        {/* Search bar */}
+        <input
+          type="text"
+          placeholder="Filter by domain..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="input mb-4"
+        />
+
+        {/* Content */}
         {filteredResults.length > 0 ? (
           filteredResults.map((result, index) => (
-            <div key={index} className="mt-6 border-t border-gray-200 pt-4">
-              <p className="text-lg text-gray-700">Compared to: <strong className="text-blue-600">{result.domain}</strong></p>
-              <h1 className="text-5xl text-red-600 font-extrabold mt-2 mb-4">Final Score: {result.finalScore.toFixed(2)}</h1>
-              <h3 className="text-md font-semibold text-gray-800 mt-2">Lexical Features</h3>
-              <ul className="list-disc pl-6 space-y-2 text-gray-600">
-                <li>Suspicious Score: <span className="font-medium">{result.lexical.suspicious_score.toFixed(2)}</span></li>
+            <div
+              key={index}
+              className="border-t border-gray-200 dark:border-gray-700 pt-4 mt-4"
+            >
+              <p className="text-lg">
+                Compared to:{" "}
+                <strong className="text-blue-600 dark:text-blue-400">
+                  {result.domain}
+                </strong>
+              </p>
+
+              <h1 className="text-4xl font-extrabold text-red-600 mt-2 mb-4">
+                Final Score: {result.finalScore.toFixed(2)}
+              </h1>
+
+              {/* Lexical Section */}
+              <h3 className="text-md font-semibold mt-4">Lexical Features</h3>
+              <ul className="list-disc pl-6 space-y-1 text-sm">
+                <li>
+                  Suspicious Score:{" "}
+                  <span className="font-medium">
+                    {result.lexical.suspicious_score.toFixed(2)}
+                  </span>
+                </li>
                 <li>Dice: <span className="font-medium">{result.lexical.dice.toFixed(2)}</span></li>
                 <li>Levenshtein Norm: <span className="font-medium">{result.lexical.levenshtein_norm.toFixed(2)}</span></li>
                 <li>NGram Jaccard: <span className="font-medium">{result.lexical.ngram_jaccard.toFixed(2)}</span></li>
@@ -50,8 +88,10 @@ const SimilarityPopup = ({ isOpen, onClose, similarityResults, report }) => {
                 <li>TLD Diff: <span className="font-medium">{result.lexical.tld_diff ? "Yes" : "No"}</span></li>
                 <li>SLD One Edit Away: <span className="font-medium">{result.lexical.sld_one_edit_away ? "Yes" : "No"}</span></li>
               </ul>
-              <h3 className="text-md font-semibold text-gray-800 mt-4">Pattern Features</h3>
-              <ul className="list-disc pl-6 space-y-2 text-gray-600">
+
+              {/* Pattern Section */}
+              <h3 className="text-md font-semibold mt-4">Pattern Features</h3>
+              <ul className="list-disc pl-6 space-y-1 text-sm">
                 <li>Has Digit: <span className="font-medium">{result.pattern.hasDigit ? "Yes" : "No"}</span></li>
                 <li>Has Hyphen: <span className="font-medium">{result.pattern.hasHyphen ? "Yes" : "No"}</span></li>
                 <li>Repeated Chars: <span className="font-medium">{result.pattern.repeatedChars ? "Yes" : "No"}</span></li>
@@ -66,7 +106,7 @@ const SimilarityPopup = ({ isOpen, onClose, similarityResults, report }) => {
             </div>
           ))
         ) : (
-          <p className="text-gray-500 italic">No similarity data available.</p>
+          <p className="text-gray-500 italic">No matching results.</p>
         )}
       </div>
     </div>
