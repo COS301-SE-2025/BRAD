@@ -21,7 +21,7 @@ import { DomainSimilarityModule } from './domain-similarity/domain-similarity.mo
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
-      envFilePath: '.env',
+      envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
       validationSchema: Joi.object({
         MONGO_URI: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
@@ -39,14 +39,17 @@ import { DomainSimilarityModule } from './domain-similarity/domain-similarity.mo
       }),
     }),
 
-    // MongoDB connection
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (config: ConfigService) => ({
-        uri: config.get<string>('MONGO_URI'),
-      }),
-    }),
+    ...(process.env.NODE_ENV === 'test'
+      ? [] // 👉 let mongodb-memory-server handle it in your tests
+      : [
+          MongooseModule.forRootAsync({
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: async (config: ConfigService) => ({
+              uri: config.get<string>('MONGO_URI'),
+            }),
+          }),
+        ]),
 
     // HTTP client for FastAPI communication
     HttpModule,

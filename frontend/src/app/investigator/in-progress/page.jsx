@@ -37,6 +37,10 @@ export default function InProgressReportsPage() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+      document.title = "B.R.A.D | Investigator In-Progress Reports"
+    }, [])
+
   return (
     <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
       <Sidebar onToggle={setSidebarExpanded} />

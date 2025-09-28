@@ -101,12 +101,11 @@ export class Report {
   } | null;
 
   @Prop()
-  riskScore?: number; // overall (optional)
+  riskScore?: number;
 
-  // ── Unify statuses across backend & bot ──────────────────────────────────────
-  @ApiProperty({ enum: ['bot','pending','in-progress','done','error'], default: 'bot' })
-  @Prop({ enum: ['bot','pending','in-progress','done','error'], default: 'bot' })
-  analysisStatus: 'bot' | 'pending' | 'in-progress' | 'done' | 'error';
+  @ApiProperty({ enum: ['bot', 'pending', 'in-progress', 'done', 'error'], default: 'pending' })
+  @Prop({ enum: ['bot', 'pending', 'in-progress', 'done', 'error'], default: 'pending' })
+  analysisStatus: string;
 
   @ApiProperty({ enum: ['malicious', 'benign', null], nullable: true })
   @Prop({ type: String, enum: ['malicious', 'benign', null], default: null })

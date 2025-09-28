@@ -35,6 +35,10 @@ export default function ResolvedReportsPage() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+      document.title = "B.R.A.D | Investigator Resolved Reports"
+    }, [])
+
   return (
     <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
       <Sidebar onToggle={setSidebarExpanded} />
