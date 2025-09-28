@@ -1,5 +1,7 @@
 # src/scraper/network_tracker.py
-from datetime import datetime, UTC
+from datetime import datetime, timezone
+
+UTC = timezone.utc
 
 def now_utc():
     """Timezone-aware UTC 'now' (seam for tests)."""
