@@ -107,83 +107,124 @@ export class AuthService {
     return { isValid: true, message: '' };
   }
 
-  async login(dto: LoginDto): Promise<{ token: string; user: any }> {
-    const identifier = dto.identifier.trim();
-    const emailNormalized = identifier.toLowerCase();
+// inside AuthService
+async login(dto: LoginDto): Promise<{ tempToken: string; message: string }> {
+  const identifier = dto.identifier.trim();
+  const emailNormalized = identifier.toLowerCase();
 
-    const user = await this.userModel.findOne({
-      $or: [{ email: emailNormalized }, { username: identifier }],
-    });
+  const user = await this.userModel.findOne({
+    $or: [{ email: emailNormalized }, { username: identifier }],
+  });
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
+  if (!user) throw new UnauthorizedException('Invalid credentials');
 
-    // Check if account is locked
-    if (user.lockUntil && user.lockUntil > new Date()) {
-      throw new UnauthorizedException(
-        `Account is locked. Try again after ${Math.ceil(
-          (user.lockUntil.getTime() - Date.now()) / 60000,
-        )} minutes.`,
-      );
-    }
-
-    const isMatch = await bcrypt.compare(dto.password, user.password);
-
-    if (!isMatch) {
-      // Increment failed login attempts
-      user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
-
-      // Check if max attempts reached
-      if (user.failedLoginAttempts >= this.MAX_LOGIN_ATTEMPTS) {
-        user.lockUntil = new Date(Date.now() + this.LOCKOUT_DURATION);
-        await user.save();
-
-        // Send account lockout notification email
-        await this.sendLockoutNotification(user);
-
-        throw new UnauthorizedException(
-          `Account locked due to too many failed login attempts. Try again after ${Math.ceil(
-            this.LOCKOUT_DURATION / 60000,
-          )} minutes. A notification email has been sent.`,
-        );
-      }
-
-      await user.save();
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    // Reset failed attempts and lockout on successful login
-    user.failedLoginAttempts = 0;
-    user.lockUntil = undefined;
-
-    if (user.mustChangePassword) {
-      throw new UnauthorizedException(
-        'You must change your password before logging in',
-      );
-    }
-
-    const secret = this.configService.get<string>('JWT_SECRET');
-    if (!secret) {
-      throw new Error('JWT_SECRET is not defined');
-    }
-
-    const payload = {
-      id: user._id.toString(),
-      role: user.role,
-    };
-
-    const token = this.jwtService.sign(payload);
-
-    const { password, ...userData } = user.toObject();
-
-    await user.save(); // Save the reset of failed attempts and lockUntil
-
-    return {
-      token,
-      user: userData,
-    };
+  if (user.lockUntil && user.lockUntil > new Date()) {
+    throw new UnauthorizedException(
+      `Account is locked. Try again after ${Math.ceil(
+        (user.lockUntil.getTime() - Date.now()) / 60000,
+      )} minutes.`,
+    );
   }
+
+  const isMatch = await bcrypt.compare(dto.password, user.password);
+  if (!isMatch) {
+    user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+
+    if (user.failedLoginAttempts >= this.MAX_LOGIN_ATTEMPTS) {
+      user.lockUntil = new Date(Date.now() + this.LOCKOUT_DURATION);
+      await user.save();
+      await this.sendLockoutNotification(user);
+      throw new UnauthorizedException(`Account locked. Try again later.`);
+    }
+
+    await user.save();
+    throw new UnauthorizedException('Invalid credentials');
+  }
+
+  // ✅ Reset failed attempts
+  user.failedLoginAttempts = 0;
+  user.lockUntil = undefined;
+
+  // ✅ Generate OTP
+  const otp = Math.floor(100000 + Math.random() * 900000).toString();
+  user.otp = await bcrypt.hash(otp, 10);
+  user.otpExpires = new Date(Date.now() + 5 * 60 * 1000); // 5 min
+  await user.save();
+
+  await this.sendOtpEmail(user, otp);
+
+  // ✅ Issue temporary token (5 min expiry)
+  const tempToken = this.jwtService.sign(
+    { id: user._id.toString(), stage: 'otp' },
+    { expiresIn: '5m' },
+  );
+
+  return { tempToken, message: 'OTP sent to your email. Please verify.' };
+}
+
+
+private async sendOtpEmail(user: User, otp: string): Promise<void> {
+  const transporter = nodemailer.createTransport({
+    service: 'Gmail',
+    auth: {
+      user: this.configService.get<string>('EMAIL_USER'),
+      pass: this.configService.get<string>('EMAIL_PASS'),
+    },
+  });
+
+  const mailOptions = {
+    to: user.email,
+    from: this.configService.get<string>('EMAIL_USER'),
+    subject: 'Your MFA Verification Code',
+    text: `Hello ${user.firstname},\n\nYour one-time password (OTP) is: ${otp}\n\nThis code will expire in 5 minutes.\n\nIf you did not attempt to login, please contact support immediately.`,
+  };
+
+  await transporter.sendMail(mailOptions);
+}
+
+async verifyOtp(tempToken: string, otp: string): Promise<{ token: string; user: any }> {
+  let payload: any;
+  try {
+    payload = this.jwtService.verify(tempToken);
+  } catch (err) {
+    throw new UnauthorizedException('Invalid or expired temp token');
+  }
+
+  if (payload.stage !== 'otp') {
+    throw new UnauthorizedException('Invalid login stage');
+  }
+
+  const user = await this.userModel.findById(payload.id);
+  if (!user || !user.otp || !user.otpExpires) {
+    throw new UnauthorizedException('OTP not found or already used');
+  }
+
+  if (user.otpExpires < new Date()) {
+    throw new UnauthorizedException('OTP expired');
+  }
+
+  const isOtpValid = await bcrypt.compare(otp, user.otp);
+  if (!isOtpValid) {
+    throw new UnauthorizedException('Invalid OTP');
+  }
+
+  // ✅ Clear OTP
+  user.otp = undefined;
+  user.otpExpires = undefined;
+  await user.save();
+
+  // ✅ Issue real JWT
+  const realToken = this.jwtService.sign({
+    id: user._id.toString(),
+    role: user.role,
+  });
+
+  const { password, otp: _, otpExpires: __, ...userData } = user.toObject();
+
+  return { token: realToken, user: userData };
+}
+
+
 
   async sendLockoutNotification(user: User): Promise<void> {
  
