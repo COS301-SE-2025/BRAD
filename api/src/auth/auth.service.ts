@@ -22,9 +22,15 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(dto: RegisterDto): Promise<{ userId: string }> {
+    async register(dto: RegisterDto): Promise<{ userId: string }> {
     const email = dto.email.toLowerCase().trim();
     const username = dto.username.trim();
+    
+    // Password validation
+    const passwordValidation = this.validatePassword(dto.password);
+    if (!passwordValidation.isValid) {
+      throw new BadRequestException(passwordValidation.message);
+    }
 
     const existingUser = await this.userModel.findOne({
       $or: [{ email }, { username }],
@@ -45,7 +51,7 @@ export class AuthService {
       email,
       password: hashedPassword,
       role: 'general',
-      failedLoginAttempts: 0, 
+      failedLoginAttempts: 0,
     });
 
     try {
@@ -55,6 +61,50 @@ export class AuthService {
       console.error('Error registering user:', err);
       throw new InternalServerErrorException('Could not register user');
     }
+  }
+
+  private validatePassword(password: string): { isValid: boolean; message: string } {
+    // Minimum 6 characters
+    if (password.length < 6) {
+      return {
+        isValid: false,
+        message: 'Password must be at least 6 characters long',
+      };
+    }
+
+    // At least one uppercase letter
+    if (!/[A-Z]/.test(password)) {
+      return {
+        isValid: false,
+        message: 'Password must contain at least one uppercase letter',
+      };
+    }
+
+    // At least one lowercase letter
+    if (!/[a-z]/.test(password)) {
+      return {
+        isValid: false,
+        message: 'Password must contain at least one lowercase letter',
+      };
+    }
+
+    // At least one number
+    if (!/[0-9]/.test(password)) {
+      return {
+        isValid: false,
+        message: 'Password must contain at least one number',
+      };
+    }
+
+    // At least one special character
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      return {
+        isValid: false,
+        message: 'Password must contain at least one special character',
+      };
+    }
+
+    return { isValid: true, message: '' };
   }
 
   async login(dto: LoginDto): Promise<{ token: string; user: any }> {
