@@ -1,8 +1,9 @@
-from typing import Dict, Any, Tuple
+from typing import Dict, Any, Tuple, Optional
 from ..utils.logger import get_logger
 
 logger = get_logger(__name__)
 
+# Risk band thresholds (0–10 scale)
 RISK_THRESHOLDS = {"low": 0, "medium": 4, "high": 7}
 
 # Trim super-common infra to avoid constant false positives.
@@ -14,7 +15,28 @@ RISKY_COUNTRIES = ['RU', 'CN', 'KP', 'IR']
 # Known safe/training domains that should slightly deflate the score.
 ALLOWLIST_DOMAINS = {'books.toscrape.com', 'toscrape.com', 'example.com'}
 
+
+def _num(val: Any, default: float) -> float:
+    """
+    Best-effort numeric coercion.
+    - Returns default on None/invalid.
+    - Avoids treating booleans as 1/0.
+    """
+    if isinstance(val, bool):
+        return default
+    if isinstance(val, (int, float)):
+        return float(val)
+    try:
+        return float(str(val).strip())
+    except Exception:
+        return default
+
+
 def calculate_risk_score_with_reasons(stats: Dict[str, Any], forensics: Dict[str, Any]) -> Tuple[float, Dict[str, str]]:
+    """
+    Calculate a 0–10 risk score with explanatory reasons.
+    Robust to None/strings for numeric fields (e.g., ssl_days_remaining).
+    """
     logger.info("[Scoring] Calculating risk score with reasons...")
     reasons: Dict[str, str] = {}
     score = 0.0
@@ -24,7 +46,12 @@ def calculate_risk_score_with_reasons(stats: Dict[str, Any], forensics: Dict[str
 
     # 1) Domain age
     raw_age = stats.get("domain_age_days")
-    domain_age = raw_age if isinstance(raw_age, (int, float)) and raw_age >= 0 else None
+    if raw_age is None:
+        domain_age: Optional[float] = None
+    else:
+        age = _num(raw_age, float("nan"))
+        domain_age = age if age == age and age >= 0 else None  # NaN check
+
     if domain_age is None:
         reasons["new_domain"] = "Domain age unknown — not penalizing"
     elif domain_age < 30:
@@ -34,22 +61,22 @@ def calculate_risk_score_with_reasons(stats: Dict[str, Any], forensics: Dict[str
         reasons["new_domain"] = f"Domain is mature ({int(domain_age)} days)"
 
     # 2) SSL health
-    ssl_remaining = stats.get("ssl_days_remaining", -1)
+    ssl_remaining = _num(stats.get("ssl_days_remaining"), -1)
     if ssl_remaining <= 0:
-        reasons["ssl_expired"] = f"SSL expired or invalid ({ssl_remaining} days)"
+        reasons["ssl_expired"] = f"SSL expired or invalid ({int(ssl_remaining)} days)"
         score += 0.2
         logger.debug("[Scoring] SSL expired → +0.2")
     elif ssl_remaining <= 14:
-        reasons["ssl_expired"] = f"SSL expiring soon ({ssl_remaining} days)"
+        reasons["ssl_expired"] = f"SSL expiring soon ({int(ssl_remaining)} days)"
         score += 0.05
         logger.debug("[Scoring] SSL expiring soon → +0.05")
     else:
-        reasons["ssl_expired"] = f"SSL valid ({ssl_remaining} days remaining)"
+        reasons["ssl_expired"] = f"SSL valid ({int(ssl_remaining)} days remaining)"
 
     # 3) DNS posture
     dns = stats.get("dns", {}) or {}
-    mx_count = int(dns.get("mx_count", 0) or 0)
-    ns_count = int(dns.get("ns_count", 0) or 0)
+    mx_count = int(_num(dns.get("mx_count"), 0))
+    ns_count = int(_num(dns.get("ns_count"), 0))
     has_spf = bool(dns.get("has_spf", False))
     has_dmarc = bool(dns.get("has_dmarc", False))
 
@@ -118,17 +145,19 @@ def calculate_risk_score_with_reasons(stats: Dict[str, Any], forensics: Dict[str
     else:
         reasons["geo_risk"] = f"Country {country or 'Unknown'} (OK)"
 
-    # 7) Allowlist bias (training / sandbox domains) — apply ONCE, keep delta out of user-facing text
+    # 7) Allowlist bias (training / sandbox domains) — apply ONCE
     if domain in ALLOWLIST_DOMAINS:
         prev = score
         score = max(0.0, score - 0.12)
         reasons["allowlist_bias"] = "Training/sandbox domain — slight forgiveness applied"
         logger.debug(f"[Scoring] Allowlist {domain}: {prev:.2f} → {score:.2f}")
 
+    # Normalize to 0–10, two decimals
     total_score = round(min(score * 10, 10.0), 2)
     logger.info(f"[Scoring] Final score: {total_score} ({risk_label(total_score)})")
     logger.debug(f"[Scoring] Reasons: {reasons}")
     return total_score, reasons
+
 
 def risk_label(score: float) -> str:
     if score >= RISK_THRESHOLDS["high"]:

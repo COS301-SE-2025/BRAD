@@ -32,7 +32,7 @@ export class StatisticsController {
         const user=req['user'] as JwtPayload;
         const userId=user?.id;
         const role=user?.role;
-        return this.statisticsService.getTotalReports(userId, role);
+        return this.statisticsService.getTotalReports();
     }
 
     @UseGuards(AuthGuard, RolesGuard)
@@ -203,4 +203,49 @@ async getDomainsReportedMoreThanOnce(@Req() req: Request) {
         const role=user?.role;
         return this.statisticsService.getResolvedReportsCount(user.id, role);
     }
+
+    @UseGuards(AuthGuard, RolesGuard)
+    // @Roles('admin')
+    @Get('avg-bot-analysis-time')
+    @ApiBearerAuth("JWT-auth")
+    @ApiOperation({ summary: 'Get average bot analysis time across all reports' })
+    @ApiResponse({ status: 200, description: 'Average bot analysis time' })
+    async getAvgBotAnalysisTime(@Req() req: Request) {
+    const user = req['user'] as JwtPayload;
+    return this.statisticsService.getAvgBotAnalysisTime();
+    }
+
+    @UseGuards(AuthGuard, RolesGuard)
+    // @Roles('admin')
+    @Get('avg-investigator-time')
+    @ApiBearerAuth("JWT-auth")
+    @ApiOperation({ summary: 'Get average investigator analysis time across all reports' })
+    @ApiResponse({ status: 200, description: 'Average investigator analysis time' })
+    async getAvgInvestigatorTime(@Req() req: Request) {
+    const user = req['user'] as JwtPayload;
+    return this.statisticsService.getAvgInvestigatorTime();
+    }
+
+    @UseGuards(AuthGuard, RolesGuard)
+    // @Roles('admin')
+    @Get('avg-resolution-time')
+    @ApiBearerAuth("JWT-auth")
+    @ApiOperation({ summary: 'Get average resolution time for reports' })
+    @ApiResponse({ status: 200, description: 'Average resolution time' })
+    async getAvgResolutionTime(@Req() req: Request) {
+    const user = req['user'] as JwtPayload;
+    return this.statisticsService.getAvgResolutionTime();
+    }
+
+    @UseGuards(AuthGuard, RolesGuard)
+    // @Roles('admin')
+    @Get('investigator-stats')
+    @ApiBearerAuth("JWT-auth")
+    @ApiOperation({ summary: 'Get investigator statistics (resolved count, malicious %, safe %, avg time)' })
+    @ApiResponse({ status: 200, description: 'Investigator stats' })
+    async getInvestigatorStats(@Req() req: Request) {
+    const user = req['user'] as JwtPayload;
+    return this.statisticsService.getInvestigatorStats(user.role);
+    }
+
 }

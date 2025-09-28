@@ -38,6 +38,26 @@ export class AuthController {
   }
 
 @Public()
+@Post('verify-otp')
+@ApiOperation({ summary: 'Verify OTP and complete login' })
+@ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      tempToken: { type: 'string', example: 'eyJhbGciOi...' },
+      otp: { type: 'string', example: '123456' },
+    },
+  },
+})
+@ApiResponse({ status: 200, description: 'OTP verified, JWT returned' })
+@ApiResponse({ status: 401, description: 'Invalid or expired OTP' })
+async verifyOtp(@Body() body: { tempToken: string; otp: string }) {
+  return this.authService.verifyOtp(body.tempToken, body.otp);
+}
+
+
+
+@Public()
 @Post('forgot-password')
 @ApiOperation({ summary: 'Request password reset link by email' })
 @ApiBody({ schema: { example: { email: 'user@example.com' } } })
@@ -80,5 +100,7 @@ async updateUser(@Req() req: Request, @Body() dto: UpdateUserDto) {
   const user = req['user'] as JwtPayload;
   return this.authService.updateUser(user.id, dto);
 }
+
+
 
 }

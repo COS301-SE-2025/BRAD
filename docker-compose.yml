@@ -7,7 +7,7 @@ services:
     volumes:
       - ./api:/app
       - ./uploads:/usr/src/app/uploads
-      - ./screenshots:/usr/src/app/screenshots
+      - brad_screenshots:/data/screenshots
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.api.rule=Host(`capstone-brad.dns.net.za`) && PathPrefix(`/api`)"
@@ -19,6 +19,8 @@ services:
     environment:
       - NODE_ENV=production
       - BODY_LIMIT=20mb
+      - SCREENSHOTS_DIR=/data/screenshots
+      - DOMAIN_API_URL=http://brad-domain-api:8000 
     depends_on:
       - mongo
       - fastapi-queue
@@ -32,8 +34,8 @@ services:
     container_name: brad-bot
     volumes:
       - ./bot:/app
-      - ./screenshots:/app/screenshots
       - ./logs/bot:/app/logs
+      - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - redis
       - api
@@ -43,6 +45,42 @@ services:
       - LOG_DIR=/app/logs
       - LOG_FILE_MAX_BYTES=5242880
       - LOG_BACKUP_COUNT=5
+      - DOCKER_HOST=unix://var/run/docker.sock
+      - PROXY_URL=${PROXY_URL}
+      - PROXY_USERNAME=${PROXY_USERNAME}
+      - PROXY_PASSWORD=${PROXY_PASSWORD}
+      - NO_PROXY=${NO_PROXY}
+    env_file:
+      - .env
+    networks:
+      - brad_net
+    labels:
+      - "traefik.enable=false"
+
+  # No container_name or volume: This will only be ran dynamically and not with docker compose
+  bot-runner:
+    build: ./bot-runner
+    image: brad-bot-runner:latest
+    networks:
+      - brad_net
+    labels:
+      - "traefik.enable=false"
+
+  domain-api:
+    build: ./domain-api
+    container_name: brad-domain-api
+    ports:
+      - "${DOMAIN_API_PORT}:8000"
+    depends_on: []
+    expose:
+      - "8000"  
+    environment:
+      - LOG_TO_FILE=1
+      - LOG_DIR=/app/logs
+      - LOG_FILE_MAX_BYTES=5242880
+      - LOG_BACKUP_COUNT=5
+    volumes:
+      - ./logs/domain-api:/app/logs
     env_file:
       - .env
     networks:
@@ -63,7 +101,12 @@ services:
       - brad_net
 
   frontend:
-    build: ./frontend
+    build:
+      ./frontend
+      # context: ./frontend
+      # dockerfile: Dockerfile
+      # args:
+      #   NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     container_name: brad-frontend
     ports:
       - "5173:5173"
@@ -74,9 +117,12 @@ services:
       - "traefik.http.routers.frontend.tls.certresolver=myresolver"
       - "traefik.http.services.frontend.loadbalancer.server.port=5173"
     environment:
-      #   - NODE_ENV=development
-      - NODE_ENV=production
+      - NODE_ENV=development
+      # - NODE_ENV=production
       - VITE_API_BASE_API=
+      # - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+    # env_file:
+    # - .env
     depends_on:
       - api
     networks:
@@ -135,6 +181,7 @@ services:
 volumes:
   mongo-data:
   redis-data:
+  brad_screenshots: # Named volume for screenshots
 
 networks:
   brad_net:

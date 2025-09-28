@@ -11,6 +11,8 @@ import { AdminModule } from './admin/admin.module';
 import { StatisticsModule } from './statistics/statistics.module';
 import { HttpModule } from '@nestjs/axios';
 import { QueueModule } from './queue/queue.module'; // your FastAPI wrapper
+import { DomainSimilarityService } from './domain-similarity/domain-similarity.service';
+import { DomainSimilarityModule } from './domain-similarity/domain-similarity.module';
 
 
 @Module({
@@ -19,7 +21,7 @@ import { QueueModule } from './queue/queue.module'; // your FastAPI wrapper
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
-      envFilePath: '.env',
+      envFilePath: process.env.NODE_ENV === 'test' ? '.env.test' : '.env',
       validationSchema: Joi.object({
         MONGO_URI: Joi.string().required(),
         JWT_SECRET: Joi.string().required(),
@@ -37,14 +39,17 @@ import { QueueModule } from './queue/queue.module'; // your FastAPI wrapper
       }),
     }),
 
-    // MongoDB connection
-    MongooseModule.forRootAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: async (config: ConfigService) => ({
-        uri: config.get<string>('MONGO_URI'),
-      }),
-    }),
+    ...(process.env.NODE_ENV === 'test'
+      ? [] // 👉 let mongodb-memory-server handle it in your tests
+      : [
+          MongooseModule.forRootAsync({
+            imports: [ConfigModule],
+            inject: [ConfigService],
+            useFactory: async (config: ConfigService) => ({
+              uri: config.get<string>('MONGO_URI'),
+            }),
+          }),
+        ]),
 
     // HTTP client for FastAPI communication
     HttpModule,
@@ -55,9 +60,10 @@ import { QueueModule } from './queue/queue.module'; // your FastAPI wrapper
     AuthModule,
     AdminModule,
     StatisticsModule,
+    DomainSimilarityModule,
   ],
 
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, DomainSimilarityService],
 })
 export class AppModule {}
