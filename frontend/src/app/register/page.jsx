@@ -92,6 +92,30 @@ export default function RegisterPage() {
             </div>
           )}
 
+          {error && (
+            <div className="mb-3">
+              <Notification
+                type="error"
+                title="Error"
+                onClose={() => setError("")}
+              >
+                {error}
+              </Notification>
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-3">
+              <Notification
+                type="success"
+                title="Success"
+                onClose={() => setSuccess("")}
+              >
+                {success}
+              </Notification>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="flex items-center gap-2">
               <label className="w-24 text-xs font-medium">First Name</label>
