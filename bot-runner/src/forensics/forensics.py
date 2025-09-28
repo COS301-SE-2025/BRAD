@@ -3,10 +3,11 @@ import ssl
 import whois
 import tldextract
 import dns.resolver
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any
 from .threat_utils import get_geo_info
 from urllib.parse import urlparse
+
 
 def sanitize_domain(value: str) -> str:
     raw = (value or "").strip().lower().replace("\u200b","").replace("\u2060","")
@@ -68,22 +69,29 @@ def get_ssl_info(domain: str) -> Dict[str, Any]:
             s.settimeout(3)
             s.connect((domain, 443))
             cert = s.getpeercert()
+
             not_after = cert.get("notAfter")
-            expires = (
-                datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z")
-                if not_after else None
-            )
-            # valid only if we have an expiry in the future
-            now = datetime.utcnow()
+            expires = None
+            if not_after:
+                # Example format: "Dec 31 23:59:59 2099 GMT"
+                try:
+                    dt = datetime.strptime(not_after, "%b %d %H:%M:%S %Y %Z")
+                    # Make it timezone-aware (UTC)
+                    expires = dt.replace(tzinfo=timezone.utc)
+                except ValueError:
+                    # Some platforms may omit %Z or use a different token; last-resort parse:
+                    try:
+                        dt = datetime.strptime(not_after, "%b %d %H:%M:%S %Y")
+                        expires = dt.replace(tzinfo=timezone.utc)
+                    except Exception:
+                        expires = None
+
+            now = datetime.now(timezone.utc)
             is_valid = bool(expires and expires > now)
 
-            # pull extra details (issuer, subject, SANs)
             subject = dict(x[0] for x in cert.get("subject", []))
             issuer = dict(x[0] for x in cert.get("issuer", []))
-            san = []
-            for k, v in cert.get("subjectAltName", []):
-                if k.lower() == "dns":
-                    san.append(v)
+            san = [v for k, v in cert.get("subjectAltName", []) if k.lower() == "dns"]
 
             return {
                 "valid": is_valid,
