@@ -58,17 +58,16 @@ This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)**
 
 ## Documentation
 
-- [SRS Document](/docs/SRS_Document.md)
-  <!-- - [Design specifications](/docs/DesignRequirements.md) -->
-  <!-- - [Service Contract](/docs/Service_Contracts.md) -->
-  <!-- - [User Stories](/docs/User_Stories.md) -->
-  <!-- - [Architectural Requirements](/docs/Architectural_Requirements.md) -->
-  <!-- - [Quality Requirements](/docs/Quality_Requirements.pdf) -->
+<!-- - [SRS Document](/docs/SRS_Document.md)
 - [GitHub Contributions](docs/GitHub-contributions.md)
-- [Coding Standards](docs/Coding-standards.md)
-    <!-- - [Github Contributions](/docs/requirement-specs/GitHub-contributions.pdf) -->
-    <!-- - [API Documentation](/docs/requirement-specs/API_Documentation.md) -->
-- [Older Versions](/docs/versions/)
+- [Coding Standards](docs/Coding-standards.md) -->
+
+- [B.R.A.D-User-Manual](/docs/pdf/B.R.A.D-User-Manual.pdf)
+- [Coding-standards](/docs/pdf/Coding-standards.pdf)
+- [Deployment-model](/docs/pdf/Deployment-model.pdf)
+- [GitHub-contributions](/docs/pdf/GitHub-contributions.pdf)
+- [SRS-document](/docs/pdf/SRS_Document.pdf)
+<!-- - [](/docs/pdf) -->
 
 ## Demo Videos
 
@@ -87,13 +86,16 @@ This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)**
 ## Project
 
 - [Project Board](https://github.com/orgs/COS301-SE-2025/projects/220/views/1)
-- [Project Plan](/docs/Project-plan.md)
-- [Burn Down Charts](/docs/burn-down-charts.md)
-- [User Manual](/docs/User%20Manual/B.R.A.D-User-Manual.pdf)
+- [Project Plan](/docs/pdf/Project-plan.pdf)
+- [Burn Down Charts](/docs/pdf/burn-down-charts.pdf)
 
 ## Installation
 
-- [Technical Installation Manual](/docs/Technical-installation-manual.md)
+- [Technical Installation Manual](/docs/pdf/Technical-installation-manual.pdf)
+
+## Older versions
+
+- [Older Versions](/docs/versions/)
 
 ## Technologies used
 
@@ -113,6 +115,8 @@ This repository contains our team's **B.R.A.D. (Bot to Report Abusive Domains)**
     <img src="docs/svgs/javascript.svg" alt="VSCode" width="50" height="50">
     <img src="docs/svgs/typescript.svg" alt="VSCode" width="50" height="50">
     <img src="docs/svgs/swagger.svg" alt="VSCode" width="50" height="50">
+    <img src="docs/svgs/nextjs.svg" alt="VSCode" width="50" height="50">
+    <img src="docs/svgs/tailwind.svg" alt="VSCode" width="50" height="50">
 </p>
 
 ## CI/CD & GitHub Actions
