@@ -20,6 +20,7 @@ services:
       - NODE_ENV=production
       - BODY_LIMIT=20mb
       - SCREENSHOTS_DIR=/data/screenshots
+      - DOMAIN_API_URL=http://brad-domain-api:8000 
     depends_on:
       - mongo
       - fastapi-queue
@@ -71,6 +72,8 @@ services:
     ports:
       - "${DOMAIN_API_PORT}:8000"
     depends_on: []
+    expose:
+      - "8000"  
     environment:
       - LOG_TO_FILE=1
       - LOG_DIR=/app/logs
