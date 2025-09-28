@@ -1,5 +1,11 @@
 # src/scraper/network_tracker.py
-from datetime import datetime
+from datetime import datetime, timezone
+
+UTC = timezone.utc
+
+def now_utc():
+    """Timezone-aware UTC 'now' (seam for tests)."""
+    return datetime.now(UTC)
 
 class NetworkTracker:
     def __init__(self):
@@ -13,19 +19,25 @@ class NetworkTracker:
 
     def mark_start(self):
         if self._first is None:
-            self._first = datetime.utcnow()
+            self._first = now_utc()
 
     def mark_end(self):
-        self._last = datetime.utcnow()
+        self._last = now_utc()
 
     def to_summary(self):
-        start = self._first.isoformat() + "Z" if self._first else None
-        end = self._last.isoformat() + "Z" if self._last else None
-        duration_ms = (int((self._last - self._first).total_seconds() * 1000)
-                       if self._first and self._last else None)
+        def _fmt(dt):
+            if dt is None:
+                return None
+            # emit with 'Z' suffix for UTC
+            return dt.isoformat(timespec="milliseconds").replace("+00:00", "Z")
+
+        duration_ms = (
+            int((self._last - self._first).total_seconds() * 1000)
+            if self._first and self._last else None
+        )
         return {
-            "startTime": start,
-            "endTime": end,
+            "startTime": _fmt(self._first),
+            "endTime": _fmt(self._last),
             "durationMs": duration_ms,
             "requests": self.requests_total,
             "responses": self.responses_total,
