@@ -65,6 +65,24 @@ services:
     labels:
       - "traefik.enable=false"
 
+  domain-api:
+    build: ./domain-api
+    container_name: brad-domain-api
+    ports:
+      - "${DOMAIN_API_PORT}:8000"
+    depends_on: []
+    environment:
+      - LOG_TO_FILE=1
+      - LOG_DIR=/app/logs
+      - LOG_FILE_MAX_BYTES=5242880
+      - LOG_BACKUP_COUNT=5
+    volumes:
+      - ./logs/domain-api:/app/logs
+    env_file:
+      - .env
+    networks:
+      - brad_net
+
   fastapi-queue:
     build: ./fastapi-queue
     container_name: brad-fastapi
