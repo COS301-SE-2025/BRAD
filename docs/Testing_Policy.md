@@ -98,8 +98,6 @@ Security is essential to protect system data, maintain trust, and ensure complia
 
   **Measurement**: Role-based access control tests and security reviews confirmed proper enforcement and no unauthorized access.
 
-![Screenshot: Password Hashing Test Results](./testing/Swagger_Security_Tests/Screenshot_(663).png)
-
 
 ## 2. Compliance
 
@@ -151,8 +149,6 @@ Reliability ensures the BRAD system performs consistently under expected conditi
   
   **Measurement**: Reliability was tested through long-duration runs with continuous monitoring.
 
-  <img src="./images/Usecase1V1.png"
-  style="width:6.31514in;height:2.65903in" />
 
 ---
 
@@ -179,8 +175,6 @@ Scalability ensures that BRAD can handle growing numbers of users, reports, and 
   **Justification**: Ensures fairness and efficiency in handling user reports.
   
   **Measurement**: Queue performance was measured under concurrent submissions.
-<img src="./images/Usecase1V1.png"
-style="width:6.31514in;height:2.65903in" />
 
 ---
 
@@ -237,4 +231,4 @@ Test the Bot module for functional correctness, security, and integration with A
 
 ## Conclusion
 
-The testing of the BRAD system ensures that the application meets its top quality requirements and that individual components (Frontend, Backend, Bot) operate
+The testing of the BRAD system ensures that the application meets its top quality requirements and that individual components (Frontend, Backend, Bot) operate smoothly.
