@@ -13,6 +13,7 @@ import { HttpModule } from '@nestjs/axios';
 import { QueueModule } from './queue/queue.module'; // your FastAPI wrapper
 import { DomainSimilarityService } from './domain-similarity/domain-similarity.service';
 import { DomainSimilarityModule } from './domain-similarity/domain-similarity.module';
+import { HealthModule } from './health/health.module';
 
 
 @Module({
@@ -61,6 +62,7 @@ import { DomainSimilarityModule } from './domain-similarity/domain-similarity.mo
     AdminModule,
     StatisticsModule,
     DomainSimilarityModule,
+    HealthModule,
   ],
 
   controllers: [AppController],
