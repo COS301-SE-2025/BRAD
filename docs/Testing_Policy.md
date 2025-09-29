@@ -98,7 +98,7 @@ Security is essential to protect system data, maintain trust, and ensure complia
 
   **Measurement**: Role-based access control tests and security reviews confirmed proper enforcement and no unauthorized access.
 
-![Screenshot: Password Hashing Test Results](/testing/Swagger_Security_Tests/Screenshot_(663).png)
+![Screenshot: Password Hashing Test Results](./testing/Swagger_Security_Tests/Screenshot_(663).png)
 
 
 ## 2. Compliance
