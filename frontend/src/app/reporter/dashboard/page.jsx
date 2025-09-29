@@ -76,6 +76,10 @@ export default function ReporterDashboard() {
     return Object.keys(counts).map((status) => ({ name: status, value: counts[status] }));
   }, [reports]);
 
+  useEffect(() => {
+      document.title = 'B.R.A.D | Reporter Dashboard';
+    }, []);
+  
   return (
     <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
       <Sidebar onToggle={setSidebarExpanded} />

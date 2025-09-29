@@ -38,6 +38,27 @@ export class AuthController {
   }
 
 @Public()
+@Post('verify-otp')
+@ApiOperation({ summary: 'Verify OTP and complete login' })
+@ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      tempToken: { type: 'string', example: 'eyJhbGciOi...' },
+      otp: { type: 'string', example: '123456' },
+      rememberMe: { type: 'boolean', example: true },   // ✅ add this
+    },
+  },
+})
+@ApiResponse({ status: 200, description: 'OTP verified, JWT returned' })
+@ApiResponse({ status: 401, description: 'Invalid or expired OTP' })
+async verifyOtp(@Body() body: { tempToken: string; otp: string; rememberMe: boolean }) {
+  return this.authService.verifyOtp(body.tempToken, body.otp, body.rememberMe ?? false);
+}
+
+
+
+@Public()
 @Post('forgot-password')
 @ApiOperation({ summary: 'Request password reset link by email' })
 @ApiBody({ schema: { example: { email: 'user@example.com' } } })

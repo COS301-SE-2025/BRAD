@@ -103,7 +103,9 @@ def calculate_risk_score_with_reasons(stats: Dict[str, Any], forensics: Dict[str
     if domain in THREAT_DOMAINS:
         reasons["threat_domain_match"] = "Domain found in known threat list"
         score += 0.5
-        logger.warning(f"[Scoring] Threat domain match: {domain} → +0.5")
+        # replace lines with " → +0.5" to use ASCII:
+        logger.warning(f"[Scoring] Threat domain match: {domain} -> +0.5")
+        logger.warning(f"[Scoring] Threat IP match: {ip} -> +0.5")
     if ip in THREAT_IPS:
         reasons["threat_ip_match"] = "IP found in known threat list"
         score += 0.5

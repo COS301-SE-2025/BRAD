@@ -22,9 +22,15 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async register(dto: RegisterDto): Promise<{ userId: string }> {
+    async register(dto: RegisterDto): Promise<{ userId: string }> {
     const email = dto.email.toLowerCase().trim();
     const username = dto.username.trim();
+    
+    // Password validation
+    const passwordValidation = this.validatePassword(dto.password);
+    if (!passwordValidation.isValid) {
+      throw new BadRequestException(passwordValidation.message);
+    }
 
     const existingUser = await this.userModel.findOne({
       $or: [{ email }, { username }],
@@ -45,7 +51,7 @@ export class AuthService {
       email,
       password: hashedPassword,
       role: 'general',
-      failedLoginAttempts: 0, 
+      failedLoginAttempts: 0,
     });
 
     try {
@@ -57,83 +63,219 @@ export class AuthService {
     }
   }
 
-  async login(dto: LoginDto): Promise<{ token: string; user: any }> {
+  private validatePassword(password: string): { isValid: boolean; message: string } {
+    // Minimum 6 characters
+    if (password.length < 6) {
+      return {
+        isValid: false,
+        message: 'Password must be at least 6 characters long',
+      };
+    }
+
+    // At least one uppercase letter
+    if (!/[A-Z]/.test(password)) {
+      return {
+        isValid: false,
+        message: 'Password must contain at least one uppercase letter',
+      };
+    }
+
+    // At least one lowercase letter
+    if (!/[a-z]/.test(password)) {
+      return {
+        isValid: false,
+        message: 'Password must contain at least one lowercase letter',
+      };
+    }
+
+    // At least one number
+    if (!/[0-9]/.test(password)) {
+      return {
+        isValid: false,
+        message: 'Password must contain at least one number',
+      };
+    }
+
+    // At least one special character
+    if (!/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(password)) {
+      return {
+        isValid: false,
+        message: 'Password must contain at least one special character',
+      };
+    }
+
+    return { isValid: true, message: '' };
+  }
+
+async login(dto: LoginDto): Promise<{ token?: string; tempToken?: string; message: string; user?: any }> {
     const identifier = dto.identifier.trim();
     const emailNormalized = identifier.toLowerCase();
 
-    const user = await this.userModel.findOne({
-      $or: [{ email: emailNormalized }, { username: identifier }],
-    });
+    try {
+      console.log('Login attempt:', { identifier, timestamp: new Date() });
+      const user = await this.userModel.findOne({
+        $or: [{ email: emailNormalized }, { username: identifier }],
+      });
+      console.log('User found:', user ? user._id.toString() : null);
 
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
+      if (!user) {
+        console.log('No user found for identifier:', identifier);
+        throw new UnauthorizedException('Invalid credentials');
+      }
 
-    // Check if account is locked
-    if (user.lockUntil && user.lockUntil > new Date()) {
-      throw new UnauthorizedException(
-        `Account is locked. Try again after ${Math.ceil(
-          (user.lockUntil.getTime() - Date.now()) / 60000,
-        )} minutes.`,
-      );
-    }
-
-    const isMatch = await bcrypt.compare(dto.password, user.password);
-
-    if (!isMatch) {
-      // Increment failed login attempts
-      user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
-
-      // Check if max attempts reached
-      if (user.failedLoginAttempts >= this.MAX_LOGIN_ATTEMPTS) {
-        user.lockUntil = new Date(Date.now() + this.LOCKOUT_DURATION);
-        await user.save();
-
-        // Send account lockout notification email
-        await this.sendLockoutNotification(user);
-
+      if (user.lockUntil && user.lockUntil > new Date()) {
+        console.log('Account locked:', { lockUntil: user.lockUntil });
         throw new UnauthorizedException(
-          `Account locked due to too many failed login attempts. Try again after ${Math.ceil(
-            this.LOCKOUT_DURATION / 60000,
-          )} minutes. A notification email has been sent.`,
+          `Account is locked. Try again after ${Math.ceil(
+            (user.lockUntil.getTime() - Date.now()) / 60000,
+          )} minutes.`,
         );
       }
 
-      await user.save();
-      throw new UnauthorizedException('Invalid credentials');
-    }
+      const isMatch = await bcrypt.compare(dto.password, user.password);
+      console.log('Password match:', isMatch);
+      if (!isMatch) {
+        user.failedLoginAttempts = (user.failedLoginAttempts || 0) + 1;
+        console.log('Failed attempts:', user.failedLoginAttempts);
+        if (user.failedLoginAttempts >= this.MAX_LOGIN_ATTEMPTS) {
+          user.lockUntil = new Date(Date.now() + this.LOCKOUT_DURATION);
+          await user.save();
+          await this.sendLockoutNotification(user);
+          throw new UnauthorizedException(`Account locked. Try again later.`);
+        }
+        await user.save();
+        throw new UnauthorizedException('Invalid credentials');
+      }
 
-    // Reset failed attempts and lockout on successful login
-    user.failedLoginAttempts = 0;
-    user.lockUntil = undefined;
+      user.failedLoginAttempts = 0;
+      user.lockUntil = undefined;
 
-    if (user.mustChangePassword) {
-      throw new UnauthorizedException(
-        'You must change your password before logging in',
+      if (user.rememberMeToken && user.rememberMeExpires && user.rememberMeExpires > new Date()) {
+        console.log('Remember Me active, generating token');
+        try {
+          const token = this.jwtService.sign({
+            id: user._id.toString(),
+            role: user.role,
+          });
+          const { password, otp, otpExpires, rememberMeToken, rememberMeExpires, ...userData } = user.toObject();
+          console.log('Returning token for Remember Me:', {
+            token: token.slice(0, 10) + '...',
+            user: userData,
+          });
+          await user.save(); // Save reset failedLoginAttempts
+          return {
+            token,
+            user: userData,
+            message: 'Login successful (MFA skipped due to remember me)',
+          };
+        } catch (jwtError) {
+          console.error('JWT signing error:', jwtError);
+          throw new InternalServerErrorException('Failed to generate token');
+        }
+      }
+
+      console.log('No Remember Me, generating OTP');
+      const otp = Math.floor(100000 + Math.random() * 900000).toString();
+      user.otp = await bcrypt.hash(otp, 10);
+      user.otpExpires = new Date(Date.now() + 5 * 60 * 1000);
+      try {
+        await user.save();
+        console.log('OTP saved:', { otp, otpExpires: user.otpExpires });
+      } catch (saveError) {
+        console.error('Error saving OTP:', saveError);
+        throw new InternalServerErrorException('Failed to save OTP');
+      }
+
+      try {
+        await this.sendOtpEmail(user, otp);
+        console.log('OTP email sent to:', user.email);
+      } catch (emailError) {
+        console.error('Error sending OTP email:', emailError);
+        throw new InternalServerErrorException('Failed to send OTP email');
+      }
+
+      const tempToken = this.jwtService.sign(
+        { id: user._id.toString(), stage: 'otp' },
+        { expiresIn: '5m' },
       );
+      console.log('Returning tempToken:', { tempToken: tempToken.slice(0, 10) + '...' });
+      return { tempToken, message: 'OTP sent to your email. Please verify.' };
+    } catch (error) {
+      console.error('Login error:', { message: error.message, stack: error.stack });
+      throw error instanceof UnauthorizedException
+        ? error
+        : new InternalServerErrorException('Login failed');
+    }
+  }
+
+  private async sendOtpEmail(user: User, otp: string): Promise<void> {
+    const transporter = nodemailer.createTransport({
+      service: 'Gmail',
+      auth: {
+        user: this.configService.get<string>('EMAIL_USER'),
+        pass: this.configService.get<string>('EMAIL_PASS'),
+      },
+    });
+
+    const mailOptions = {
+      to: user.email,
+      from: this.configService.get<string>('EMAIL_USER'),
+      subject: 'Your MFA Verification Code',
+      text: `Hello ${user.firstname},\n\nYour one-time password (OTP) is: ${otp}\n\nThis code will expire in 5 minutes.\n\nIf you did not attempt to login, please contact support immediately.`,
+    };
+
+    await transporter.sendMail(mailOptions);
+  }
+
+  async verifyOtp(tempToken: string, otp: string, rememberMe: boolean): Promise<{ token: string; user: any }> {
+    let payload: any;
+    try {
+      payload = this.jwtService.verify(tempToken);
+    } catch (err) {
+      throw new UnauthorizedException('Invalid or expired temp token');
     }
 
-    const secret = this.configService.get<string>('JWT_SECRET');
-    if (!secret) {
-      throw new Error('JWT_SECRET is not defined');
+    if (payload.stage !== 'otp') {
+      throw new UnauthorizedException('Invalid login stage');
     }
 
-    const payload = {
+    const user = await this.userModel.findById(payload.id);
+    if (!user || !user.otp || !user.otpExpires) {
+      throw new UnauthorizedException('OTP not found or already used');
+    }
+
+    if (user.otpExpires < new Date()) {
+      throw new UnauthorizedException('OTP expired');
+    }
+
+    const isOtpValid = await bcrypt.compare(otp, user.otp);
+    if (!isOtpValid) {
+      throw new UnauthorizedException('Invalid OTP');
+    }
+
+    user.otp = undefined;
+    user.otpExpires = undefined;
+
+    if (rememberMe) {
+      user.rememberMeToken = crypto.randomBytes(32).toString('hex');
+      user.rememberMeExpires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    } else {
+      user.rememberMeToken = undefined;
+      user.rememberMeExpires = undefined;
+    }
+
+    await user.save();
+
+    const realToken = this.jwtService.sign({
       id: user._id.toString(),
       role: user.role,
-    };
+    });
 
-    const token = this.jwtService.sign(payload);
+    const { password, otp: _, otpExpires: __, ...userData } = user.toObject();
 
-    const { password, ...userData } = user.toObject();
-
-    await user.save(); // Save the reset of failed attempts and lockUntil
-
-    return {
-      token,
-      user: userData,
-    };
+    return { token: realToken, user: userData };
   }
+
 
   async sendLockoutNotification(user: User): Promise<void> {
  
