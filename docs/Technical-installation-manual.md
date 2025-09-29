@@ -18,6 +18,9 @@ Before installing BRAD, ensure you have the following software installed:
 | Node.js        | ≥ 20.0  | [Install Node.js](https://nodejs.org/en/download/)                           |
 | npm            | ≥ 9.0   | Installed with Node.js                                                       |
 | Text Editor    | Any     | Recommended: [VS Code](https://code.visualstudio.com/download)               |
+| React          | ≥ 18.0  | Installed via npm (already part of this repo)                                |
+| Next.js        | ≥ 14.0  | Installed via npm (already part of this repo)                                |
+| TailwindCSS    | ≥ 3.0   | Installed via npm (already part of this repo)                                |
 
 > **Note:** For Windows users, enable WSL 2 if running Linux containers. For macOS, ensure Docker Desktop has proper permissions.
 
@@ -57,6 +60,16 @@ _Important:_ To get the correct keys and passwords, contact a contributer of the
 
 Make sure you have Docker installed. Then run:
 
+```bash
+docker-compose up --build
+```
+
+# Deployment/Running
+
+## Starting the Application
+
+For different starting modes:
+
 (showing container logs)
 
 ```bash
@@ -79,7 +92,7 @@ _or_
 docker-compose up --build -d
 ```
 
-## 4. Accessing the Application in Your Browser
+## Accessing the Application
 
 Once Docker has started all services successfully, open your browser and go to the following URL:
 
@@ -87,9 +100,9 @@ Once Docker has started all services successfully, open your browser and go to t
 http://localhost:5173
 ```
 
-_If you are running this on a remote server, replace `localhost` with the server’s IP or domain name._
+> _If you are running this on a remote server, replace `localhost` with the server’s IP or domain name._
 
-## 5. Stopping the Containers
+## Stopping the Application
 
 To stop the running containers, run:
 
@@ -115,8 +128,7 @@ _or_
 docker-compose down -v
 ```
 
-## 6. Optional
+## User Manual
 
-Our previous installation is also accessible that shows installation of individual components to run without docker.
-
-[BRAD-Developer-Guide](versions/version2/BRAD-Developer-Guide.pdf)
+For guidance on using the system once installed, please refer to the BRAD User Manual:
+[BRAD-Developer-Guide](./User%20Manual/B.R.A.D-User-Manual.pdf)

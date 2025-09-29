@@ -1,118 +1,162 @@
-import os
-import requests
-import time
-from datetime import datetime, timezone
+# bot/src/worker.py
+import os, requests
+from datetime import datetime
 from dotenv import load_dotenv
+from urllib.parse import urlparse
+from requests.adapters import HTTPAdapter
+from urllib3.util.retry import Retry
 
 import dramatiq
 from dramatiq.brokers.redis import RedisBroker
 
-from .forensics.report import ForensicReport
-from .utils.analysis import perform_scraping
+from src.forensics.report import ForensicReport
+from src.scraper.analysis import perform_scraping
+import docker
+from docker.types import Mount
+from docker.errors import NotFound, APIError
 from src.utils.logger import get_logger, report_id_ctx
 from src.utils.job_logging_middleware import JobLoggingMiddleware
 
-
-# ─── Logger ───
 logger = get_logger(__name__)
-
-# ─── Load Environment ───
 load_dotenv()
 
 API_URL = os.getenv("API_URL")
 AUTH_KEY = os.getenv("BOT_ACCESS_KEY")
 REDIS_HOST = os.getenv("REDIS_HOST", "localhost")
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD") or None
+MAX_RETRIES = int(os.getenv("MAX_RETRIES", 3))
 
-MAX_RETRIES = 3
 
-# ─── Setup Headers ───
 if not AUTH_KEY:
     logger.critical("BOT_ACCESS_KEY missing from .env — bot cannot start.")
-    raise RuntimeError("BOT_ACCESS_KEY missing from .env")
+    raise RuntimeError("BOT_ACCESS_KEY missing")
 
+if not API_URL:
+    logger.critical("API_URL missing from .env — bot cannot start.")
+    raise RuntimeError("API_URL missing")
+
+API_BASE = API_URL.rstrip("/")
 headers = {"Authorization": f"Bot {AUTH_KEY}"}
 
-# ─── Redis Broker Setup ───
-logger.info(f"Connecting to Redis broker at {REDIS_HOST}:{REDIS_PORT}...")
-redis_broker = RedisBroker(
-    host=REDIS_HOST,
-    port=REDIS_PORT,
-    password=os.getenv("REDIS_PASSWORD") or None
+# Durable HTTP session with retries/backoff for transient API errors.
+session = requests.Session()
+session.headers.update(headers)
+retry = Retry(
+    total=5,
+    backoff_factor=0.6,
+    status_forcelist=[429, 500, 502, 503, 504],
+    allowed_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"],
+    raise_on_status=False,
 )
+adapter = HTTPAdapter(max_retries=retry)
+session.mount("https://", adapter)
+session.mount("http://", adapter)
+
+# ── Redis Broker ──
+logger.info(f"Connecting to Redis broker at {REDIS_HOST}:{REDIS_PORT}...")
+redis_broker = RedisBroker(host=REDIS_HOST, port=REDIS_PORT, password=REDIS_PASSWORD)
 redis_broker.add_middleware(JobLoggingMiddleware())
 dramatiq.set_broker(redis_broker)
 logger.info("Redis broker set successfully.")
 
-# ─── Utility Functions ───
+
 def sanitize_domain(domain: str) -> str:
-    return domain.strip().replace("\u200b", "").replace("\u2060", "")
+    d = (domain or "").strip().replace("\u200b", "").replace("\u2060", "")
+    if not d:
+        return d
+    parsed = urlparse(d)
+    if not parsed.scheme:
+        d = "https://" + d
+        parsed = urlparse(d)
+    netloc = (parsed.netloc or "").lower()
+    return parsed._replace(netloc=netloc).geturl()
+
 
 def serialize(obj):
     if isinstance(obj, dict):
-        return {k: serialize(v) for k, v in obj.items() if v not in (None, [], {}, "")}
-    elif isinstance(obj, list):
-        return [serialize(i) for i in obj if i not in (None, "", [])]
-    elif isinstance(obj, datetime):
+        return {k: serialize(v) for k, v in obj.items() if v not in (None, "", [], {})}
+    if isinstance(obj, list):
+        return [serialize(i) for i in obj if i not in (None, "", [], {})]
+    if isinstance(obj, datetime):
         return obj.isoformat()
     return obj
 
-def report_analysis(report_id, report_obj: ForensicReport, scraping_info, abuse_flags):
-    url = f"{API_URL}/reports/{report_id}/analysis"
+
+def report_analysis(report_id, report_obj: ForensicReport, scraping_info, abuse_flags) -> bool:
+    url = f"{API_BASE}/reports/{report_id}/analysis"
     data = {
         "analysis": serialize(report_obj.to_dict()),
         "scrapingInfo": serialize(scraping_info),
         "abuseFlags": serialize(abuse_flags),
-        "analysisStatus": "pending"
+        "analysisStatus": "pending",
     }
-
     try:
         logger.debug(f"PATCH {url} — sending analysis results...")
-        response = requests.patch(url, json=data, headers=headers, timeout=10)
-        response.raise_for_status()
+        resp = session.patch(url, json=data, timeout=30)
+        resp.raise_for_status()
         logger.info(f"Report {report_id} updated successfully in API.")
         return True
     except Exception as e:
-        logger.error(f"Failed to PATCH analysis for {report_id}: {e}", exc_info=True)
+        body = ""
+        try:
+            body = resp.text[:500] if "resp" in locals() and resp is not None else ""
+        except Exception:
+            pass
+        logger.error(f"Failed to PATCH analysis for {report_id}: {e} {(' | body='+body) if body else ''}", exc_info=True)
         return False
 
-# ─── Dramatiq Actor: Main Job Consumer ───
-@dramatiq.actor(max_retries=MAX_RETRIES, time_limit=60000)
-def process_report(data):
-    report_id = data.get("report_id")
-    domain = data.get("domain")
 
+@dramatiq.actor(max_retries=3, time_limit=120000)
+def process_report(job):
+    """Dispatch each report into an isolated, ephemeral runner container."""
+    report_id = job.get("report_id")
+    domain = job.get("domain")
     if not report_id or not domain:
-        logger.warning(f"Skipping invalid job payload: {data}")
+        logger.warning(f"Skipping invalid job payload: {job}")
         return
 
-    t0 = time.perf_counter()
-    logger.debug(f"Received job payload: {data}")
-    logger.info(f"[BOT] Starting analysis for {domain} (Report ID: {report_id})")
+    token = report_id_ctx.set(report_id)
+    logger.info(f"[DISPATCHER] Spawning sandbox for {domain} (Report ID: {report_id})")
 
     try:
-        domain = sanitize_domain(domain)
+        client = docker.from_env()
 
-        # 1) Forensics
-        logger.debug("Running forensic data collection...")
-        forensic_data = ForensicReport(domain)
-        forensic_data.run()
-        logger.debug("Forensic data collection complete.")
+        container = client.containers.run(
+            "brad-bot-runner:latest",
+            environment={
+                "TARGET_URL": domain,
+                "REPORT_ID": report_id,
+                "API_URL": os.getenv("API_URL"),
+                "BOT_ACCESS_KEY": os.getenv("BOT_ACCESS_KEY"),
+                "SCREENSHOTS_DIR": "/data/screenshots",
+                "UPLOAD_ENDPOINT": f"{os.getenv('API_URL').rstrip('/')}/reports/{report_id}/screenshots",
 
-        # 2) Scraping
-        logger.debug("Performing scraping and abuse flag extraction...")
-        scraping_info, abuse_flags = perform_scraping(domain, report_id)
-        logger.debug("Scraping and abuse flag extraction complete.")
+                # >>> PROXY SERVER <<<
+                "PROXY_URL": os.getenv("PROXY_URL", ""),
+                "PROXY_USERNAME": os.getenv("PROXY_USERNAME", ""),
+                "PROXY_PASSWORD": os.getenv("PROXY_PASSWORD", ""),
+                "PW_CONTEXTS_PER_IP": os.getenv("PW_CONTEXTS_PER_IP", "2"),
+                " NO_PROXY": os.getenv("NO_PROXY"),
 
-        # 3) Send to API
-        if report_analysis(report_id, forensic_data, scraping_info, abuse_flags):
-            elapsed_ms = int((time.perf_counter() - t0) * 1000)
-            logger.info(f"[BOT] Report {report_id} successfully analyzed "
-                        f"(risk={forensic_data.risk_level}, score={forensic_data.risk_score}, {elapsed_ms}ms)")
-        else:
-            logger.warning(f"[BOT] Report {report_id} analysis completed but failed to update API.")
+                 # Semaphore / Redis
+                "REDIS_HOST": os.getenv("REDIS_HOST", "brad-redis"),
+                "REDIS_PORT": str(os.getenv("REDIS_PORT", 6379)),
+                "REDIS_PASSWORD": os.getenv("REDIS_PASSWORD", ""),
+            },
+            labels={"traefik.enable": "false"}, # disable Traefik for this container
+            network="brad_network",
+            tmpfs={"/data/screenshots": ""},
+            volumes={ os.path.abspath("./logs/bot"): {"bind": "/app/logs", "mode": "rw"} },
+            detach=True,
+            auto_remove=True,
+        )
+
+        logger.info(f"[DISPATCHER] Sandbox {container.id[:12]} started for {domain}")
     except Exception as e:
-        logger.error(f"[BOT] Analysis failed for {domain}: {e}", exc_info=True)
+        logger.error(
+            f"[DISPATCHER] Failed to spawn sandbox for {domain}: {e}", exc_info=True
+        )
         raise
-
-
+    finally:
+        report_id_ctx.reset(token)

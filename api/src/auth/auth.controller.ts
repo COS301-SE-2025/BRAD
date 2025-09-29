@@ -1,18 +1,17 @@
-import { Body, Controller, Post,Patch,Param } from '@nestjs/common';
+import { Controller, Post, Patch, Body, Param, UseGuards, Req } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginDto } from './dto/login.dto';
-import { RegisterDto } from './dto/register.dto';
+import { AuthGuard } from './guards/auth.guard';
+import { RolesGuard } from './guards/roles.guard';
+import { BotGuard } from './guards/bot.guard';
 import { Public } from './decorators/public.decorator';
+import { JwtPayload } from './interfaces/jwt-payload.interface';
+import { RegisterDto } from './dto/register.dto';
+import { LoginDto } from './dto/login.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
-import {
-  ApiTags,
-  ApiOperation,
-  ApiResponse,
-  ApiBody,
-ApiParam,
-} from '@nestjs/swagger';
-
+import { UpdateUserDto } from './dto/update-user.dto';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { Request } from 'express';
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
@@ -37,6 +36,26 @@ export class AuthController {
   async login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
   }
+
+@Public()
+@Post('verify-otp')
+@ApiOperation({ summary: 'Verify OTP and complete login' })
+@ApiBody({
+  schema: {
+    type: 'object',
+    properties: {
+      tempToken: { type: 'string', example: 'eyJhbGciOi...' },
+      otp: { type: 'string', example: '123456' },
+    },
+  },
+})
+@ApiResponse({ status: 200, description: 'OTP verified, JWT returned' })
+@ApiResponse({ status: 401, description: 'Invalid or expired OTP' })
+async verifyOtp(@Body() body: { tempToken: string; otp: string }) {
+  return this.authService.verifyOtp(body.tempToken, body.otp);
+}
+
+
 
 @Public()
 @Post('forgot-password')
@@ -71,4 +90,17 @@ async changePassword(
 ) {
   return this.authService.changePassword(username, dto);
 }
+
+@UseGuards(AuthGuard)
+@Patch('update-user')
+@ApiBearerAuth('JWT-auth')
+@ApiOperation({ summary: 'Update user profile' })
+@ApiBody({ type: UpdateUserDto })
+async updateUser(@Req() req: Request, @Body() dto: UpdateUserDto) {
+  const user = req['user'] as JwtPayload;
+  return this.authService.updateUser(user.id, dto);
+}
+
+
+
 }

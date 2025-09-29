@@ -16,9 +16,16 @@ import {
 import { diskStorage } from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import * as path from 'path';
+import { Express } from 'express';
 import Multer from 'multer';
 import { extname } from 'path';
 import { use } from 'passport';
+import { join } from 'path';
+import * as fs from 'fs';
+
+function ensureDir(p: string) {
+  if (!fs.existsSync(p)) fs.mkdirSync(p, { recursive: true });
+}
 
 
 @ApiTags('Reports')
@@ -31,7 +38,7 @@ export class ReportController {
   @Post('report')
   @UseInterceptors(FilesInterceptor('evidence',5,{
     storage: diskStorage({
-     destination: path.join(__dirname, '..', '..','uploads', 'evidence'),
+    destination: path.join(__dirname, '..', '..','..', '..', '..','..','uploads', 'evidence'),
 
       
       // Ensure the uploads directory exists
@@ -68,7 +75,7 @@ export class ReportController {
   async submit(
     @Req() req: Request,
     @Body('domain') domain: string,
-    @UploadedFiles() files?: Multer.File[] | Multer.File,
+    @UploadedFiles() files?: Express.Multer.File[],
   ) {
     const user = req['user'] as JwtPayload;
     const userId = user?.id;
@@ -210,4 +217,50 @@ async releaseReport(@Param('id') id: string, @Req() req: Request) {
 
   return this.reportService.releaseReport(id, reviewerId);
 }
+
+
+// ⬇⬇ paste this inside ReportController
+@UseGuards(BotGuard)
+@Post('reports/:id/screenshots')
+@ApiOperation({ summary: 'Upload a screenshot for a report (bot only)' })
+@ApiParam({ name: 'id', type: 'string' })
+@ApiConsumes('multipart/form-data')
+@UseInterceptors(FileInterceptor('file', {
+  storage: diskStorage({
+    destination: (req, file, cb) => {
+      // base dir where Nest serves images from
+      const base = process.env.SCREENSHOTS_DIR || '/data/screenshots';
+
+      const perReport = join(base, req.params.id);
+      ensureDir(perReport);
+      cb(null, perReport);
+    },
+    filename: (req, file, cb) => {
+      cb(null, file.originalname); // use the name provided by bot
+    },
+  }),
+  limits: { fileSize: 20 * 1024 * 1024 }, // 20MB
+}))
+async uploadScreenshot(
+  @Param('id') id: string,
+  @UploadedFile() file: Express.Multer.File,
+  @Req() req: Request,
+) {
+  // Extra bot guard (in case you want to validate header explicitly)
+  const auth = req.headers['authorization'] ?? '';
+  const k = process.env.BOT_ACCESS_KEY;
+  if (!auth?.startsWith('Bot ') || auth.slice(4) !== k) {
+    throw new BadRequestException('Invalid bot key');
+  }
+  if (!file) throw new BadRequestException('No file provided');
+
+  // Build relative path used by your frontend (served under /static)
+  const rel = `screenshots/${id}/${file.filename}`; // matches destination above
+
+  // Persist reference to DB (implement this in your ReportService)
+  await this.reportService.addScreenshot(id, rel);
+
+  return { ok: true, filename: file.filename, path: rel, url: `/static/${rel}` };
 }
+}
+

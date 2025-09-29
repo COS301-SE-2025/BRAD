@@ -13,11 +13,15 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
+    "test": "npm run test:unit && npm run test:integration",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "jest --config ./test/jest-e2e.json"
+
+    "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
+    "test:integration": "jest --config ./test/jest-integration.json",
+    "test:unit": "jest --config ./test/jest-unit.json"
+
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.1",
@@ -37,6 +41,7 @@
     "bull": "^4.16.5",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.2",
+    "compression": "^1.8.1",
     "dotenv": "^16.5.0",
     "ioredis": "^5.6.1",
     "joi": "^17.13.3",
@@ -44,9 +49,11 @@
     "nodemailer": "^7.0.3",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
+    "punycode": "^2.3.1",
     "react-toastify": "^11.0.5",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
+    "string-similarity": "^4.0.4",
     "swagger-ui-express": "^5.0.1",
     "uuid": "^11.1.0"
   },
@@ -55,14 +62,16 @@
     "@eslint/js": "^9.18.0",
     "@nestjs/cli": "^11.0.0",
     "@nestjs/schematics": "^11.0.0",
-    "@nestjs/testing": "^11.1.3",
+    "@nestjs/testing": "^11.1.6",
     "@swc/cli": "^0.6.0",
     "@swc/core": "^1.10.7",
     "@types/bcryptjs": "^3.0.0",
     "@types/bull": "^4.10.4",
+    "@types/compression": "^1.8.1",
     "@types/express": "^5.0.0",
     "@types/ioredis": "^5.0.0",
     "@types/jest": "^29.5.14",
+    "@types/multer": "^2.0.0",
     "@types/node": "^22.15.33",
     "@types/nodemailer": "^6.4.17",
     "@types/passport-jwt": "^4.0.1",
@@ -76,8 +85,8 @@
     "mongodb-memory-server": "^10.1.4",
     "prettier": "^3.4.2",
     "source-map-support": "^0.5.21",
-    "supertest": "^7.0.0",
-    "ts-jest": "^29.4.0",
+    "supertest": "^7.1.4",
+    "ts-jest": "^29.4.4",
     "ts-loader": "^9.5.2",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
@@ -85,3 +94,4 @@
     "typescript-eslint": "^8.20.0"
   }
 }
+
