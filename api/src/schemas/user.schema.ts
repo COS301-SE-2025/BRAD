@@ -87,6 +87,13 @@ lockUntil?: Date;
   })
   @Prop()
   otpExpires?: Date;
+
+  @Prop()
+rememberMeToken?: string;
+
+@Prop()
+rememberMeExpires?: Date;
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
