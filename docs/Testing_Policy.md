@@ -98,6 +98,9 @@ Security is essential to protect system data, maintain trust, and ensure complia
 
   **Measurement**: Role-based access control tests and security reviews confirmed proper enforcement and no unauthorized access.
 
+  <img src="./testing/Swagger_Security_Tests/Screenshot (663).png"
+  style="width:6.31514in;height:2.65903in" />
+
 
 ## 2. Compliance
 
@@ -149,6 +152,9 @@ Reliability ensures the BRAD system performs consistently under expected conditi
   
   **Measurement**: Reliability was tested through long-duration runs with continuous monitoring.
 
+  <img src="./images/Usecase1V1.png"
+  style="width:6.31514in;height:2.65903in" />
+
 ---
 
 ## 4. Scalability
@@ -174,6 +180,8 @@ Scalability ensures that BRAD can handle growing numbers of users, reports, and 
   **Justification**: Ensures fairness and efficiency in handling user reports.
   
   **Measurement**: Queue performance was measured under concurrent submissions.
+<img src="./images/Usecase1V1.png"
+style="width:6.31514in;height:2.65903in" />
 
 ---
 
