@@ -3,18 +3,8 @@ import mongoose from 'mongoose';
 
 export let mongoServer: MongoMemoryServer;
 
-/*export const connectInMemoryDB = async () => {
-  mongoServer = await MongoMemoryServer.create();
-  const uri = mongoServer.getUri();
-  await mongoose.connect(uri);
-};*/
-
 export const connectInMemoryDB = async () => {
-  mongoServer = await MongoMemoryServer.create({
-    binary: { version: '4.4.6' },
-    instance: { dbName: 'testdb' },
-  });
-
+  mongoServer = await MongoMemoryServer.create();
   const uri = mongoServer.getUri();
   await mongoose.connect(uri);
 };
