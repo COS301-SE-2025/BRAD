@@ -46,13 +46,14 @@ export class AuthController {
     properties: {
       tempToken: { type: 'string', example: 'eyJhbGciOi...' },
       otp: { type: 'string', example: '123456' },
+      rememberMe: { type: 'boolean', example: true },   // ✅ add this
     },
   },
 })
 @ApiResponse({ status: 200, description: 'OTP verified, JWT returned' })
 @ApiResponse({ status: 401, description: 'Invalid or expired OTP' })
-async verifyOtp(@Body() body: { tempToken: string; otp: string }) {
-  return this.authService.verifyOtp(body.tempToken, body.otp);
+async verifyOtp(@Body() body: { tempToken: string; otp: string; rememberMe: boolean }) {
+  return this.authService.verifyOtp(body.tempToken, body.otp, body.rememberMe ?? false);
 }
 
 

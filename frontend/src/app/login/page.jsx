@@ -19,6 +19,7 @@ export default function LoginPage() {
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [step, setStep] = useState(1); // 1 = login, 2 = verify OTP
   const [tempToken, setTempToken] = useState("");
+  const [rememberMe, setRememberMe] = useState(false);
 
   // Step 1: Handle login
   const handleLogin = async (e) => {
@@ -32,24 +33,52 @@ export default function LoginPage() {
     try {
       setLoading(true);
 
+      console.log("Sending login request:", { identifier: username }); // ✅ Log request
       const response = await API.post("/auth/login", {
         identifier: username,
         password,
       });
+      console.log("API Response:", JSON.stringify(response.data, null, 2)); // ✅ Detailed response log
 
-      // backend returns tempToken (not JWT yet)
-      const { tempToken, message } = response.data;
+      const { tempToken, token, message, user } = response.data;
 
       if (tempToken) {
+        console.log("Received tempToken, switching to OTP step"); // ✅ Log OTP flow
         setTempToken(tempToken);
-        setStep(2); // switch to OTP step
+        setStep(2);
         setNotify({ type: "success", title: "OTP Sent", message });
+      } else if (token && user) {
+        console.log("Received token, performing direct login"); // ✅ Log direct login
+        localStorage.removeItem("user");
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            _id: user._id,
+            username: user.username,
+            token: token,
+            role: user.role,
+          })
+        );
+
+        if (user.role === "investigator") {
+          router.push("/investigator/dashboard");
+        } else if (user.role === "admin") {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/reporter/dashboard");
+        }
       } else {
+        console.warn("No token received, response:", response.data); // ✅ Log error case
         setError("Login failed: no token received.");
       }
     } catch (err) {
+      console.error("Login error:", {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status,
+      }); // ✅ Detailed error logging
       if (err.response?.data?.message) {
-        setError(err.response.data.message);
+        setError(err.response.data.message); // Display specific backend error
       } else {
         setError("Login failed. Please try again.");
       }
@@ -70,10 +99,13 @@ export default function LoginPage() {
     try {
       setLoading(true);
 
+      console.log("Sending OTP verification:", { tempToken, otp, rememberMe }); // ✅ Log OTP request
       const response = await API.post("/auth/verify-otp", {
         tempToken,
         otp,
+        rememberMe,
       });
+      console.log("Verify OTP response:", response.data); // ✅ Log response
 
       const { user, token } = response.data;
 
@@ -82,7 +114,6 @@ export default function LoginPage() {
         return;
       }
 
-      // ✅ Save user & JWT
       localStorage.removeItem("user");
       localStorage.setItem(
         "user",
@@ -94,7 +125,6 @@ export default function LoginPage() {
         })
       );
 
-      // ✅ Redirect by role
       if (user.role === "investigator") {
         router.push("/investigator/dashboard");
       } else if (user.role === "admin") {
@@ -103,6 +133,7 @@ export default function LoginPage() {
         router.push("/reporter/dashboard");
       }
     } catch (err) {
+      console.error("OTP verification error:", err.response?.data, err); // ✅ Log errors
       if (err.response?.data?.message) {
         setError(err.response.data.message);
       } else {
@@ -155,7 +186,6 @@ export default function LoginPage() {
         )}
 
         {step === 1 ? (
-          // Step 1: Username & password
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">Username</label>
@@ -184,7 +214,12 @@ export default function LoginPage() {
 
             <div className="flex items-center justify-between text-sm">
               <label className="inline-flex items-center gap-2">
-                <input type="checkbox" className="form-checkbox" />
+                <input
+                  type="checkbox"
+                  className="form-checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
+                />
                 Remember me
               </label>
 
@@ -221,7 +256,6 @@ export default function LoginPage() {
             </div>
           </form>
         ) : (
-          // Step 2: OTP form
           <form onSubmit={handleVerifyOtp} className="space-y-4">
             <div>
               <label className="block text-sm font-medium mb-1">
@@ -248,7 +282,8 @@ export default function LoginPage() {
             </div>
 
             <div className="text-center text-sm">
-              Didn’t get the code?{" "}
+              Didn’t get the code?{" "
+              }
               <button
                 type="button"
                 className="text-brad-500 underline"
