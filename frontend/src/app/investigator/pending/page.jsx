@@ -11,6 +11,7 @@ export default function PendingReportsPage() {
   const [reports, setReports] = useState([]);
   const [storedUser, setStoredUser] = useState({ username: "Investigator", role: "investigator" });
   const [notification, setNotification] = useState(null);
+  const [similarityResults, setSimilarityResults] = useState({}); // Object to store results by report ID
 
   // Load user safely
   useEffect(() => {
@@ -32,11 +33,27 @@ export default function PendingReportsPage() {
     }
   };
 
+  // Fetch similarity data for a specific report
+const fetchSimilarity = async (reportId, domain) => {
+    try {
+      const res = await API.post("/domain-similarity/check", { domain });
+      setSimilarityResults((prev) => ({ ...prev, [reportId]: res.data }));
+      setNotification({ type: "success", title: "Success", message: "Similarity check completed." });
+    } catch (err) {
+      setNotification({ type: "error", title: "Error", message: "Failed to check similarity." });
+      console.error("Error fetching similarity:", err);
+    }
+  };
+
   useEffect(() => {
     fetchReports();
     const interval = setInterval(fetchReports, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+      document.title = "B.R.A.D | Investigator Pending Reports"
+    }, [])
 
   return (
     <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
@@ -68,7 +85,9 @@ export default function PendingReportsPage() {
                 view="pending"
                 loggedInUser={storedUser}
                 onRefresh={fetchReports}
-                setNotification={setNotification} 
+                setNotification={setNotification}
+                fetchSimilarity={(reportId, domain) => fetchSimilarity(reportId, domain)} // Pass callback
+                similarityResults={similarityResults[report._id] || []} // Pass results
               />
             ))}
           </div>

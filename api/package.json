@@ -13,12 +13,14 @@
     "start:debug": "nest start --debug --watch",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
+    "test": "npm run test:unit && npm run test:integration",
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json --runInBand",
     "test:integration": "jest --config ./test/jest-integration.json"
+    "test:integration": "jest --config ./test/jest-integration.json",
+    "test:unit": "jest --config ./test/jest-unit.json"
   },
   "dependencies": {
     "@nestjs/axios": "^4.0.1",
@@ -49,6 +51,7 @@
     "passport-jwt": "^4.0.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
+    "punycode": "^2.3.1",
     "react-toastify": "^11.0.5",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",

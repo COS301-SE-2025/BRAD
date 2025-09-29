@@ -23,20 +23,56 @@ export default function RegisterPage() {
   const [notify, setNotify] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [passwordValidations, setPasswordValidations] = useState({
+    minLength: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    specialChar: false,
+  });
 
   const handleChange = (e) => {
+    const { name, value } = e.target;
     setForm({
       ...form,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
     setError("");
     setSuccess("");
+
+    // Update password validations if password field is changed
+    if (name === "password") {
+      setPasswordValidations({
+        minLength: value.length >= 6,
+        uppercase: /[A-Z]/.test(value),
+        lowercase: /[a-z]/.test(value),
+        number: /[0-9]/.test(value),
+        specialChar: /[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/.test(value),
+      });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setNotify(null);
+
+    // Check if all password validations are met
+    if (
+      !passwordValidations.minLength ||
+      !passwordValidations.uppercase ||
+      !passwordValidations.lowercase ||
+      !passwordValidations.number ||
+      !passwordValidations.specialChar
+    ) {
+      setNotify({
+        type: "error",
+        title: "Error",
+        message: "Password does not meet all requirements.",
+      });
+      setLoading(false);
+      return;
+    }
 
     if (form.password !== form.confirmPassword) {
       setNotify({
@@ -52,12 +88,31 @@ export default function RegisterPage() {
       const userData = { ...form };
       const response = await API.post("/auth/register", userData);
       setSuccess(response.data.message);
-      setTimeout(() => router.push("/login"), 1500); 
+      setNotify({
+        type: "success",
+        title: "Success",
+        message: "Registration successful! Redirecting to login...",
+      });
+      setTimeout(() => router.push("/login"), 1500);
     } catch (err) {
-      if (err.response?.data?.message) {
-        setError(err.response.data.message);
+      if (err.response?.data?.message === "User with this email or username already exists.") {
+        setNotify({
+          type: "error",
+          title: "Error",
+          message: "This email or username is already taken. Please try another.",
+        });
+      } else if (err.response?.data?.message) {
+        setNotify({
+          type: "error",
+          title: "Error",
+          message: err.response.data.message,
+        });
       } else {
-        setError("Registration failed. Please try again.");
+        setNotify({
+          type: "error",
+          title: "Error",
+          message: "Registration failed. Please try again.",
+        });
       }
     } finally {
       setLoading(false);
@@ -92,11 +147,35 @@ export default function RegisterPage() {
             </div>
           )}
 
+          {error && (
+            <div className="mb-3">
+              <Notification
+                type="error"
+                title="Error"
+                onClose={() => setError("")}
+              >
+                {error}
+              </Notification>
+            </div>
+          )}
+
+          {success && (
+            <div className="mb-3">
+              <Notification
+                type="success"
+                title="Success"
+                onClose={() => setSuccess("")}
+              >
+                {success}
+              </Notification>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="space-y-3">
             <div className="flex items-center gap-2">
               <label className="w-24 text-xs font-medium">First Name</label>
               <input
-                name="firstname" 
+                name="firstname"
                 value={form.firstname}
                 onChange={handleChange}
                 required
@@ -158,6 +237,27 @@ export default function RegisterPage() {
                 placeholder="••••••••"
                 autoComplete="new-password"
               />
+            </div>
+
+            <div className="ml-24 text-xs">
+              <p>Password must contain:</p>
+              <ul className="list-disc list-inside text-gray-600 dark:text-gray-300">
+                <li className={passwordValidations.minLength ? "text-green-500" : "text-red-500"}>
+                  At least 6 characters
+                </li>
+                <li className={passwordValidations.uppercase ? "text-green-500" : "text-red-500"}>
+                  At least one uppercase letter
+                </li>
+                <li className={passwordValidations.lowercase ? "text-green-500" : "text-red-500"}>
+                  At least one lowercase letter
+                </li>
+                <li className={passwordValidations.number ? "text-green-500" : "text-red-500"}>
+                  At least one number
+                </li>
+                <li className={passwordValidations.specialChar ? "text-green-500" : "text-red-500"}>
+                  At least one special character
+                </li>
+              </ul>
             </div>
 
             <div className="flex items-center gap-2">

@@ -1,9 +1,11 @@
-// "use client"
+// @/components/ReportFileCard.tsx
+"use client";
 import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { FaCalendarAlt, FaUser, FaShieldAlt } from "react-icons/fa";
 import { MdDangerous, MdCheckCircle } from "react-icons/md";
 import ReportAnalysisModal from "./ReportAnalysisModal";
+import SimilarityPopup from "./SimilarityPopup";
 import API from "@/lib/api/axios";
 
 /**
@@ -39,23 +41,27 @@ function getRiskInfo(analysis, scrapingSummary) {
  *  - view: optional view string (used for accessibility)
  *  - loggedInUser: object - optional (preferred)
  *  - onRefresh: function to call to refresh lists after claim/decision
+ *  - fetchSimilarity: function to fetch similarity data
+ *  - similarityResults: array of similarity results for the report
+ *  - setNotification: function to set notification state
  */
 export default function ReportFileCard({
   report,
   view = "pending",
   loggedInUser = null,
   onRefresh = () => {},
+  fetchSimilarity,
+  similarityResults = [],
   setNotification,
 }) {
   setNotification = setNotification || (() => {});
   const [role, setRole] = useState("reporter");
-  const pathname = typeof window !== "undefined" ? window.location.pathname : "";
+  const pathname = usePathname() || "";
 
   const analysis = report.analysis || {};
   const scrapingInfo = report.scrapingInfo || {};
   const s = scrapingInfo.summary || {};
 
-  // derive role: prefer loggedInUser.role, fallback to route path
   useEffect(() => {
     if (loggedInUser?.role) setRole(loggedInUser.role);
     else if (pathname.startsWith("/investigator")) setRole("investigator");
@@ -63,17 +69,14 @@ export default function ReportFileCard({
     else if (pathname.startsWith("/reporter")) setRole("reporter");
   }, [loggedInUser, pathname]);
 
-  // Centralized risk score logic
-  const { score: finalRiskScore, level: finalRiskLevel, color: riskColor } =
-    getRiskInfo(analysis, s);
+  const { score: finalRiskScore, level: finalRiskLevel, color: riskColor } = getRiskInfo(analysis, s);
 
   const claimReport = async (e) => {
     e?.stopPropagation?.();
     if (!loggedInUser && role !== "investigator") {
       return setNotification({
         type: "error",
-        message:
-          "You must be signed in as an investigator to claim this report.",
+        message: "You must be signed in as an investigator to claim this report.",
       });
     }
     try {
@@ -92,6 +95,20 @@ export default function ReportFileCard({
         message: err?.response?.data?.message || "Failed to claim report.",
       });
     }
+  };
+
+  const [loadingSimilarity, setLoadingSimilarity] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  const handleCheckSimilarity = async () => {
+    setLoadingSimilarity(true);
+    await fetchSimilarity(report._id, report.domain);
+    setLoadingSimilarity(false);
+    setIsPopupOpen(true);
+  };
+
+  const closePopup = () => {
+    setIsPopupOpen(false);
   };
 
   return (
@@ -117,9 +134,7 @@ export default function ReportFileCard({
         <div className="flex items-center text-sm gap-2">
           <FaShieldAlt className={`${riskColor} flex-shrink-0`} />
           <span className="truncate block w-full">
-            Risk Score:{" "}
-            <b>{finalRiskScore !== null ? finalRiskScore : "N/A"}</b> (
-            {finalRiskLevel})
+            Risk Score: <b>{finalRiskScore !== null ? finalRiskScore : "N/A"}</b> ({finalRiskLevel})
           </span>
         </div>
 
@@ -127,10 +142,7 @@ export default function ReportFileCard({
           <div className="flex items-center text-sm gap-2">
             <FaUser className="text-brad-500 flex-shrink-0" />
             <span className="truncate block w-full">
-              Investigator:{" "}
-              {report.reviewedBy?.username ||
-                report.investigator ||
-                "Unknown"}
+              Investigator: {report.reviewedBy?.username || report.investigator || "Unknown"}
             </span>
           </div>
         )}
@@ -173,7 +185,24 @@ export default function ReportFileCard({
                 Claim
               </button>
             )}
+
+          {role === "investigator" && (
+            <button
+              onClick={handleCheckSimilarity}
+              disabled={loadingSimilarity}
+              className="px-3 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium hover:opacity-95"
+            >
+              {loadingSimilarity ? "Checking Similarity..." : "Check Similarity"}
+            </button>
+          )}
         </div>
+
+        <SimilarityPopup
+          isOpen={isPopupOpen}
+          onClose={closePopup}
+          similarityResults={similarityResults}
+          report={report} // Pass the report to filter self-comparisons
+        />
       </div>
     </div>
   );

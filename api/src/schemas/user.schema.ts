@@ -73,6 +73,20 @@ failedLoginAttempts?: number;
 
 @Prop({default: null})
 lockUntil?: Date;
+
+ @ApiProperty({
+    example: '123456',
+    description: 'One-time pin for MFA',
+  })
+  @Prop()
+  otp?: string;
+
+  @ApiProperty({
+    example: '2025-09-28T12:00:00Z',
+    description: 'Expiration time for the one-time pin',
+  })
+  @Prop()
+  otpExpires?: Date;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

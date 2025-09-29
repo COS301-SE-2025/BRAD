@@ -1,4 +1,4 @@
-#logger.py
+# bot-runner/src/utils/logger.py
 """
 Centralized logging setup for the bot.
 - Provides a logger with correlation ID support for job tracking.

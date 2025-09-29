@@ -20,6 +20,7 @@ services:
       - NODE_ENV=production
       - BODY_LIMIT=20mb
       - SCREENSHOTS_DIR=/data/screenshots
+      - DOMAIN_API_URL=http://brad-domain-api:8000 
     depends_on:
       - mongo
       - fastapi-queue
@@ -65,6 +66,26 @@ services:
     labels:
       - "traefik.enable=false"
 
+  domain-api:
+    build: ./domain-api
+    container_name: brad-domain-api
+    ports:
+      - "${DOMAIN_API_PORT}:8000"
+    depends_on: []
+    expose:
+      - "8000"  
+    environment:
+      - LOG_TO_FILE=1
+      - LOG_DIR=/app/logs
+      - LOG_FILE_MAX_BYTES=5242880
+      - LOG_BACKUP_COUNT=5
+    volumes:
+      - ./logs/domain-api:/app/logs
+    env_file:
+      - .env
+    networks:
+      - brad_net
+
   fastapi-queue:
     build: ./fastapi-queue
     container_name: brad-fastapi
@@ -81,10 +102,11 @@ services:
 
   frontend:
     build:
-      context: ./frontend
-      dockerfile: Dockerfile
-      args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
+      ./frontend
+      # context: ./frontend
+      # dockerfile: Dockerfile
+      # args:
+      #   NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL}
     container_name: brad-frontend
     ports:
       - "5173:5173"
@@ -159,7 +181,7 @@ services:
 volumes:
   mongo-data:
   redis-data:
-  brad_screenshots:            # Named volume for screenshots
+  brad_screenshots: # Named volume for screenshots
 
 networks:
   brad_net:
