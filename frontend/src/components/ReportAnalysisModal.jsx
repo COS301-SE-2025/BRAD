@@ -20,6 +20,7 @@ import { MdDangerous, MdSecurity } from "react-icons/md";
 import Notification from "./Notification";
 import ConfirmationModal from "./ConfirmationModal";
 import ScrapingInfoViewer from "./ScrapingInfoViewer";
+import ScreenshotGallery from "./ScreenshotGallery";
 
 /**
  * Props:
@@ -215,8 +216,9 @@ export default function ReportAnalysisModal({
 
             {/* Header */}
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <FaGlobe className="text-blue-500" /> {report.domain}
+              <h2 className="text-xl font-bold flex items-center gap-2 break-words whitespace-normal max-w-full">
+                <FaGlobe className="text-blue-500 flex-shrink-0" />
+                <span className="break-all text-wrap">{report.domain}</span>
               </h2>
               <button onClick={() => setOpen(false)}>✕</button>
             </div>
@@ -229,6 +231,18 @@ export default function ReportAnalysisModal({
                 <InfoCard icon={<MdSecurity />} label="Risk Level" value={finalRiskLevel} />
                 <InfoCard icon={<FaCheckCircle />} label="Verdict" value={report.investigatorDecision ?? "N/A"} />
                 <InfoCard icon={<FaShieldAlt />} label="Status" value={getDisplayStatus(report)} />
+
+                <section>
+                  <ScreenshotGallery
+                    screenshots={Array.isArray(report.scrapingInfo?.screenshots)
+                      ? report.scrapingInfo.screenshots.map((p) =>
+                          p.startsWith("http")
+                            ? p
+                            : `/api/static/screenshots/${p.replace(/^\/+/, "")}`
+                        )
+                      : []}
+                  />
+                </section>
               </div>
             )}
 
