@@ -9,6 +9,7 @@ import { AuthGuard } from '../auth/guards/auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { JwtPayload } from '../auth/interfaces/jwt-payload.interface';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { OptionalAuthGuard } from 'src/auth/guards/optional-auth.guard';
 import { BotGuard } from '../auth/guards/bot.guard';
 import { FileInterceptor,FilesInterceptor } from '@nestjs/platform-express';
 import {
@@ -21,11 +22,8 @@ import {
 export class StatisticsController {
 
     constructor(private readonly statisticsService: StatisticsService) {}
-
-    @UseGuards(AuthGuard, RolesGuard)
-    @Roles('admin', 'investigator', 'general')
+    @UseGuards(OptionalAuthGuard)
     @Get('total-reports')
-    @ApiBearerAuth("JWT-auth")
     @ApiOperation({ summary: 'Get total reports count or reports submitted by you(general)' })
     @ApiResponse({ status: 200, description: 'Total reports count' })
     async getTotalReports(@Req() req: Request) {
@@ -71,12 +69,8 @@ export class StatisticsController {
 async getDomainsReportedMoreThanOnce(@Req() req: Request) {
   return this.statisticsService.getDomainsReportedMoreThanOnce();
 }
-
-
-    @UseGuards(AuthGuard, RolesGuard)
-    @Roles('admin', 'investigator')
+    @UseGuards(OptionalAuthGuard)
     @Get('malicious-reports')
-    @ApiBearerAuth("JWT-auth")
     @ApiOperation({ summary: 'Get reports marked as malicious' })
     @ApiResponse({ status: 200, description: 'Reports marked as malicious' })
     async getReportsMarkedAsMalicious(@Req() req: Request) {
@@ -86,10 +80,8 @@ async getDomainsReportedMoreThanOnce(@Req() req: Request) {
         return this.statisticsService.getReportsMarkedAsMalicious(role);
     }
 
-    @UseGuards(AuthGuard, RolesGuard)
-    @Roles('admin', 'investigator')
+    @UseGuards(OptionalAuthGuard)
     @Get('safe-reports')
-    @ApiBearerAuth("JWT-auth")
     @ApiOperation({ summary: 'Get reports marked as safe' })
     @ApiResponse({ status: 200, description: 'Reports marked as safe' })
     async getReportsMarkedAsSafe(@Req() req: Request) {
@@ -204,36 +196,33 @@ async getDomainsReportedMoreThanOnce(@Req() req: Request) {
         return this.statisticsService.getResolvedReportsCount(user.id, role);
     }
 
-    @UseGuards(AuthGuard, RolesGuard)
-    // @Roles('admin')
+    @UseGuards(OptionalAuthGuard)
     @Get('avg-bot-analysis-time')
-    @ApiBearerAuth("JWT-auth")
     @ApiOperation({ summary: 'Get average bot analysis time across all reports' })
     @ApiResponse({ status: 200, description: 'Average bot analysis time' })
     async getAvgBotAnalysisTime(@Req() req: Request) {
-    const user = req['user'] as JwtPayload;
+    const user = req['user'] as JwtPayload | undefined;
+    const role = user?.role ?? 'public';
     return this.statisticsService.getAvgBotAnalysisTime();
     }
 
-    @UseGuards(AuthGuard, RolesGuard)
-    // @Roles('admin')
+    @UseGuards(OptionalAuthGuard)
     @Get('avg-investigator-time')
-    @ApiBearerAuth("JWT-auth")
     @ApiOperation({ summary: 'Get average investigator analysis time across all reports' })
     @ApiResponse({ status: 200, description: 'Average investigator analysis time' })
     async getAvgInvestigatorTime(@Req() req: Request) {
-    const user = req['user'] as JwtPayload;
+    const user = req['user'] as JwtPayload | undefined;
+    const role = user?.role ?? 'public';
     return this.statisticsService.getAvgInvestigatorTime();
     }
 
-    @UseGuards(AuthGuard, RolesGuard)
-    // @Roles('admin')
+    @UseGuards(OptionalAuthGuard)
     @Get('avg-resolution-time')
-    @ApiBearerAuth("JWT-auth")
     @ApiOperation({ summary: 'Get average resolution time for reports' })
     @ApiResponse({ status: 200, description: 'Average resolution time' })
     async getAvgResolutionTime(@Req() req: Request) {
-    const user = req['user'] as JwtPayload;
+    const user = req['user'] as JwtPayload | undefined;
+    const role = user?.role ?? 'public';
     return this.statisticsService.getAvgResolutionTime();
     }
 
