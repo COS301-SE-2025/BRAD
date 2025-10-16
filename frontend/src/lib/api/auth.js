@@ -12,5 +12,6 @@ export const changePassword = (username, OTP, newPassword) =>
     newPassword,
   });
 
-  export const updateUser = (data) => API.patch('/auth/update-user', data);
+export const updateUser = (data) =>
+  API.patch('/auth/update-user', data)
 

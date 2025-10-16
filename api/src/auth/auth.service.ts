@@ -398,12 +398,6 @@ async login(dto: LoginDto): Promise<{ token?: string; tempToken?: string; messag
     const user = await this.userModel.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(
-      dto.currentPassword,
-      user.password,
-    );
-    if (!isPasswordValid) throw new BadRequestException('Incorrect password');
 
     // Allowed fields to update
     const allowedFields = ['firstname', 'lastname', 'username', 'email'];
@@ -416,4 +410,11 @@ async login(dto: LoginDto): Promise<{ token?: string; tempToken?: string; messag
     await user.save();
     return user;
   }
+
+async logout(userId: string): Promise<{ message: string }> {
+  const user = await this.userModel.findById(userId);
+  if (!user) throw new NotFoundException('User not found');
+
+  return { message: 'User logged out successfully' };
+}
 }

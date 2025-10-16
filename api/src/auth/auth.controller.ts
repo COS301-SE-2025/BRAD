@@ -102,6 +102,15 @@ async updateUser(@Req() req: Request, @Body() dto: UpdateUserDto) {
   return this.authService.updateUser(user.id, dto);
 }
 
+@UseGuards(AuthGuard)
+@Post('logout')
+@ApiBearerAuth('JWT-auth')
+@ApiOperation({ summary: 'Log out the current user and clear tokens' })
+@ApiResponse({ status: 200, description: 'User logged out successfully' })
+async logout(@Req() req: Request) {
+  const user = req['user'] as JwtPayload; 
+  return this.authService.logout(user.id);
+}
 
 
 }
