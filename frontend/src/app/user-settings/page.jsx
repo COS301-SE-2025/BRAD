@@ -18,9 +18,8 @@ export default function UserSettingsPage() {
     username: "",
     email: "",
   })
+
   const [message, setMessage] = useState("")
-  const [showPasswordModal, setShowPasswordModal] = useState(false)
-  const [currentPassword, setCurrentPassword] = useState("")
   const [sidebarExpanded, setSidebarExpanded] = useState(false)
 
   useEffect(() => {
@@ -32,35 +31,43 @@ export default function UserSettingsPage() {
     setMessage("")
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+
+    // Collect only non-empty fields
     const updatedFields = {}
     for (const key in form) {
       if (form[key].trim() !== "") updatedFields[key] = form[key].trim()
     }
+
     if (Object.keys(updatedFields).length === 0) {
       setMessage("Please fill in at least one field to update.")
       return
     }
-    // Open password confirmation modal
-    setShowPasswordModal(true)
-  }
 
-  const handlePasswordConfirm = async () => {
     try {
-      const payload = { ...form, currentPassword }
-      const response = await updateUser(payload)
+      // ✅ Get token correctly
+      const storedUser = JSON.parse(localStorage.getItem("user"))
+      const token = storedUser?.token
 
-      // ✅ API returns updated user — store in localStorage (same as old frontend)
-      localStorage.setItem("user", JSON.stringify(response.data))
-      setStoredUser(response.data)
+      if (!token) {
+        setMessage("You must be logged in to update your profile.")
+        return
+      }
+
+      // ✅ Send update request (the interceptor already attaches token)
+      const response = await updateUser(updatedFields)
+
+      // ✅ Update local storage with new user info
+      const updatedUser = { ...storedUser, ...updatedFields }
+      localStorage.setItem("user", JSON.stringify(updatedUser))
+      setStoredUser(updatedUser)
 
       setMessage("Profile updated successfully!")
-      setShowPasswordModal(false)
-      setCurrentPassword("")
       setForm({ firstname: "", lastname: "", username: "", email: "" })
     } catch (err) {
-      setMessage(err.response?.data?.message || "Update failed")
+      console.error("Update failed:", err)
+      setMessage(err.response?.data?.message || "Update failed.")
     }
   }
 
@@ -69,13 +76,13 @@ export default function UserSettingsPage() {
       {/* Sidebar */}
       <Sidebar onToggle={setSidebarExpanded} />
 
-      {/* Main content shifts based on sidebar state */}
+      {/* Main content */}
       <div
         className={`flex-1 p-8 transition-all duration-300 ${
           sidebarExpanded ? "ml-56" : "ml-16"
         }`}
       >
-        {/* Top bar with theme toggle */}
+        {/* Top bar */}
         <div className="flex justify-end mb-6">
           <ThemeToggle />
         </div>
@@ -147,33 +154,6 @@ export default function UserSettingsPage() {
 
           {message && <p className="mt-4 text-brad-500">{message}</p>}
         </div>
-
-        {/* Password Modal */}
-        {showPasswordModal && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-            <div className="card p-6 w-80 flex flex-col gap-4">
-              <h3 className="text-lg font-semibold">Confirm Your Password</h3>
-              <input
-                type="password"
-                placeholder="Current Password"
-                value={currentPassword}
-                onChange={(e) => setCurrentPassword(e.target.value)}
-                className="input"
-              />
-              <div className="flex justify-end gap-2 mt-2">
-                <button onClick={handlePasswordConfirm} className="btn-primary">
-                  Confirm
-                </button>
-                <button
-                  onClick={() => setShowPasswordModal(false)}
-                  className="px-4 py-2 rounded-md border border-gray-300"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   )

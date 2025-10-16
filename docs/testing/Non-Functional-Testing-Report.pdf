@@ -1,0 +1,75 @@
+Structure for Non-Functional Testing Report
+
+1. Introduction
+
+Briefly explain what non-functional testing is.
+
+List the 5 quality requirements I tested (Security, Compliance, Reliability, Scalability, Maintainability).
+
+Mention that these were prioritized (Security highest, Maintainability lowest).
+
+2. Methodology
+
+State that I used automated testing tools only (per Demo 4 rules).
+
+List the tools chosen:
+
+Security → OWASP ZAP/Postman automated tests
+
+Compliance → Log review scripts, Postman validation tests
+
+Reliability → Jest integration tests + chaos simulation (DB downtime)
+
+Scalability → JMeter/Locust/k6 load tests
+
+Maintainability → ESLint/SonarQube + test coverage reports
+
+3. Test Cases by Quality Requirement
+
+For each requirement, make a subsection like this:
+
+1. Security
+
+Requirement: Only authenticated users can access protected routes.
+
+Metric: Unauthorized requests must fail with 401; JWT must be validated.
+
+Tool: Postman tests + OWASP ZAP scan.
+
+Steps: Describe how I configured Postman collection or ZAP scan.
+
+Results: Insert screenshot of failing unauthorized access + ZAP summary.
+
+Reflection: State if requirement was met.
+
+2. Compliance
+
+(same structure, e.g., check logs for no exposed PII)
+
+3. Reliability
+
+(e.g., simulate DB crash → API retries, returns error gracefully)
+
+4. Scalability
+
+(run JMeter load test → screenshot graph of response times under 100 concurrent users)
+
+5. Maintainability
+
+(run ESLint + coverage → screenshot of “No major issues” and coverage %)
+
+4. Summary Table
+
+Make a table like:
+
+Quality Requirement	Metric	Tool	Result	Passed?
+Security	Auth must block unauth. users	Postman/ZAP	Screenshot X	tick
+Compliance	No PII in logs	Log scanner	Screenshot Y	tick
+Reliability	API recovers from DB crash	Jest/Chaos test	Screenshot Z	tick
+Scalability	100 concurrent users <500ms avg	JMeter	Graph A	tick
+Maintainability	80%+ coverage, lint clean	Jest/ESLint	Report B	tick
+5. Conclusion
+
+State which requirements were fully met, which need improvement.
+
+Reflect briefly on lessons learned.

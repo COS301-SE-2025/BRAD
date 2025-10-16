@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { usePathname } from "next/navigation"
+import API from "@/lib/api/axios"
+import { usePathname, useRouter } from "next/navigation"
 import {
   Home,
   ClipboardList,
@@ -18,6 +19,7 @@ import Logo from "./Logo"
 export default function Sidebar({ onToggle }) {
   const [expanded, setExpanded] = useState(false)
   const pathname = usePathname()
+  const router = useRouter()
   const [role, setRole] = useState("general") 
 
   useEffect(() => {
@@ -40,7 +42,6 @@ export default function Sidebar({ onToggle }) {
     setRole(detectedRole)
   }, [pathname])
 
-  // notify parent of expanded state
   useEffect(() => {
     if (onToggle) onToggle(expanded)
   }, [expanded, onToggle])
@@ -66,9 +67,26 @@ export default function Sidebar({ onToggle }) {
     ],
   }
 
+ const handleLogout = async () => {
+  try {
+    // Call backend logout endpoint (JWT automatically added by interceptor)
+    await API.post("/auth/logout");
+
+    // Clear local storage
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+
+    // Redirect to login
+    router.push("/login");
+  } catch (err) {
+    console.error("Logout failed:", err);
+    alert("Logout failed. Try again.");
+  }
+};
+
   const commonItems = [
     { icon: <Settings size={20} />, label: "Settings", href: "/user-settings" },
-    { icon: <LogOut size={20} />, label: "Log out", href: "/login" },
+    { icon: <LogOut size={20} />, label: "Log out", onClick: handleLogout },
   ]
 
   const menuItems = [...(menus[role] || []), ...commonItems]
@@ -83,18 +101,36 @@ export default function Sidebar({ onToggle }) {
     >
       <Logo expanded={expanded} size={32} />
       <nav className="flex-1 mt-6">
-        {menuItems.map((item, idx) => (
-          <Link key={idx} href={item.href}>
-            <div
-              className={`flex items-center px-4 py-3 hover:bg-brad-700 cursor-pointer ${
-                pathname === item.href ? "bg-brad-700" : ""
-              }`}
-            >
-              {item.icon}
-              {expanded && <span className="ml-3">{item.label}</span>}
-            </div>
-          </Link>
-        ))}
+        {menuItems.map((item, idx) => {
+          if (item.onClick) {
+            // For actions like logout
+            return (
+              <div
+                key={idx}
+                onClick={item.onClick}
+                className={`flex items-center px-4 py-3 hover:bg-brad-700 cursor-pointer ${
+                  pathname === item.href ? "bg-brad-700" : ""
+                }`}
+              >
+                {item.icon}
+                {expanded && <span className="ml-3">{item.label}</span>}
+              </div>
+            )
+          }
+
+          return (
+            <Link key={idx} href={item.href}>
+              <div
+                className={`flex items-center px-4 py-3 hover:bg-brad-700 cursor-pointer ${
+                  pathname === item.href ? "bg-brad-700" : ""
+                }`}
+              >
+                {item.icon}
+                {expanded && <span className="ml-3">{item.label}</span>}
+              </div>
+            </Link>
+          )
+        })}
       </nav>
     </div>
   )

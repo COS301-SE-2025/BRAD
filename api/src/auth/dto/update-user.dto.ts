@@ -21,8 +21,5 @@ export class UpdateUserDto {
   @IsEmail()
   email?: string;
 
-  @ApiProperty({ description: 'Current password for verification', example: 'Password123' })
-  @IsNotEmpty()
-  @IsString()
-  currentPassword: string; 
+
 }

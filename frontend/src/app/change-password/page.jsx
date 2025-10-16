@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation";
 import { changePassword } from "../../lib/api/auth";
 import Notification from "../../components/Notification";
@@ -39,6 +39,10 @@ export default function ChangePasswordPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+      document.title = "B.R.A.D | Change Password"
+    }, [])
 
   return (
     <div className="max-w-md mx-auto p-6 bg-white dark:bg-gray-800 rounded-lg shadow-md mt-10">

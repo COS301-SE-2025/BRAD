@@ -35,11 +35,6 @@ export default function ManageUsersPage() {
     setTimeout(() => setNotification(null), 4000)
   }
 
-  useEffect(() => {
-    fetchUsers()
-    document.title = "B.R.A.D | Admin"
-  }, [])
-
   const fetchUsers = async () => {
     try {
       const res = await getAllUsers()
@@ -117,6 +112,10 @@ export default function ManageUsersPage() {
     const matchesRole = filterRole === "all" || u.role === filterRole
     return matchesSearch && matchesRole
   })
+
+  useEffect(() => {
+        document.title = 'B.R.A.D | Admin Manage users';
+      }, []);
 
   return (
     <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">

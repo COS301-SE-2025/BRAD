@@ -207,8 +207,9 @@ def perform_scraping(
                 reasons.append(f"Training domain bias: {host} ({old}→{score})")
             return score, reasons
 
-    screenshot_dir = "/app/screenshots"
-    os.makedirs(screenshot_dir, exist_ok=True)
+    screenshot_dir = os.getenv("SCREENSHOTS_DIR", "/data/screenshots")
+    job_dir = os.path.join(screenshot_dir, report_id)
+    os.makedirs(job_dir, exist_ok=True)
 
     origin = _origin(start_url)
     logger.info(f"[Crawl Start] {start_url} (origin={origin}) | Report={report_id}")
@@ -347,11 +348,13 @@ def perform_scraping(
 
                 ts = int(time.time())
                 fname = f"{report_id}_{len(pages_out)+1}_{ts}.png"
-                screenshot_rel = f"screenshots/{fname}"
-                screenshot_abs = os.path.join(screenshot_dir, fname)
+                screenshot_abs = os.path.join(job_dir, fname)
+                screenshot_rel = f"screenshots/{report_id}/{fname}"  # served at /static/<this>
+
                 try:
                     page.screenshot(path=screenshot_abs, full_page=True)
                     screenshots_all.append(screenshot_rel)
+                    logger.info(f"[Screenshot] saved {screenshot_rel}")
                 except Exception as e:
                     logger.warning(f"[Screenshot Failed] {final_url}: {e}")
 

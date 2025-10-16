@@ -115,6 +115,10 @@ export default function InvestigatorDashboard() {
     fetchBarData()
   }, [timeFrame])
 
+  useEffect(() => {
+      document.title = "B.R.A.D | Investigator Dashboard"
+    }, [])
+
   return (
     <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
       {/* Sidebar */}

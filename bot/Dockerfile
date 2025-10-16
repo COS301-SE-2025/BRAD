@@ -11,7 +11,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ./src ./src
 
 # Ensure runtime dirs exist
-RUN mkdir -p /app/screenshots
+RUN mkdir -p /data/screenshots
 
 # Recommended env
 ENV PYTHONUNBUFFERED=1

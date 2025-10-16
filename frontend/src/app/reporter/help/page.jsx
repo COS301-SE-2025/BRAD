@@ -26,6 +26,10 @@ export default function HelpPage() {
     }
   }, [pathname])
 
+  useEffect(() => {
+        document.title = 'B.R.A.D | Help Page';
+      }, []);
+
   return (
     <main className="help-page">
       <div className="container">
@@ -64,7 +68,7 @@ export default function HelpPage() {
               <div className="contact-item">
                 📄{" "}
                 <a
-                  href="/B.R.A.D-User_Manual.pdf"
+                  href="/B.R.A.D-User-Manual.pdf"
                   target="_blank"
                   rel="noopener noreferrer"
                 >
