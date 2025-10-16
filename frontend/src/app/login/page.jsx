@@ -296,8 +296,12 @@ export default function LoginPage() {
         )}
 
         <div className="mt-6 text-xs text-gray-600 dark:text-gray-400">
-          By logging in you agree to our{" "}
-          <a href="/B.R.A.D-User-Manual.pdf" className="text-brad-500 underline">
+          We value your privacy. Learn more in our{" "}
+          <a href="/B.R.A.D_Privacy_Policy.pdf" 
+             target="_blank" 
+             className="text-brad-500 underline"
+             rel="noopener noreferrer"
+          >
             Terms & Privacy
           </a>
           .
