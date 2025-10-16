@@ -7,6 +7,7 @@ import { MdDangerous, MdCheckCircle } from "react-icons/md";
 import ReportAnalysisModal from "./ReportAnalysisModal";
 import SimilarityPopup from "./SimilarityPopup";
 import API from "@/lib/api/axios";
+import Link from "next/link";
 
 /**
  * Helper to safely compute risk score + level + color
@@ -162,17 +163,25 @@ export default function ReportFileCard({
 
         {/* Actions */}
         <div className="mt-4 flex gap-2">
-          <ReportAnalysisModal
-            report={report}
-            view={report.analysisStatus}
-            loggedInUser={loggedInUser}
-            onRefresh={onRefresh}
-            trigger={
-              <button className="flex-1 px-3 py-2 bg-[var(--primary)] text-white rounded-lg text-sm font-medium hover:opacity-95">
+          {report.analysisStatus === "in-progress" && role === "investigator" ? (
+            <Link href={`/investigator/in-progress/${report._id}`} className="flex-1">
+              <button className="w-full px-3 py-2 bg-[var(--primary)] text-white rounded-lg text-sm font-medium hover:opacity-95">
                 View Report
               </button>
-            }
-          />
+            </Link>
+          ) : (
+            <ReportAnalysisModal
+              report={report}
+              view={report.analysisStatus}
+              loggedInUser={loggedInUser}
+              onRefresh={onRefresh}
+              trigger={
+                <button className="flex-1 px-3 py-2 bg-[var(--primary)] text-white rounded-lg text-sm font-medium hover:opacity-95">
+                  View Report
+                </button>
+              }
+            />
+          )}
 
           {role === "investigator" &&
             !report.reviewedBy &&
