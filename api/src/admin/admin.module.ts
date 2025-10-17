@@ -4,10 +4,11 @@ import { AdminService } from './admin.service';
 import { AdminController } from './admin.controller';
 import { User, UserSchema } from '../schemas/user.schema';
 import { AuthModule } from '../auth/auth.module';
-
+import { ActivityModule } from 'src/activity/activity.module';
 @Module({
-  imports: [MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]), AuthModule,], 
+  imports: [MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]), AuthModule, ActivityModule],
   controllers: [AdminController],
   providers: [AdminService],
+  
 })
 export class AdminModule {}
