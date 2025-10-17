@@ -14,6 +14,7 @@ import { QueueModule } from './queue/queue.module'; // your FastAPI wrapper
 import { DomainSimilarityService } from './domain-similarity/domain-similarity.service';
 import { DomainSimilarityModule } from './domain-similarity/domain-similarity.module';
 import { HealthModule } from './health/health.module';
+import { ActivityModule } from './activity/activity.module';
 
 
 @Module({
@@ -63,6 +64,7 @@ import { HealthModule } from './health/health.module';
     StatisticsModule,
     DomainSimilarityModule,
     HealthModule,
+    ActivityModule,
   ],
 
   controllers: [AppController],

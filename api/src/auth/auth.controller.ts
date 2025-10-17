@@ -12,6 +12,8 @@ import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { Request } from 'express';
+import { UpdatePasswordDto } from './dto/update-paasword.dto';
+
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
@@ -112,5 +114,18 @@ async logout(@Req() req: Request) {
   return this.authService.logout(user.id);
 }
 
-
+@UseGuards(AuthGuard)
+  @Patch('change-password-logged-in')
+  @ApiBearerAuth('JWT-auth')
+  @ApiOperation({ summary: 'Change password for logged-in user' })
+  @ApiBody({ type: UpdatePasswordDto })
+  @ApiResponse({ status: 200, description: 'Password changed successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid current password or validation failed' })
+  async changePasswordLoggedIn(
+    @Req() req: Request,
+    @Body() dto: UpdatePasswordDto,
+  ) {
+    const user = req['user'] as JwtPayload;
+    return this.authService.changePasswordLoggedIn(user.id, dto);
+  }
 }

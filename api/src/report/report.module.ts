@@ -7,7 +7,7 @@ import { ForensicService } from '../services/forensic.service';
 import { UserModule } from '../users/user.module'; 
 import { AuthModule } from '../auth/auth.module';
 import { QueueModule } from '../queue/queue.module';
-
+import { ActivityModule } from 'src/activity/activity.module';
 import { StatisticsService } from 'src/statistics/statistics.service';
 
 @Module({
@@ -16,6 +16,7 @@ import { StatisticsService } from 'src/statistics/statistics.service';
     UserModule,
     AuthModule,
     QueueModule,
+    ActivityModule,
   ],
   controllers: [ReportController],
   providers: [ReportService, ForensicService],
