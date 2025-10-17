@@ -232,12 +232,6 @@ export default function LoginPage() {
               </button>
             </div>
 
-            {showForgotPassword && (
-              <ForgotPasswordModal
-                onClose={() => setShowForgotPassword(false)}
-              />
-            )}
-
             <div>
               <button
                 type="submit"
@@ -302,11 +296,16 @@ export default function LoginPage() {
              className="text-brad-500 underline"
              rel="noopener noreferrer"
           >
-            Terms & Privacy
+            Privacy Policy
           </a>
           .
         </div>
       </div>
+
+      {/* Modal rendered outside the form to avoid nested form issues */}
+      {showForgotPassword && (
+        <ForgotPasswordModal onClose={() => setShowForgotPassword(false)} />
+      )}
     </AuthLayout>
   );
 }
