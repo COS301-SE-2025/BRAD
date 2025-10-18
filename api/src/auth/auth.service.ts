@@ -11,6 +11,8 @@ import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { ActivityService } from 'src/activity/activity.service';
+import { UpdatePasswordDto } from './dto/update-paasword.dto';
 @Injectable()
 export class AuthService {
      private readonly MAX_LOGIN_ATTEMPTS = 5;
@@ -20,6 +22,7 @@ export class AuthService {
     @InjectModel(User.name) private userModel: Model<User>,
     private configService: ConfigService,
     private jwtService: JwtService,
+    private activityService: ActivityService,
   ) {}
 
   async register(
@@ -177,6 +180,7 @@ async login(dto: LoginDto): Promise<{ token?: string; tempToken?: string; messag
             token: token.slice(0, 10) + '...',
             user: userData,
           });
+            await this.activityService.logActivity(user._id,  `${user.username} logged in`);
           await user.save(); // Save reset failedLoginAttempts
           return {
             token,
@@ -196,7 +200,7 @@ async login(dto: LoginDto): Promise<{ token?: string; tempToken?: string; messag
       try {
         await user.save();
         console.log('OTP saved:', { otp, otpExpires: user.otpExpires });
-      } catch (saveError) {
+      }catch (saveError) {
         console.error('Error saving OTP:', saveError);
         throw new InternalServerErrorException('Failed to save OTP');
       }
@@ -221,6 +225,7 @@ async login(dto: LoginDto): Promise<{ token?: string; tempToken?: string; messag
         ? error
         : new InternalServerErrorException('Login failed');
     }
+
   }
 
   private async sendOtpEmail(user: User, otp: string): Promise<void> {
@@ -318,6 +323,7 @@ async login(dto: LoginDto): Promise<{ token?: string; tempToken?: string; messag
       console.error('Error sending lockout notification email:', err);
     
     }
+
   }
 
   async forgotPassword(email: string): Promise<{ message: string }> {
@@ -414,12 +420,6 @@ async login(dto: LoginDto): Promise<{ token?: string; tempToken?: string; messag
     const user = await this.userModel.findById(userId);
     if (!user) throw new NotFoundException('User not found');
 
-    // Verify password
-    const isPasswordValid = await bcrypt.compare(
-      dto.currentPassword,
-      user.password,
-    );
-    if (!isPasswordValid) throw new BadRequestException('Incorrect password');
 
     // Allowed fields to update
     const allowedFields = ['firstname', 'lastname', 'username', 'email'];
@@ -432,4 +432,34 @@ async login(dto: LoginDto): Promise<{ token?: string; tempToken?: string; messag
     await user.save();
     return user;
   }
+
+async logout(userId: string): Promise<{ message: string }> {
+  const user = await this.userModel.findById(userId);
+  if (!user) throw new NotFoundException('User not found');
+
+  return { message: 'User logged out successfully' };
+}
+
+async changePasswordLoggedIn(userId: string, dto: UpdatePasswordDto) {
+  const { oldPassword, newPassword, confirmPassword } = dto;
+
+  if (newPassword !== confirmPassword) {
+    throw new BadRequestException('New password and confirm password do not match');
+  }
+
+  const user = await this.userModel.findById(userId);
+  if (!user) throw new NotFoundException('User not found');
+
+  const isMatch = await bcrypt.compare(oldPassword, user.password);
+  if (!isMatch) throw new BadRequestException('Old password is incorrect');
+
+  const hashedNew = await bcrypt.hash(newPassword, 10);
+  user.password = hashedNew;
+
+  await user.save();
+  await this.activityService.logActivity(user._id, `${user.username} changed their password`);
+
+  return { message: 'Password changed successfully' };
+}
+
 }

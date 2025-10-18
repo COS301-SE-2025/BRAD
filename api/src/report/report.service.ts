@@ -7,7 +7,7 @@ import { UpdateAnalysisDto, AnalysisStatusUnified } from './dto/update-analysis.
 import { User } from '../schemas/user.schema';
 import * as nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
-
+import { ActivityService } from 'src/activity/activity.service';
 
 @Injectable()
 export class ReportService {
@@ -17,6 +17,7 @@ export class ReportService {
     private forensicService: ForensicService,
     private readonly queueService: QueueService,
     private readonly configService: ConfigService,
+    private  activityService: ActivityService,
   ) {}
 
   async submitReport(domain: string, submittedBy: string, evidenceFiles?: string[]) {
@@ -27,6 +28,14 @@ export class ReportService {
     });
 
     const savedReport = await newReport.save();
+     const user = await this.userModel.findById(submittedBy).select('username firstname email');
+
+  const displayName = user?.firstname || user?.username || 'Unknown User';
+
+  await this.activityService.logActivity(
+    savedReport.submittedBy,
+    `${displayName} submitted new report for domain: ${domain}`
+  );
 
     // Call FastAPI queue service via HTTP
     try {
@@ -214,6 +223,7 @@ async updateAnalysis(id: string, updateDto: UpdateAnalysisDto): Promise<Report> 
   if (!updated) {
     throw new NotFoundException(`Report with id ${id} not found`);
   }
+  await this.activityService.logActivity(reviewedById, `Marked report ${id} as ${verdict.toUpperCase()}`);
 
   try {
     if (updated.submittedBy?.email) {
@@ -280,7 +290,7 @@ async updateAnalysis(id: string, updateDto: UpdateAnalysisDto): Promise<Report> 
         'Report not found or cannot be claimed (status not pending or already decided)'
       );
     }
-
+    await this.activityService.logActivity(reviewedById, `Claimed report ${id} for review`);
     return updated;
   }
   
@@ -295,7 +305,7 @@ async releaseReport(reportId: string, investigatorId: string) {
     if (!report) {
       throw new Error('Cannot release report: either not claimed by you or not in-progress');
     }
-
+ await this.activityService.logActivity(investigatorId, `Released report ${reportId}`);
     return report;
   }
 

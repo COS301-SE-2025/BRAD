@@ -7,10 +7,10 @@ import { CreateUserDto } from './dto/create-user.dto';
 import * as crypto from 'crypto';
 import * as nodemailer from 'nodemailer';
 import { ConfigService } from '@nestjs/config';
-
+import { ActivityService } from 'src/activity/activity.service';  
 @Injectable()
 export class AdminService {
-  constructor(@InjectModel(User.name) private userModel: Model<User>, private configService: ConfigService) {}
+  constructor(@InjectModel(User.name) private userModel: Model<User>, private configService: ConfigService, private activityService: ActivityService) {}
 
   async addAdmin(dto: any): Promise<any> {
     const { firstname, lastname, email, username, password } = dto;
@@ -33,6 +33,8 @@ export class AdminService {
 
     try {
       await admin.save();
+      await this.activityService.logActivity(admin._id, `New admin account created for ${username}`);
+
       const { password: _, ...data } = admin.toObject();
       return data;
     } catch (err) {
@@ -47,6 +49,8 @@ export class AdminService {
     if (user.role === 'investigator') throw new BadRequestException('User is already an investigator');
 
     user.role = 'investigator';
+        await this.activityService.logActivity(user._id, `User ${user.username} promoted to investigator`);
+
     return user.save();
   }
 
@@ -56,6 +60,9 @@ export class AdminService {
     if (user.role === 'general') throw new BadRequestException('User is already a general user');
 
     user.role = 'general';
+
+        await this.activityService.logActivity(user._id, `User ${user.username} demoted to general`);
+
     return user.save();
   }
 
@@ -65,6 +72,8 @@ export class AdminService {
     if (user.role === 'admin') throw new BadRequestException('User is already an admin');
 
     user.role = 'admin';
+    await this.activityService.logActivity(user._id, `User ${user.username} promoted to admin`);
+
     return user.save();
   }
 
@@ -76,6 +85,10 @@ export class AdminService {
     const user = await this.userModel.findById(userId);
     if (!user) throw new NotFoundException('User not found');
     await this.userModel.findByIdAndDelete(userId);
+     await this.activityService.logActivity(
+      user._id,
+      `User account (${user.username}) deleted by admin`,
+    );
     return { message: 'User deleted successfully' };
   }
   async createUser(dto: CreateUserDto): Promise<any> {
@@ -123,6 +136,7 @@ await transporter.sendMail(mailOptions);
 try {
   await user.save();
   await transporter.sendMail(mailOptions);
+      await this.activityService.logActivity(user._id, `New ${role} account created for ${username}`);
 
   const { password: _, resetPasswordToken, resetPasswordExpires, ...data } = user.toObject();
   return data;

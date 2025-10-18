@@ -57,6 +57,9 @@ export default function LoginPage() {
             username: user.username,
             token: token,
             role: user.role,
+            email: user.email,
+            firstname: user.firstname,
+            lastname: user.lastname,  
           })
         );
 
