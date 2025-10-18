@@ -36,6 +36,17 @@ export default function AdminDashboard() {
   const [timeFrame, setTimeFrame] = useState("Monthly")
   const [topDomains, setTopDomains] = useState([])
   const [investigatorStats, setInvestigatorStats] = useState([])
+  const [storedUser, setStoredUser] = useState(null) // <-- add local user state
+
+  // Load user from localStorage (client-only)
+  useEffect(() => {
+    try {
+      const userData = typeof window !== "undefined" ? localStorage.getItem("user") : null
+      if (userData) setStoredUser(JSON.parse(userData))
+    } catch {
+      // ignore parse errors
+    }
+  }, [])
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -87,7 +98,7 @@ export default function AdminDashboard() {
     fetchStats()
   }, [])
 
-  // === Fetch Reports over Time for Bar Chart ===
+  // Fetch Reports over Time for Bar Chart
   useEffect(() => {
     const fetchBarData = async () => {
       try {
@@ -125,20 +136,20 @@ export default function AdminDashboard() {
   }, [timeFrame])
 
   useEffect(() => {
-      document.title = 'B.R.A.D | Admin Dashboard';
-    }, []);
+    document.title = 'B.R.A.D | Admin Dashboard'
+  }, [])
 
   return (
-  <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
+    <div className="flex min-h-screen bg-[var(--bg)] text-[var(--text)]">
       <Sidebar onToggle={setSidebarExpanded} />
 
       <main
-      className={`flex-1 bg-[var(--bg)] text-[var(--text)] transition-all duration-300 min-h-screen ${
-        sidebarExpanded ? "ml-56" : "ml-16"
-      }`}
-    >
+        className={`flex-1 bg-[var(--bg)] text-[var(--text)] transition-all duration-300 min-h-screen ${
+          sidebarExpanded ? "ml-56" : "ml-16"
+        }`}
+      >
         <UserGreeting
-          username="Admin"
+          username={storedUser?.username || "Admin"}
           title="Welcome back"
           subtitle="Here are the latest system insights and investigator stats."
           fullWidth
