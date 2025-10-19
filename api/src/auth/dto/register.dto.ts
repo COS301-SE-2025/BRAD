@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, Matches, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, Matches, MinLength, IsBoolean, Equals } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class RegisterDto {
@@ -28,4 +28,12 @@ export class RegisterDto {
   })
   @MinLength(6)
   password: string;
+
+  @ApiProperty({
+    example: true,
+    description: 'User consent to data handling / privacy policy',
+  })
+  @IsBoolean()
+  @Equals(true, { message: 'You must agree to the data handling policy.' })
+  consent: boolean;
 }
