@@ -1,7 +1,7 @@
 import API from './axios';
 
 export const forgotPassword = (email) =>
-  API.post('/auth/forgot-password', { email })
+  API.post('/auth/forgot-password', { email: email.trim().toLowerCase() })
 
 export const resetPassword = (token, newPassword) =>
   API.post('/auth/reset-password', { token, newPassword });

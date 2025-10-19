@@ -25,46 +25,60 @@ export class AuthService {
     private activityService: ActivityService,
   ) {}
 
-    async register(dto: RegisterDto): Promise<{ userId: string }> {
-    const email = dto.email.toLowerCase().trim();
-    const username = dto.username.trim();
-    
-    // Password validation
-    const passwordValidation = this.validatePassword(dto.password);
-    if (!passwordValidation.isValid) {
-      throw new BadRequestException(passwordValidation.message);
-    }
+  async register(
+      dto: RegisterDto,
+      meta?: { ip?: string; userAgent?: string },
+    ): Promise<{ userId: string }> {
+      const email = dto.email.toLowerCase().trim();
+      const username = dto.username.trim();
 
-    const existingUser = await this.userModel.findOne({
-      $or: [{ email }, { username }],
-    });
+      // Ensure user gave consent (extra safeguard beyond DTO validation)
+      if (!dto.consent) {
+        throw new BadRequestException('You must agree to the data handling policy.');
+      }
 
-    if (existingUser) {
-      throw new ConflictException(
-        'User with this email or username already exists.',
-      );
-    }
+      // Password validation
+      const passwordValidation = this.validatePassword(dto.password);
+      if (!passwordValidation.isValid) {
+        throw new BadRequestException(passwordValidation.message);
+      }
 
-    const hashedPassword = await bcrypt.hash(dto.password, 10);
+      // Check for existing email/username
+      const existingUser = await this.userModel.findOne({
+        $or: [{ email }, { username }],
+      });
 
-    const newUser = new this.userModel({
-      firstname: dto.firstname,
-      lastname: dto.lastname,
-      username,
-      email,
-      password: hashedPassword,
-      role: 'admin',
-      failedLoginAttempts: 0,
-    });
+      if (existingUser) {
+        throw new ConflictException('User with this email or username already exists.');
+      }
 
-    try {
-      await newUser.save();
-      return { userId: newUser._id.toString() };
-    } catch (err) {
-      console.error('Error registering user:', err);
-      throw new InternalServerErrorException('Could not register user');
-    }
-    
+      // Hash password
+      const hashedPassword = await bcrypt.hash(dto.password, 10);
+
+      // Create new user document with consent record
+      const newUser = new this.userModel({
+        firstname: dto.firstname,
+        lastname: dto.lastname,
+        username,
+        email,
+        password: hashedPassword,
+        role: 'general',
+        failedLoginAttempts: 0,
+        consentGiven: true,
+        consentAt: new Date(),
+        consentPolicyVersion: process.env.PRIVACY_POLICY_VERSION || '1',
+        consentSource: 'web_register',
+        consentIp: undefined, // if behind proxy, use passed IP
+        consentUserAgent: meta?.userAgent,
+      });
+
+      try {
+        await newUser.save();
+        return { userId: newUser._id.toString() };
+      } catch (err) {
+        console.error('Error registering user:', err);
+        throw new InternalServerErrorException('Could not register user');
+      }
   }
 
   private validatePassword(password: string): { isValid: boolean; message: string } {
@@ -313,6 +327,7 @@ async login(dto: LoginDto): Promise<{ token?: string; tempToken?: string; messag
   }
 
   async forgotPassword(email: string): Promise<{ message: string }> {
+    console.log(`[forgotPassword] start for  ${email}`);
     const user = await this.userModel.findOne({
       email: email.toLowerCase().trim(),
     });

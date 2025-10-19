@@ -66,13 +66,13 @@ export class User {
   resetPasswordExpires?: Date;
 
   @Prop({ default: false })
-mustChangePassword:boolean;
+  mustChangePassword:boolean;
 
-@Prop()
-failedLoginAttempts?: number;
+  @Prop()
+  failedLoginAttempts?: number;
 
-@Prop({default: null})
-lockUntil?: Date;
+  @Prop({default: null})
+  lockUntil?: Date;
 
  @ApiProperty({
     example: '123456',
@@ -89,11 +89,25 @@ lockUntil?: Date;
   otpExpires?: Date;
 
   @Prop()
-rememberMeToken?: string;
+  rememberMeToken?: string;
 
-@Prop()
-rememberMeExpires?: Date;
+  @Prop()
+  rememberMeExpires?: Date;
 
+  // ------- Consent fields -------
+  @Prop({ type: Boolean, required: true, default: false })
+  consentGiven: boolean;
+
+  @Prop({ type: Date })
+  consentAt?: Date;
+
+  @Prop({ type: String, default: () => process.env.PRIVACY_POLICY_VERSION || '1' })
+  consentPolicyVersion?: string;
+
+  @Prop() consentSource?: string;    // e.g. 'web_register'
+  @Prop() consentIp?: string;
+  @Prop() consentUserAgent?: string;
+  // -----------------------------
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

@@ -23,6 +23,8 @@ export default function RegisterPage() {
   const [notify, setNotify] = useState(null);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [consent, setConsent] = useState(false); // consent state
+
   const [passwordValidations, setPasswordValidations] = useState({
     minLength: false,
     uppercase: false,
@@ -33,14 +35,10 @@ export default function RegisterPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm({
-      ...form,
-      [name]: value,
-    });
+    setForm((prev) => ({ ...prev, [name]: value }));
     setError("");
     setSuccess("");
 
-    // Update password validations if password field is changed
     if (name === "password") {
       setPasswordValidations({
         minLength: value.length >= 6,
@@ -57,7 +55,17 @@ export default function RegisterPage() {
     setLoading(true);
     setNotify(null);
 
-    // Check if all password validations are met
+    // extra safeguard (in addition to required attribute)
+    if (!consent) {
+      setNotify({
+        type: "error",
+        title: "Error",
+        message: "Please agree to the data handling policy before registering.",
+      });
+      setLoading(false);
+      return;
+    }
+
     if (
       !passwordValidations.minLength ||
       !passwordValidations.uppercase ||
@@ -85,7 +93,7 @@ export default function RegisterPage() {
     }
 
     try {
-      const userData = { ...form };
+      const userData = { ...form, consent }; // optional: send consent boolean
       const response = await API.post("/auth/register", userData);
       setSuccess(response.data.message);
       setNotify({
@@ -128,9 +136,7 @@ export default function RegisterPage() {
       <BackButton />
       <div className="flex items-center justify-center py-12">
         <div className="w-full max-w-md">
-          <h3 className="text-lg font-semibold mb-1 text-center">
-            Create your account
-          </h3>
+          <h3 className="text-lg font-semibold mb-1 text-center">Create your account</h3>
           <p className="text-xs mb-4 text-gray-600 dark:text-gray-300 text-center">
             Fill in your details to register.
           </p>
@@ -149,11 +155,7 @@ export default function RegisterPage() {
 
           {error && (
             <div className="mb-3">
-              <Notification
-                type="error"
-                title="Error"
-                onClose={() => setError("")}
-              >
+              <Notification type="error" title="Error" onClose={() => setError("")}>
                 {error}
               </Notification>
             </div>
@@ -161,11 +163,7 @@ export default function RegisterPage() {
 
           {success && (
             <div className="mb-3">
-              <Notification
-                type="success"
-                title="Success"
-                onClose={() => setSuccess("")}
-              >
+              <Notification type="success" title="Success" onClose={() => setSuccess("")}>
                 {success}
               </Notification>
             </div>
@@ -274,11 +272,52 @@ export default function RegisterPage() {
               />
             </div>
 
+            {/* Privacy Consent */}
+            <div className="flex items-start gap-2 text-xs mt-2">
+              <input
+                type="checkbox"
+                id="consent"
+                checked={consent}
+                onChange={(e) => setConsent(e.target.checked)}
+                className="w-4 h-4 accent-brad-500 cursor-pointer rounded focus:ring-1 focus:ring-brad-500 transition-all duration-200"
+                required
+              />
+              <label
+                htmlFor="consent"
+                className="leading-tight text-gray-700 dark:text-gray-300 select-none"
+              >
+                By registering, you are agreeing with the storage and handling of your data by this website. 
+                For more information, you can view our{" "}
+                <a
+                  href="/B.R.A.D_Privacy_Policy.pdf"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-brad-500 hover:text-brad-600 font-medium underline underline-offset-2 transition-colors"
+                >
+                  Privacy Policy
+                </a>.
+              </label>
+            </div>
+
             <div>
               <button
                 type="submit"
                 className="w-full py-1.5 rounded-md btn-primary disabled:opacity-60"
-                disabled={loading}
+                disabled={
+                  loading ||
+                  !consent ||
+                  !passwordValidations.minLength ||
+                  !passwordValidations.uppercase ||
+                  !passwordValidations.lowercase ||
+                  !passwordValidations.number ||
+                  !passwordValidations.specialChar ||
+                  !form.firstname ||
+                  !form.lastname ||
+                  !form.email ||
+                  !form.username ||
+                  !form.password ||
+                  form.password !== form.confirmPassword
+                }
               >
                 {loading ? "Registering…" : "Register"}
               </button>
