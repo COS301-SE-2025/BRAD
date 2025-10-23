@@ -305,4 +305,122 @@ select.input:focus {
   -webkit-backdrop-filter: blur(6px); /* Safari support */
 }
 
+/* ===== LANDING PAGE RESPONSIVENESS ===== */
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+  }
+
+  section {
+    padding: 2rem 1rem !important;
+  }
+
+  .landing-bg h1 {
+    font-size: 1.75rem !important;
+    text-align: center;
+  }
+
+  .landing-bg p {
+    text-align: center;
+  }
+
+  footer {
+    text-align: center;
+  }
+
+  footer .grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .landing-bg h1 {
+    font-size: 1.5rem !important;
+  }
+
+  .landing-bg img {
+    max-width: 80% !important;
+  }
+
+  .landing-bg a {
+    display: inline-block;
+    width: 100%;
+    text-align: center;
+  }
+}
+
+/* ===== REPORTER DASHBOARD MOBILE FIXES ===== */
+@media (max-width: 1024px) {
+  /* reduce main padding on tablets */
+  .reporter-dashboard-main {
+    padding: 1.5rem !important;
+    margin-left: 4rem !important;
+  }
+
+  .user-greeting {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.5rem !important;
+    padding: 1rem 1.25rem !important;
+  }
+
+  .user-greeting h1 {
+    font-size: 1.25rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  /* sidebar collapses automatically */
+  .sidebar-fixed {
+    width: 3.5rem !important;
+  }
+
+  .reporter-dashboard-main {
+    margin-left: 3.5rem !important;
+    padding: 1rem !important;
+  }
+
+  /* make grid stack properly */
+  .reporter-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* report cards stack */
+  .report-cards {
+    grid-template-columns: 1fr !important;
+  }
+
+  .user-greeting {
+    position: static !important;
+    flex-direction: column !important;
+    text-align: left !important;
+  }
+
+  .user-greeting h1 {
+    font-size: 1.2rem !important;
+  }
+
+  .user-greeting p {
+    font-size: 0.9rem !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .reporter-dashboard-main {
+    margin-left: 0 !important;
+    padding: 0.75rem !important;
+  }
+
+  .user-greeting h1 {
+    font-size: 1rem !important;
+  }
+
+  .card {
+    padding: 0.75rem !important;
+  }
+
+  select {
+    font-size: 0.85rem !important;
+  }
+}
 
