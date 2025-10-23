@@ -38,7 +38,27 @@ export default function Sidebar({ onToggle }) {
         detectedRole = JSON.parse(userData).role || "general"
       }
     }
-
+    else if (pathname.startsWith("/activity")) {
+      const userData =
+        typeof window !== "undefined" ? localStorage.getItem("user") : null
+      if (userData) {
+        detectedRole = JSON.parse(userData).role || "general"
+      }
+    }
+    else if (pathname.startsWith("/update-info")) {
+      const userData =
+        typeof window !== "undefined" ? localStorage.getItem("user") : null
+      if (userData) {
+        detectedRole = JSON.parse(userData).role || "general"
+      }
+    }
+    else if (pathname.startsWith("/update-password")) {
+      const userData =
+        typeof window !== "undefined" ? localStorage.getItem("user") : null       
+      if (userData) {
+        detectedRole = JSON.parse(userData).role || "general"
+      }
+    }
     setRole(detectedRole)
   }, [pathname])
 
