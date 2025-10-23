@@ -28,6 +28,8 @@ export default function LandingPage() {
     safe: 0,
   });
 
+  const [showMenu, setShowMenu] = useState(false);
+
   useEffect(() => {
     const fetchLandingStats = async () => {
       try {
@@ -66,24 +68,71 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen landing-bg text-[var(--text)]">
       {/* Navbar */}
-      <nav className="sticky top-0 z-50 flex items-center justify-between px-8 py-4 bg-white dark:bg-gray-900 shadow-md">
-        <div className="flex items-center gap-3">
-          <Logo className="h-8 w-8" />
-          <span className="font-bold text-lg">B.R.A.D.</span>
-        </div>
-        <div className="flex items-center gap-6">
-          <Link href="/help" className="hover:underline text-sm">
-            Help
-          </Link>
-          <Link href="/login" className="hover:underline text-sm">
-            Login
-          </Link>
-          <Link href="/register" className="hover:underline text-sm">
-            Register
-          </Link>
-          <ThemeToggle />
-        </div>
-      </nav>
+        <nav className="sticky top-0 z-50 bg-white dark:bg-gray-900 shadow-md">
+          <div className="flex flex-wrap items-center justify-between max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8">
+            {/* Left side (logo + title) */}
+            <div className="flex items-center gap-3">
+              <Logo className="h-8 w-8" />
+              <span className="font-bold text-lg">B.R.A.D.</span>
+            </div>
+
+            {/* Right side (links + theme toggle) */}
+            <div className="hidden md:flex items-center gap-6">
+              <Link href="/help" className="hover:underline text-sm">
+                Help
+              </Link>
+              <Link href="/login" className="hover:underline text-sm">
+                Login
+              </Link>
+              <Link href="/register" className="hover:underline text-sm">
+                Register
+              </Link>
+              <ThemeToggle />
+            </div>
+
+            {/* Mobile menu button */}
+            <div className="md:hidden">
+              <button
+                className="p-2 rounded-md text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                onClick={() =>
+                  setShowMenu((prev) => !prev)
+                }
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Mobile dropdown menu */}
+          {showMenu && (
+            <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700 px-4 py-3 space-y-3">
+              <Link href="/help" className="block text-sm hover:underline">
+                Help
+              </Link>
+              <Link href="/login" className="block text-sm hover:underline">
+                Login
+              </Link>
+              <Link href="/register" className="block text-sm hover:underline">
+                Register
+              </Link>
+              <ThemeToggle />
+            </div>
+          )}
+        </nav>
+
 
       {/* Hero Section */}
       <section className="flex flex-col md:flex-row items-center justify-between px-12 py-16">
