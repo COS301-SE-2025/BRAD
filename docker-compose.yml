@@ -20,7 +20,7 @@ services:
       - NODE_ENV=production
       - BODY_LIMIT=20mb
       - SCREENSHOTS_DIR=/data/screenshots
-      - DOMAIN_API_URL=http://brad-domain-api:8000 
+      - DOMAIN_API_URL=http://brad-domain-api:8000
     depends_on:
       - mongo
       - fastapi-queue
@@ -46,10 +46,10 @@ services:
       - LOG_FILE_MAX_BYTES=5242880
       - LOG_BACKUP_COUNT=5
       - DOCKER_HOST=unix://var/run/docker.sock
-      - PROXY_URL=${PROXY_URL}
-      - PROXY_USERNAME=${PROXY_USERNAME}
-      - PROXY_PASSWORD=${PROXY_PASSWORD}
-      - NO_PROXY=${NO_PROXY}
+      # - PROXY_URL=${PROXY_URL}
+      # - PROXY_USERNAME=${PROXY_USERNAME}
+      # - PROXY_PASSWORD=${PROXY_PASSWORD}
+      # - NO_PROXY=${NO_PROXY}
     env_file:
       - .env
     networks:
@@ -73,7 +73,7 @@ services:
       - "${DOMAIN_API_PORT}:8000"
     depends_on: []
     expose:
-      - "8000"  
+      - "8000"
     environment:
       - LOG_TO_FILE=1
       - LOG_DIR=/app/logs
